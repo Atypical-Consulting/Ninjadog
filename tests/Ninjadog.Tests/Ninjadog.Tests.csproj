@@ -12,7 +12,7 @@
     <PackageReference Include="ValueOf" Version="2.0.31" />
     <PackageReference Include="Verify.XUnit" Version="22.8.0" />
     <PackageReference Include="Verify.SourceGenerators" Version="2.2.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
