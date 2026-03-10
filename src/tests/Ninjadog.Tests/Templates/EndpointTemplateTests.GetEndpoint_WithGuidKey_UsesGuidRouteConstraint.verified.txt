@@ -19,11 +19,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace TestApp.Api.Endpoints;
 
-public partial class GetTodoItemEndpoint
+public partial class GetTodoItemEndpoint(ITodoItemService todoItemService)
     : Endpoint<GetTodoItemRequest, TodoItemResponse>
 {
-    public ITodoItemService TodoItemService { get; private set; } = null!;
-
     public override void Configure()
     {
         Get("/todo-items/{id:guid}");
@@ -32,7 +30,7 @@ public partial class GetTodoItemEndpoint
 
     public override async Task HandleAsync(GetTodoItemRequest req, CancellationToken ct)
     {
-        var todoItem = await TodoItemService.GetAsync(req.Id);
+        var todoItem = await todoItemService.GetAsync(req.Id);
 
         if (todoItem is null)
         {

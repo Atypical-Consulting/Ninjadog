@@ -3,8 +3,10 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Ninjadog.Settings.Config;
 using Ninjadog.Settings.Entities;
+using Ninjadog.Settings.Entities.Properties;
 
 namespace Ninjadog.Settings;
 
@@ -19,6 +21,13 @@ public abstract record NinjadogSettings(
     NinjadogConfiguration Config,
     NinjadogEntities Entities)
 {
+    private static readonly JsonSerializerOptions _deserializeOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DictionaryKeyPolicy = null,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+
     /// <summary>
     /// Serializes the record to JSON using the JsonSerializationContext.
     /// </summary>
@@ -26,5 +35,60 @@ public abstract record NinjadogSettings(
     public string ToJsonString()
     {
         return JsonSerializer.Serialize(this, JsonSerializationContext.Default.NinjadogSettings);
+    }
+
+    /// <summary>
+    /// Deserializes a JSON string into a <see cref="NinjadogSettings"/> instance.
+    /// </summary>
+    /// <param name="json">The JSON string to deserialize.</param>
+    /// <returns>A <see cref="NinjadogSettings"/> instance loaded from the JSON string.</returns>
+    /// <exception cref="JsonException">Thrown when the JSON is invalid or cannot be deserialized.</exception>
+    public static NinjadogSettings FromJsonString(string json)
+    {
+        var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        var configElement = root.GetProperty("config");
+        var name = configElement.GetProperty("name").GetString()!;
+        var config = new NinjadogLoadedConfiguration(
+            Name: name,
+            Version: configElement.GetProperty("version").GetString()!,
+            Description: configElement.GetProperty("description").GetString()!,
+            RootNamespace: configElement.GetProperty("rootNamespace").GetString()!,
+            OutputPath: configElement.TryGetProperty("outputPath", out var op) ? op.GetString()! : $"src/applications/{name}",
+            SaveGeneratedFiles: configElement.TryGetProperty("saveGeneratedFiles", out var sgf) && sgf.GetBoolean());
+
+        var entities = new NinjadogLoadedEntities();
+
+        if (root.TryGetProperty("entities", out var entitiesElement))
+        {
+            foreach (var entityProp in entitiesElement.EnumerateObject())
+            {
+                var entityName = entityProp.Name;
+                var properties = new NinjadogEntityProperties();
+
+                if (entityProp.Value.TryGetProperty("properties", out var propsElement))
+                {
+                    foreach (var prop in propsElement.EnumerateObject())
+                    {
+                        var propName = prop.Name;
+                        var type = prop.Value.GetProperty("type").GetString()!;
+                        var isKey = prop.Value.TryGetProperty("isKey", out var ik) && ik.GetBoolean();
+                        properties.Add(propName, new NinjadogEntityProperty(type, isKey));
+                    }
+                }
+
+                NinjadogEntityRelationships? relationships = null;
+                if (entityProp.Value.TryGetProperty("relationships", out var relsElement))
+                {
+                    relationships = JsonSerializer.Deserialize<NinjadogEntityRelationships>(
+                        relsElement.GetRawText(), _deserializeOptions);
+                }
+
+                entities.Add(entityName, new NinjadogEntity(properties, relationships));
+            }
+        }
+
+        return new NinjadogLoadedSettings(config, entities);
     }
 }

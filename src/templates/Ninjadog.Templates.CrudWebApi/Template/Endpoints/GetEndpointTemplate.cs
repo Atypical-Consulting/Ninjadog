@@ -34,11 +34,9 @@ public sealed class GetEndpointTemplate
 
               {{WriteFileScopedNamespace(ns)}}
 
-              public partial class {{st.ClassGetModelEndpoint}}
+              public partial class {{st.ClassGetModelEndpoint}}({{st.InterfaceModelService}} {{st.VarModelService}})
                   : Endpoint<{{st.ClassGetModelRequest}}, {{st.ClassModelResponse}}>
               {
-                  public {{st.InterfaceModelService}} {{st.PropertyModelService}} { get; private set; } = null!;
-
                   public override void Configure()
                   {
                       Get("{{st.ModelEndpoint}}/{id:{{GetRouteConstraint(entityKey.Type)}}}");
@@ -47,7 +45,7 @@ public sealed class GetEndpointTemplate
 
                   public override async Task HandleAsync({{st.ClassGetModelRequest}} req, CancellationToken ct)
                   {
-                      var {{st.VarModel}} = await {{st.PropertyModelService}}.GetAsync(req.{{entityKey.Key}});
+                      var {{st.VarModel}} = await {{st.VarModelService}}.GetAsync(req.{{entityKey.Key}});
 
                       if ({{st.VarModel}} is null)
                       {

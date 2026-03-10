@@ -19,11 +19,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace TestApp.Api.Endpoints;
 
-public partial class GetOrderEndpoint
+public partial class GetOrderEndpoint(IOrderService orderService)
     : Endpoint<GetOrderRequest, OrderResponse>
 {
-    public IOrderService OrderService { get; private set; } = null!;
-
     public override void Configure()
     {
         Get("/orders/{id:int}");
@@ -32,7 +30,7 @@ public partial class GetOrderEndpoint
 
     public override async Task HandleAsync(GetOrderRequest req, CancellationToken ct)
     {
-        var order = await OrderService.GetAsync(req.OrderId);
+        var order = await orderService.GetAsync(req.OrderId);
 
         if (order is null)
         {

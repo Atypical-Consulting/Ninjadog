@@ -9,7 +9,6 @@ using Ninjadog.Engine;
 using Ninjadog.Engine.Core.DomainEvents;
 using Ninjadog.Engine.Infrastructure;
 using Ninjadog.Templates.CrudWebAPI.Setup;
-using Ninjadog.Templates.CrudWebAPI.UseCases.TodoApp;
 
 SpectreWriteHelpers.WriteNinjadog();
 
@@ -18,7 +17,23 @@ registrations.AddDomainEventDispatcher();
 registrations.AddInfrastructure();
 registrations.AddSingleton<INinjadogEngineFactory, NinjadogEngineFactory>();
 registrations.AddSingleton<NinjadogTemplateManifest, CrudTemplateManifest>();
-registrations.AddSingleton<NinjadogSettings, TodoAppSettings>();
+
+const string settingsFileName = "ninjadog.json";
+var settingsFilePath = Path.Combine(Directory.GetCurrentDirectory(), settingsFileName);
+
+if (File.Exists(settingsFilePath))
+{
+    var json = File.ReadAllText(settingsFilePath);
+    var settings = NinjadogSettings.FromJsonString(json);
+    registrations.AddSingleton(settings);
+}
+else
+{
+    AnsiConsole.MarkupLine($"[yellow]Warning:[/] No {settingsFileName} found in the current directory. Run [green]ninjadog init[/] first.");
+    AnsiConsole.MarkupLine("[yellow]Using default settings.[/]");
+    registrations.AddSingleton<NinjadogSettings>(new Ninjadog.Settings.Extensions.NinjadogInitialSettings());
+}
+
 var registrar = new Ninjadog.CLI.Infrastructure.TypeRegistrar(registrations);
 
 var app = new CommandApp(registrar);
@@ -46,7 +61,7 @@ app.Configure(config =>
 
 try
 {
-    return app.Run(args);
+    return await app.RunAsync(args);
 }
 catch (Exception ex)
 {

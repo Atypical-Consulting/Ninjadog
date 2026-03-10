@@ -34,11 +34,9 @@ public sealed class CreateEndpointTemplate
 
               {{WriteFileScopedNamespace(ns)}}
 
-              public partial class {{st.ClassCreateModelEndpoint}}
+              public partial class {{st.ClassCreateModelEndpoint}}({{st.InterfaceModelService}} {{st.VarModelService}})
                   : Endpoint<{{st.ClassCreateModelRequest}}, {{st.ClassModelResponse}}>
               {
-                  public {{st.InterfaceModelService}} {{st.PropertyModelService}} { get; private set; } = null!;
-
                   public override void Configure()
                   {
                       Post("{{st.ModelEndpoint}}");
@@ -49,7 +47,7 @@ public sealed class CreateEndpointTemplate
                   {
                       var {{st.VarModel}} = req.{{st.MethodToModel}}();
 
-                      await {{st.PropertyModelService}}.CreateAsync({{st.VarModel}});
+                      await {{st.VarModelService}}.CreateAsync({{st.VarModel}});
 
                       var {{st.VarModelResponse}} = {{st.VarModel}}.{{st.MethodToModelResponse}}();
                       await SendCreatedAtAsync<{{st.ClassGetModelEndpoint}}>(

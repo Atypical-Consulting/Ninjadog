@@ -19,11 +19,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace TestApp.Api.Endpoints;
 
-public partial class UpdateTodoItemEndpoint
+public partial class UpdateTodoItemEndpoint(ITodoItemService todoItemService)
     : Endpoint<UpdateTodoItemRequest, TodoItemResponse>
 {
-    public ITodoItemService TodoItemService { get; private set; } = null!;
-
     public override void Configure()
     {
         Put("/todo-items/{id:guid}");
@@ -32,7 +30,7 @@ public partial class UpdateTodoItemEndpoint
 
     public override async Task HandleAsync(UpdateTodoItemRequest req, CancellationToken ct)
     {
-        var existingTodoItem = await TodoItemService.GetAsync(req.Id);
+        var existingTodoItem = await todoItemService.GetAsync(req.Id);
 
         if (existingTodoItem is null)
         {
@@ -41,7 +39,7 @@ public partial class UpdateTodoItemEndpoint
         }
 
         var todoItem = req.ToTodoItem();
-        await TodoItemService.UpdateAsync(todoItem);
+        await todoItemService.UpdateAsync(todoItem);
 
         var todoItemResponse = todoItem.ToTodoItemResponse();
         await SendOkAsync(todoItemResponse, ct);

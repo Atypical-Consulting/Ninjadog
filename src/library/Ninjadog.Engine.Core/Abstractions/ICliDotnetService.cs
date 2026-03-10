@@ -43,8 +43,17 @@ public interface ICliDotnetService
     /// </summary>
     /// <param name="projectPath">The path to the project to which the package will be added.</param>
     /// <param name="package">The name of the package to be added.</param>
+    /// <param name="version">The optional version of the package to be added. When null, the latest version is installed.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    Task ExecuteAddPackageAsync(string projectPath, string package);
+    Task ExecuteAddPackageAsync(string projectPath, string package, string? version = null);
+
+    /// <summary>
+    /// Adds a project to a solution file.
+    /// </summary>
+    /// <param name="solutionDirectory">The directory containing the solution file.</param>
+    /// <param name="projectPath">The path to the project to add to the solution.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    Task ExecuteAddProjectToSolutionAsync(string solutionDirectory, string projectPath);
 
     /// <summary>
     /// Publishes a project with Ahead-of-Time (AOT) compilation.

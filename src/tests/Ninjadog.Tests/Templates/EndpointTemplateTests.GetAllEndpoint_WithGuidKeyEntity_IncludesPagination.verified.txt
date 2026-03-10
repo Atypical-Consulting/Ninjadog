@@ -18,11 +18,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace TestApp.Api.Endpoints;
 
-public partial class GetAllTodoItemsEndpoint
+public partial class GetAllTodoItemsEndpoint(ITodoItemService todoItemService)
     : EndpointWithoutRequest<GetAllTodoItemsResponse>
 {
-    public ITodoItemService TodoItemService { get; private set; } = null!;
-
     public override void Configure()
     {
         Get("/todo-items");
@@ -34,7 +32,7 @@ public partial class GetAllTodoItemsEndpoint
         var page = int.TryParse(HttpContext.Request.Query["page"], out var p) && p > 0 ? p : 1;
         var pageSize = int.TryParse(HttpContext.Request.Query["pageSize"], out var ps) && ps > 0 ? ps : 10;
 
-        var (todoItems, totalCount) = await TodoItemService.GetAllAsync(page, pageSize);
+        var (todoItems, totalCount) = await todoItemService.GetAllAsync(page, pageSize);
         var todoItemsResponse = todoItems.ToTodoItemsResponse(page, pageSize, totalCount);
         await SendOkAsync(todoItemsResponse, ct);
     }

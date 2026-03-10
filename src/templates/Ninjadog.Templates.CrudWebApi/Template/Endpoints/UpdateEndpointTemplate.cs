@@ -34,11 +34,9 @@ public sealed class UpdateEndpointTemplate
 
               {{WriteFileScopedNamespace(ns)}}
 
-              public partial class {{st.ClassUpdateModelEndpoint}}
+              public partial class {{st.ClassUpdateModelEndpoint}}({{st.InterfaceModelService}} {{st.VarModelService}})
                   : Endpoint<{{st.ClassUpdateModelRequest}}, {{st.ClassModelResponse}}>
               {
-                  public {{st.InterfaceModelService}} {{st.PropertyModelService}} { get; private set; } = null!;
-
                   public override void Configure()
                   {
                       Put("{{st.ModelEndpoint}}/{id:{{GetRouteConstraint(entityKey.Type)}}}");
@@ -47,7 +45,7 @@ public sealed class UpdateEndpointTemplate
 
                   public override async Task HandleAsync({{st.ClassUpdateModelRequest}} req, CancellationToken ct)
                   {
-                      var {{st.VarExistingModel}} = await {{st.PropertyModelService}}.GetAsync(req.{{entityKey.Key}});
+                      var {{st.VarExistingModel}} = await {{st.VarModelService}}.GetAsync(req.{{entityKey.Key}});
 
                       if ({{st.VarExistingModel}} is null)
                       {
@@ -56,7 +54,7 @@ public sealed class UpdateEndpointTemplate
                       }
 
                       var {{st.VarModel}} = req.{{st.MethodToModel}}();
-                      await {{st.PropertyModelService}}.UpdateAsync({{st.VarModel}});
+                      await {{st.VarModelService}}.UpdateAsync({{st.VarModel}});
 
                       var {{st.VarModelResponse}} = {{st.VarModel}}.{{st.MethodToModelResponse}}();
                       await SendOkAsync({{st.VarModelResponse}}, ct);

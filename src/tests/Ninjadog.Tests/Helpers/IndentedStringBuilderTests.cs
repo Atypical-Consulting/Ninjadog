@@ -34,7 +34,7 @@ public class IndentedStringBuilderTests
     public void AppendStrings_AppendsAllStrings()
     {
         var sb = new IndentedStringBuilder(0);
-        sb.Append(new[] { "hello", " ", "world" });
+        sb.Append(["hello", " ", "world"]);
         Assert.Equal("hello world", sb.ToString());
     }
 
@@ -42,7 +42,7 @@ public class IndentedStringBuilderTests
     public void AppendChars_AppendsAllChars()
     {
         var sb = new IndentedStringBuilder(0);
-        sb.Append(new[] { 'a', 'b', 'c' });
+        sb.Append(['a', 'b', 'c']);
         Assert.Equal("abc", sb.ToString());
     }
 

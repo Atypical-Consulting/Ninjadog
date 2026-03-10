@@ -61,6 +61,7 @@ public class NinjadogAppService : INinjadogAppService
         await NewGlobalJsonFileAsync();
         await NewSolutionFileAsync();
         await NewProjectFileAsync();
+        await AddProjectToSolutionAsync();
         await InstallNuGetPackages();
 
         // var dotnetVersion = cliDotnetService.Version();
@@ -113,6 +114,12 @@ public class NinjadogAppService : INinjadogAppService
     }
 
     /// <inheritdoc />
+    public virtual async Task AddProjectToSolutionAsync()
+    {
+        await _dotnet.ExecuteAddProjectToSolutionAsync(AppDirectory, ProjectPath);
+    }
+
+    /// <inheritdoc />
     public virtual async Task AddFileToProjectAsync(NinjadogContentFile contentFile)
     {
         var path = contentFile.Category is not null
@@ -125,9 +132,13 @@ public class NinjadogAppService : INinjadogAppService
 
     private async Task InstallNuGetPackages()
     {
-        foreach (var package in _manifest.NuGetPackages)
+        foreach (var packageEntry in _manifest.NuGetPackages)
         {
-            await _dotnet.ExecuteAddPackageAsync(ProjectPath, package);
+            var parts = packageEntry.Split(':', 2);
+            var packageName = parts[0];
+            var version = parts.Length > 1 ? parts[1] : null;
+
+            await _dotnet.ExecuteAddPackageAsync(ProjectPath, packageName, version);
         }
     }
 }
