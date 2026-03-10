@@ -3,7 +3,7 @@
 //
 // Developed by: Atypical Consulting SRL - Philippe Matray
 // Generated on: [SCRUBBED]
-// Version     : 2.0.0.0
+// Version     : [SCRUBBED]
 //
 // This file is part of a custom software solution crafted to meet your
 // specific needs. For optimal performance and compatibility, modifications

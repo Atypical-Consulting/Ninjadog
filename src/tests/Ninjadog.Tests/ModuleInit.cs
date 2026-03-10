@@ -10,6 +10,8 @@ public static class ModuleInit
         VerifierSettings.ScrubLinesWithReplace(line =>
             line.Contains("Generated on:")
                 ? "// Generated on: [SCRUBBED]"
-                : line);
+                : line.Contains("// Version")
+                    ? "// Version     : [SCRUBBED]"
+                    : line);
     }
 }
