@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page.title }} | {{ site.title }}</title>
+  <meta name="description" content="{{ page.description | default: site.description }}">
+  <link rel="icon" href="{{ '/assets/images/favicon.ico' | relative_url }}">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Mermaid -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-deep: #060a14;
+      --bg-base: #0a0e1a;
+      --bg-surface: #111827;
+      --bg-elevated: #1e293b;
+      --bg-glass: rgba(17, 24, 39, 0.6);
+      --border-subtle: rgba(0, 212, 255, 0.08);
+      --border-glow: rgba(0, 212, 255, 0.25);
+      --border-dim: rgba(255, 255, 255, 0.06);
+      --accent-cyan: #00d4ff;
+      --accent-blue: #3b82f6;
+      --accent-indigo: #6366f1;
+      --accent-violet: #8b5cf6;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-orange: #f59e0b;
+      --accent-pink: #ec4899;
+      --accent-teal: #14b8a6;
+      --text-primary: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --text-bright: #f1f5f9;
+      --glow-cyan: 0 0 20px rgba(0, 212, 255, 0.3), 0 0 60px rgba(0, 212, 255, 0.1);
+      --font-display: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --sidebar-width: 280px;
+      --nav-height: 60px;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: var(--font-display);
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ===== BACKGROUND ===== */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(0, 212, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 50% at 50% 0%, black 10%, transparent 60%);
+    }
+
+    /* ===== TOP NAV ===== */
+    .topnav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      height: var(--nav-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      background: rgba(6, 10, 20, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .topnav__left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .topnav__toggle {
+      display: none;
+      background: none;
+      border: 1px solid var(--border-dim);
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 0.4rem;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .topnav__toggle:hover {
+      color: var(--accent-cyan);
+      border-color: var(--border-glow);
+    }
+
+    .topnav__toggle svg { width: 20px; height: 20px; display: block; }
+
+    .topnav__brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+    }
+
+    .topnav__logo { width: 32px; height: 32px; border-radius: 8px; }
+
+    .topnav__title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text-bright);
+      letter-spacing: -0.02em;
+    }
+
+    .topnav__title span { color: var(--accent-cyan); }
+
+    .topnav__right {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .topnav__link {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .topnav__link:hover { color: var(--text-primary); }
+    .topnav__link svg { width: 16px; height: 16px; }
+
+    @media (max-width: 640px) {
+      .topnav__right { display: none; }
+    }
+
+    /* ===== LAYOUT ===== */
+    .layout {
+      display: flex;
+      min-height: 100vh;
+      padding-top: var(--nav-height);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: var(--sidebar-width);
+      flex-shrink: 0;
+      position: sticky;
+      top: var(--nav-height);
+      height: calc(100vh - var(--nav-height));
+      overflow-y: auto;
+      padding: 1.5rem 0;
+      border-right: 1px solid var(--border-subtle);
+      background: rgba(6, 10, 20, 0.5);
+      scrollbar-width: thin;
+      scrollbar-color: var(--bg-elevated) transparent;
+    }
+
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--bg-elevated); border-radius: 4px; }
+
+    .sidebar__section {
+      padding: 0 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .sidebar__heading {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+      padding-left: 0.75rem;
+    }
+
+    .sidebar__nav {
+      list-style: none;
+    }
+
+    .sidebar__nav li { margin-bottom: 1px; }
+
+    .sidebar__link {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.88rem;
+      font-weight: 450;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.15s;
+      position: relative;
+    }
+
+    .sidebar__link:hover {
+      color: var(--text-bright);
+      background: rgba(0, 212, 255, 0.04);
+    }
+
+    .sidebar__link--active {
+      color: var(--accent-cyan);
+      background: rgba(0, 212, 255, 0.08);
+      font-weight: 600;
+    }
+
+    .sidebar__link--active::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 18px;
+      background: var(--accent-cyan);
+      border-radius: 0 3px 3px 0;
+    }
+
+    .sidebar__link svg {
+      width: 16px; height: 16px;
+      flex-shrink: 0;
+      opacity: 0.6;
+    }
+
+    .sidebar__link--active svg { opacity: 1; }
+
+    .sidebar__children {
+      list-style: none;
+      padding-left: 1rem;
+      margin-top: 2px;
+    }
+
+    .sidebar__children .sidebar__link {
+      font-size: 0.82rem;
+      padding: 0.35rem 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .sidebar__children .sidebar__link:hover { color: var(--text-secondary); }
+    .sidebar__children .sidebar__link--active { color: var(--accent-cyan); }
+
+    /* ===== MAIN CONTENT ===== */
+    .main {
+      flex: 1;
+      min-width: 0;
+      max-width: 900px;
+      padding: 3rem 3rem 6rem;
+    }
+
+    /* ===== TOC (right rail) ===== */
+    .toc-rail {
+      width: 220px;
+      flex-shrink: 0;
+      position: sticky;
+      top: var(--nav-height);
+      height: calc(100vh - var(--nav-height));
+      overflow-y: auto;
+      padding: 2rem 1.25rem 2rem 0;
+      display: none;
+    }
+
+    @media (min-width: 1280px) {
+      .toc-rail { display: block; }
+    }
+
+    .toc-rail__title {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .toc-rail ul {
+      list-style: none;
+      border-left: 1px solid var(--border-dim);
+      padding-left: 0.75rem;
+    }
+
+    .toc-rail li { margin-bottom: 0.25rem; }
+
+    .toc-rail a {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+      line-height: 1.6;
+    }
+
+    .toc-rail a:hover { color: var(--accent-cyan); }
+
+    /* ===== MOBILE SIDEBAR ===== */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 89;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+    }
+
+    .sidebar-overlay--visible { display: block; }
+
+    @media (max-width: 1024px) {
+      .topnav__toggle { display: flex; }
+
+      .sidebar {
+        position: fixed;
+        top: var(--nav-height);
+        left: 0;
+        bottom: 0;
+        z-index: 90;
+        transform: translateX(-100%);
+        transition: transform 0.3s var(--ease-out-expo);
+        background: rgba(6, 10, 20, 0.98);
+        backdrop-filter: blur(20px);
+      }
+
+      .sidebar--open { transform: translateX(0); }
+
+      .main { padding: 2rem 1.5rem 4rem; }
+    }
+
+    @media (max-width: 640px) {
+      .main { padding: 1.5rem 1rem 3rem; }
+    }
+
+    /* ===== MARKDOWN CONTENT ===== */
+
+    /* Headings */
+    .main h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text-bright);
+      margin-bottom: 0.5rem;
+      line-height: 1.2;
+    }
+
+    .main h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-bright);
+      margin-top: 3rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-dim);
+    }
+
+    .main h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-bright);
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .main h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Heading anchors */
+    .main h2 a.anchor,
+    .main h3 a.anchor,
+    .main h4 a.anchor {
+      color: var(--text-muted);
+      text-decoration: none;
+      opacity: 0;
+      margin-left: 0.3rem;
+      transition: opacity 0.2s;
+    }
+
+    .main h2:hover a.anchor,
+    .main h3:hover a.anchor,
+    .main h4:hover a.anchor {
+      opacity: 1;
+    }
+
+    /* Paragraphs */
+    .main p {
+      margin-bottom: 1rem;
+      color: var(--text-secondary);
+    }
+
+    .main > p:first-of-type {
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: var(--text-secondary);
+    }
+
+    /* Links */
+    .main a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+
+    .main a:hover {
+      color: #5ce1ff;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    /* Inline code */
+    .main code {
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+      background: var(--bg-elevated);
+      padding: 0.15em 0.4em;
+      border-radius: 5px;
+      color: var(--accent-orange);
+      border: 1px solid var(--border-dim);
+    }
+
+    /* Code blocks */
+    .main pre {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin: 1.25rem 0;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.75;
+      color: var(--text-primary);
+    }
+
+    .main pre code {
+      background: none;
+      padding: 0;
+      border: none;
+      border-radius: 0;
+      font-size: inherit;
+      color: inherit;
+    }
+
+    /* Syntax highlighting within code blocks */
+    .main .highlight .k, .main .highlight .kd, .main .highlight .kn,
+    .main .highlight .kp, .main .highlight .kr, .main .highlight .kt { color: var(--accent-indigo); }
+    .main .highlight .s, .main .highlight .s1, .main .highlight .s2,
+    .main .highlight .se { color: var(--accent-green); }
+    .main .highlight .nc, .main .highlight .nd, .main .highlight .ni,
+    .main .highlight .nf { color: var(--accent-cyan); }
+    .main .highlight .c, .main .highlight .c1, .main .highlight .cm,
+    .main .highlight .cp { color: var(--text-muted); font-style: italic; }
+    .main .highlight .mi, .main .highlight .mf { color: var(--accent-orange); }
+    .main .highlight .na { color: var(--accent-orange); }
+    .main .highlight .nb { color: var(--accent-teal); }
+    .main .highlight .o, .main .highlight .p { color: var(--text-muted); }
+
+    /* Tables */
+    .main table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.9rem;
+    }
+
+    .main thead {
+      border-bottom: 2px solid var(--border-glow);
+    }
+
+    .main th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+      color: var(--text-bright);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .main td {
+      padding: 0.65rem 1rem;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-dim);
+    }
+
+    .main tbody tr {
+      transition: background 0.15s;
+    }
+
+    .main tbody tr:hover {
+      background: rgba(0, 212, 255, 0.02);
+    }
+
+    .main td strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .main td code {
+      font-size: 0.8em;
+    }
+
+    /* Lists */
+    .main ul, .main ol {
+      margin: 1rem 0;
+      padding-left: 1.5rem;
+      color: var(--text-secondary);
+    }
+
+    .main li {
+      margin-bottom: 0.4rem;
+    }
+
+    .main li::marker {
+      color: var(--accent-cyan);
+    }
+
+    /* Horizontal rule */
+    .main hr {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-glow), transparent);
+      margin: 2.5rem 0;
+    }
+
+    /* Blockquotes (used by callouts) */
+    .main blockquote {
+      margin: 1rem 0;
+      padding: 0;
+      border: none;
+      font-size: 0.92rem;
+    }
+
+    .main blockquote p {
+      margin: 0;
+    }
+
+    /* Details / Summary (TOC) */
+    .main details {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 0.75rem 1.25rem;
+      margin: 1.5rem 0;
+      backdrop-filter: blur(10px);
+    }
+
+    .main details summary {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.02em;
+    }
+
+    .main details[open] summary {
+      margin-bottom: 0.5rem;
+    }
+
+    .main details ul, .main details ol {
+      margin: 0.25rem 0;
+    }
+
+    .main details li {
+      font-size: 0.85rem;
+    }
+
+    .main details a {
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .main details a:hover {
+      color: var(--accent-cyan);
+    }
+
+    /* ===== CALLOUTS (Just the Docs style) ===== */
+    .main .note, .main .tip, .main .warning {
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+      font-size: 0.9rem;
+      position: relative;
+      padding-left: 3rem;
+    }
+
+    .main .note::before, .main .tip::before, .main .warning::before {
+      position: absolute;
+      left: 1.1rem;
+      top: 1rem;
+      font-size: 1rem;
+    }
+
+    .main .note blockquote, .main .tip blockquote, .main .warning blockquote {
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .main .note {
+      background: rgba(0, 212, 255, 0.05);
+      border: 1px solid rgba(0, 212, 255, 0.15);
+    }
+
+    .main .note::before { content: '\2139'; color: var(--accent-cyan); }
+
+    .main .note p, .main .note blockquote p {
+      color: var(--text-secondary);
+    }
+
+    .main .tip {
+      background: rgba(16, 185, 129, 0.05);
+      border: 1px solid rgba(16, 185, 129, 0.15);
+    }
+
+    .main .tip::before { content: '\2714'; color: var(--accent-green); }
+
+    .main .tip p, .main .tip blockquote p {
+      color: var(--text-secondary);
+    }
+
+    .main .warning {
+      background: rgba(239, 68, 68, 0.05);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+    }
+
+    .main .warning::before { content: '\26A0'; color: var(--accent-red); }
+
+    .main .warning p, .main .warning blockquote p {
+      color: var(--text-secondary);
+    }
+
+    /* ===== JUST THE DOCS UTILITY CLASSES ===== */
+    .fs-6 { font-size: 1.1rem !important; }
+    .fs-5 { font-size: 1rem !important; }
+    .fw-300 { font-weight: 300 !important; }
+    .text-delta {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+    .text-center { text-align: center; }
+    .no_toc {}
+
+    /* ===== MERMAID ===== */
+    .main .language-mermaid,
+    .main pre.mermaid {
+      background: transparent;
+      border: none;
+      text-align: center;
+      padding: 1rem 0;
+    }
+
+    .mermaid svg {
+      max-width: 100%;
+    }
+
+    /* ===== IMAGES ===== */
+    .main img {
+      max-width: 100%;
+      border-radius: 12px;
+    }
+
+    /* ===== FOOTER ===== */
+    .doc-footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 2rem 0 0;
+      margin-top: 4rem;
+    }
+
+    .doc-footer__nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .doc-footer__link {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      padding: 1rem 1.25rem;
+      background: var(--bg-glass);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.2s;
+      min-width: 180px;
+      backdrop-filter: blur(10px);
+    }
+
+    .doc-footer__link:hover {
+      border-color: var(--border-glow);
+      transform: translateY(-2px);
+      text-decoration: none;
+    }
+
+    .doc-footer__link-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .doc-footer__link-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+    }
+
+    .doc-footer__copy {
+      text-align: center;
+      padding: 2rem 0;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .doc-footer__copy a {
+      color: var(--text-secondary);
+      text-decoration: none;
+    }
+
+    .doc-footer__copy a:hover { color: var(--accent-cyan); }
+
+    /* ===== BREADCRUMB ===== */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.8rem;
+    }
+
+    .breadcrumb a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+
+    .breadcrumb a:hover { color: var(--accent-cyan); }
+
+    .breadcrumb__sep {
+      color: var(--text-muted);
+      opacity: 0.4;
+      font-size: 0.7rem;
+    }
+
+    .breadcrumb__current {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* ===== PAGE ANIMATION ===== */
+    .main {
+      animation: pageIn 0.5s var(--ease-out-expo) both;
+    }
+
+    @keyframes pageIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== EDIT ON GITHUB ===== */
+    .edit-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-top: 2rem;
+      padding: 0.4rem 0.8rem;
+      border: 1px solid var(--border-dim);
+      border-radius: 8px;
+      transition: all 0.15s;
+    }
+
+    .edit-link:hover {
+      color: var(--text-secondary);
+      border-color: var(--border-subtle);
+      text-decoration: none;
+    }
+
+    .edit-link svg { width: 14px; height: 14px; }
+  </style>
+</head>
+<body>
+
+  <!-- Background -->
+  <div class="bg-grid"></div>
+
+  <!-- Top Navigation -->
+  <nav class="topnav">
+    <div class="topnav__left">
+      <button class="topnav__toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <a href="{{ '/' | relative_url }}" class="topnav__brand">
+        <img src="{{ '/assets/images/logo.png' | relative_url }}" alt="Ninjadog" class="topnav__logo">
+        <span class="topnav__title">Ninja<span>dog</span></span>
+      </a>
+    </div>
+    <div class="topnav__right">
+      <a href="https://www.nuget.org/packages/Ninjadog.Engine" target="_blank" rel="noopener" class="topnav__link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0022 16z"/></svg>
+        NuGet
+      </a>
+      <a href="https://github.com/Atypical-Consulting/Ninjadog" target="_blank" rel="noopener" class="topnav__link">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </nav>
+
+  <!-- Sidebar Overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Layout -->
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+
+      <div class="sidebar__section">
+        <div class="sidebar__heading">Documentation</div>
+        <ul class="sidebar__nav">
+          <li>
+            <a href="{{ '/' | relative_url }}" class="sidebar__link{% if page.title == 'Home' %} sidebar__link--active{% endif %}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              Home
+            </a>
+          </li>
+          <li>
+            <a href="{{ '/getting-started' | relative_url }}" class="sidebar__link{% if page.title == 'Getting Started' %} sidebar__link--active{% endif %}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Getting Started
+            </a>
+          </li>
+          <li>
+            <a href="{{ '/architecture' | relative_url }}" class="sidebar__link{% if page.title == 'Architecture' %} sidebar__link--active{% endif %}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+              Architecture
+            </a>
+          </li>
+          <li>
+            <a href="{{ '/cli' | relative_url }}" class="sidebar__link{% if page.title == 'CLI' %} sidebar__link--active{% endif %}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+              CLI Reference
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="sidebar__section">
+        <div class="sidebar__heading">Generators</div>
+        <ul class="sidebar__nav">
+          <li>
+            <a href="{{ '/generators' | relative_url }}" class="sidebar__link{% if page.title == 'Generators' %} sidebar__link--active{% endif %}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              Overview
+            </a>
+            <ul class="sidebar__children">
+              <li>
+                <a href="{{ '/generators/core' | relative_url }}" class="sidebar__link{% if page.title == 'Core' %} sidebar__link--active{% endif %}">Core</a>
+              </li>
+              <li>
+                <a href="{{ '/generators/endpoints' | relative_url }}" class="sidebar__link{% if page.title == 'Endpoints' %} sidebar__link--active{% endif %}">Endpoints</a>
+              </li>
+              <li>
+                <a href="{{ '/generators/contracts' | relative_url }}" class="sidebar__link{% if page.title == 'Contracts' %} sidebar__link--active{% endif %}">Contracts</a>
+              </li>
+              <li>
+                <a href="{{ '/generators/data-layer' | relative_url }}" class="sidebar__link{% if page.title == 'Data Layer' %} sidebar__link--active{% endif %}">Data Layer</a>
+              </li>
+              <li>
+                <a href="{{ '/generators/mapping' | relative_url }}" class="sidebar__link{% if page.title == 'Mapping' %} sidebar__link--active{% endif %}">Mapping</a>
+              </li>
+              <li>
+                <a href="{{ '/generators/validation' | relative_url }}" class="sidebar__link{% if page.title == 'Validation' %} sidebar__link--active{% endif %}">Validation</a>
+              </li>
+              <li>
+                <a href="{{ '/generators/openapi' | relative_url }}" class="sidebar__link{% if page.title == 'OpenAPI Summaries' %} sidebar__link--active{% endif %}">OpenAPI</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <div class="sidebar__section">
+        <div class="sidebar__heading">Resources</div>
+        <ul class="sidebar__nav">
+          <li>
+            <a href="{{ '/examples' | relative_url }}" class="sidebar__link{% if page.title == 'Generated Examples' %} sidebar__link--active{% endif %}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              Generated Examples
+            </a>
+          </li>
+          <li>
+            <a href="{{ '/contributing' | relative_url }}" class="sidebar__link{% if page.title == 'Contributing' %} sidebar__link--active{% endif %}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+              Contributing
+            </a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main">
+      {% if page.parent %}
+      <nav class="breadcrumb">
+        <a href="{{ '/' | relative_url }}">Home</a>
+        <span class="breadcrumb__sep">/</span>
+        <a href="{{ '/generators' | relative_url }}">Generators</a>
+        <span class="breadcrumb__sep">/</span>
+        <span class="breadcrumb__current">{{ page.title }}</span>
+      </nav>
+      {% endif %}
+
+      {{ content }}
+
+      <div class="doc-footer">
+        <div class="doc-footer__copy">
+          Built by <a href="https://github.com/Atypical-Consulting">Atypical Consulting</a> &mdash; Apache 2.0 License
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Scripts -->
+  <script>
+    // Mobile sidebar
+    const toggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    function closeSidebar() {
+      sidebar.classList.remove('sidebar--open');
+      overlay.classList.remove('sidebar-overlay--visible');
+    }
+
+    toggle.addEventListener('click', () => {
+      sidebar.classList.toggle('sidebar--open');
+      overlay.classList.toggle('sidebar-overlay--visible');
+    });
+
+    overlay.addEventListener('click', closeSidebar);
+
+    // Close sidebar on link click (mobile)
+    sidebar.querySelectorAll('.sidebar__link').forEach(link => {
+      link.addEventListener('click', closeSidebar);
+    });
+
+    // Initialize Mermaid
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        darkMode: true,
+        primaryColor: '#1e293b',
+        primaryTextColor: '#e2e8f0',
+        primaryBorderColor: '#00d4ff',
+        lineColor: '#3b82f6',
+        secondaryColor: '#111827',
+        tertiaryColor: '#0a0e1a',
+        fontFamily: 'Outfit, sans-serif',
+        fontSize: '14px',
+        nodeBorder: '#00d4ff',
+        clusterBkg: 'rgba(0, 212, 255, 0.05)',
+        clusterBorder: 'rgba(0, 212, 255, 0.15)',
+        edgeLabelBackground: '#111827',
+        noteTextColor: '#e2e8f0',
+        noteBkgColor: '#1e293b',
+        noteBorderColor: '#00d4ff'
+      }
+    });
+
+    // Convert mermaid code blocks
+    document.querySelectorAll('pre code.language-mermaid').forEach(el => {
+      const pre = el.parentElement;
+      const div = document.createElement('div');
+      div.className = 'mermaid';
+      div.textContent = el.textContent;
+      pre.replaceWith(div);
+    });
+
+    // Re-render mermaid after replacing elements
+    mermaid.run();
+  </script>
+</body>
+</html>
