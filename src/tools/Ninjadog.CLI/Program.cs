@@ -39,39 +39,6 @@ app.Configure(config =>
         .WithDescription("Builds and compiles the project.")
         .WithExample(["build"]);
 
-    config.AddCommand<AddCommand>("add")
-        .WithDescription("Adds a new template or module.");
-
-    config.AddCommand<UpdateCommand>("update")
-        .WithDescription("Updates templates and project files.")
-        .WithExample(["update"]);
-
-    config.AddCommand<ValidateCommand>("validate")
-        .WithDescription("Validates project configuration.")
-        .WithExample(["validate"]);
-
-    config.AddCommand<DeployCommand>("deploy")
-        .WithDescription("Deploys project to an environment.");
-
-    config.AddCommand<ListTemplatesCommand>("list-templates")
-        .WithDescription("Lists available templates.")
-        .WithExample(["list-templates"]);
-
-    config.AddCommand<InfoCommand>("info")
-        .WithDescription("Displays project information.")
-        .WithExample(["info"]);
-
-    config.AddCommand<CleanCommand>("clean")
-        .WithDescription("Cleans up the project directory.")
-        .WithExample(["clean"]);
-
-    config.AddCommand<AddIntegrationCommand>("add-integration")
-        .WithDescription("Adds a new integration to the project.");
-
-    config.AddCommand<TestCommand>("test")
-        .WithDescription("Runs project tests.")
-        .WithExample(["test"]);
-
     config.AddCommand<NinjadogCommand>("ninjadog")
         .WithDescription("Generates a new Ninjadog project.")
         .WithExample(["ninjadog"]);

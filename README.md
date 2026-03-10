@@ -234,7 +234,6 @@ public partial class DatabaseInitializer(IDbConnectionFactory connectionFactory)
 - **OpenAPI summaries** — Each endpoint gets Swagger documentation
 - **Database initializer** — Schema creation and connection factory generation
 - **CLI tooling** — Project scaffolding and code generation commands
-- **SaaS frontend** — Blazor web application for configuration
 - **Snapshot tested** — 14 Verify snapshot tests cover template output correctness
 
 ## Tech Stack
@@ -249,8 +248,7 @@ public partial class DatabaseInitializer(IDbConnectionFactory connectionFactory)
 | OpenAPI | FastEndpoints.Swagger |
 | Client Generation | FastEndpoints.ClientGen |
 | Architecture | Domain-Driven Design (DDD) |
-| SaaS Frontend | Blazor |
-| Build | Cake Frosting |
+| CLI | Spectre.Console |
 
 ## Getting Started
 
@@ -260,13 +258,19 @@ public partial class DatabaseInitializer(IDbConnectionFactory connectionFactory)
 
 ### Installation
 
-**Option 1 — NuGet Package** *(recommended)*
+**Option 1 — Global CLI tool** *(recommended)*
+
+```bash
+dotnet tool install -g Ninjadog.CLI
+```
+
+**Option 2 — NuGet Package** *(for library use)*
 
 ```bash
 dotnet add package Ninjadog
 ```
 
-**Option 2 — From Source**
+**Option 3 — From Source**
 
 ```bash
 git clone https://github.com/Atypical-Consulting/ninjadog.git
@@ -382,14 +386,8 @@ ninjadog/
 │   │   └── Ninjadog.CLI/                    # Command-line interface
 │   ├── templates/
 │   │   └── Ninjadog.Templates.CrudWebApi/   # CRUD Web API template
-│   ├── saas/
-│   │   ├── Ninjadog.SaaS/                   # SaaS backend
-│   │   ├── Ninjadog.SaaS.WebApp/            # SaaS Blazor frontend
-│   │   └── Ninjadog.SaaS.ServiceDefaults/   # Service defaults
-│   ├── tests/
-│   │   └── Ninjadog.Tests/                  # Snapshot + unit tests
-│   └── build/
-│       └── Ninjadog.Build/                  # Cake Frosting build scripts
+│   └── tests/
+│       └── Ninjadog.Tests/                  # Snapshot + unit tests
 ├── doc/                                     # Generator documentation
 ├── Ninjadog.sln                             # Solution file
 └── global.json                              # .NET SDK version config
@@ -417,17 +415,18 @@ Full documentation for each generator is available in [`doc/generators/`](./doc/
 
 ## CLI
 
-The `ninjadog` CLI provides project scaffolding and management commands:
+Install the CLI as a global dotnet tool:
+
+```bash
+dotnet tool install -g Ninjadog.CLI
+```
+
+Available commands:
 
 ```bash
 ninjadog init              # Initialize a new Ninjadog project
 ninjadog build             # Build and run the generator engine
-ninjadog add               # Add a new template or module
-ninjadog list-templates    # List available templates
-ninjadog validate          # Validate project configuration
-ninjadog info              # Display project information
-ninjadog clean             # Clean up the project directory
-ninjadog test              # Run project tests
+ninjadog ninjadog          # Generate a new Ninjadog project
 ```
 
 ## Roadmap
