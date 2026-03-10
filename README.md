@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.png" alt="Ninjadog logo" width="256" />
+</p>
+
 # Ninjadog
 
 > **One attribute. Full REST API. Zero boilerplate.**
