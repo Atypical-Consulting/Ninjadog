@@ -32,11 +32,9 @@ public sealed class DeleteEndpointTemplate
 
               {{WriteFileScopedNamespace(ns)}}
 
-              public partial class {{st.ClassDeleteModelEndpoint}}
+              public partial class {{st.ClassDeleteModelEndpoint}}({{st.InterfaceModelService}} {{st.VarModelService}})
                   : Endpoint<{{st.ClassDeleteModelRequest}}>
               {
-                  public {{st.InterfaceModelService}} {{st.PropertyModelService}} { get; private set; } = null!;
-
                   public override void Configure()
                   {
                       Delete("{{st.ModelEndpoint}}/{id:{{GetRouteConstraint(entityKey.Type)}}}");
@@ -45,7 +43,7 @@ public sealed class DeleteEndpointTemplate
 
                   public override async Task HandleAsync({{st.ClassDeleteModelRequest}} req, CancellationToken ct)
                   {
-                      var deleted = await {{st.PropertyModelService}}.DeleteAsync(req.{{entityKey.Key}});
+                      var deleted = await {{st.VarModelService}}.DeleteAsync(req.{{entityKey.Key}});
                       if (!deleted)
                       {
                           await SendNotFoundAsync(ct);

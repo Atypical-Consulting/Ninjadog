@@ -75,6 +75,12 @@ public interface INinjadogAppService
     Task NewProjectFileAsync();
 
     /// <summary>
+    /// Adds the generated project to the solution file.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    Task AddProjectToSolutionAsync();
+
+    /// <summary>
     /// Creates a new file in the project.
     /// </summary>
     /// <param name="contentFile">The content file to be created.</param>

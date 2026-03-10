@@ -1,4 +1,3 @@
-using Ninjadog.Settings.Entities;
 using Ninjadog.Settings.Entities.Properties;
 using Ninjadog.Settings.Extensions.Entities;
 using Ninjadog.Settings.Extensions.Entities.Properties;

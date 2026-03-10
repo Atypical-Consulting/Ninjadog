@@ -32,11 +32,9 @@ public sealed class GetAllEndpointTemplate
 
               {{WriteFileScopedNamespace(ns)}}
 
-              public partial class {{st.ClassGetAllModelsEndpoint}}
+              public partial class {{st.ClassGetAllModelsEndpoint}}({{st.InterfaceModelService}} {{st.VarModelService}})
                   : EndpointWithoutRequest<{{st.ClassGetAllModelsResponse}}>
               {
-                  public {{st.InterfaceModelService}} {{st.PropertyModelService}} { get; private set; } = null!;
-
                   public override void Configure()
                   {
                       Get("{{st.ModelEndpoint}}");
@@ -48,7 +46,7 @@ public sealed class GetAllEndpointTemplate
                       var page = int.TryParse(HttpContext.Request.Query["page"], out var p) && p > 0 ? p : 1;
                       var pageSize = int.TryParse(HttpContext.Request.Query["pageSize"], out var ps) && ps > 0 ? ps : 10;
 
-                      var ({{st.VarModels}}, totalCount) = await {{st.PropertyModelService}}.GetAllAsync(page, pageSize);
+                      var ({{st.VarModels}}, totalCount) = await {{st.VarModelService}}.GetAllAsync(page, pageSize);
                       var {{st.VarModelsResponse}} = {{st.VarModels}}.{{st.MethodToModelsResponse}}(page, pageSize, totalCount);
                       await SendOkAsync({{st.VarModelsResponse}}, ct);
                   }

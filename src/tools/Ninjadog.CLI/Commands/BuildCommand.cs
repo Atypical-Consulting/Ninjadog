@@ -9,9 +9,9 @@ namespace Ninjadog.CLI.Commands;
 internal sealed class BuildCommand(
     INinjadogEngineFactory engineFactory,
     IDomainEventDispatcher domainEventDispatcher)
-    : Command
+    : Command<BuildCommandSettings>
 {
-    public override int Execute(CommandContext context, CancellationToken cancellationToken)
+    public override int Execute(CommandContext context, BuildCommandSettings settings, CancellationToken cancellationToken)
     {
         try
         {
