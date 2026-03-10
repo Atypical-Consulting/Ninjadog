@@ -9,6 +9,7 @@
 [![forks - ninjadog](https://img.shields.io/github/forks/Atypical-Consulting/ninjadog?style=social)](https://github.com/Atypical-Consulting/ninjadog)
 
 <!-- Badges: Row 2 — Activity -->
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![GitHub tag](https://img.shields.io/github/tag/Atypical-Consulting/ninjadog?include_prereleases=&sort=semver&color=blue)](https://github.com/Atypical-Consulting/ninjadog/releases/)
 [![issues - ninjadog](https://img.shields.io/github/issues/Atypical-Consulting/ninjadog)](https://github.com/Atypical-Consulting/ninjadog/issues)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/Atypical-Consulting/ninjadog)](https://github.com/Atypical-Consulting/ninjadog/pulls)
@@ -293,7 +294,7 @@ Contributions are welcome! Here's how to get started:
 
 ## License
 
-This project is currently unlicensed. A license will be added soon.
+This project is licensed under the Apache License 2.0 — see the [LICENSE](LICENSE) file for details.
 
 ---
 
