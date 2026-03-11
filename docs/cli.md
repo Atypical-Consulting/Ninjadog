@@ -32,13 +32,15 @@ dotnet tool install -g Ninjadog
 ## Typical Workflow
 
 ```
-ninjadog init       Create a new project
+ninjadog init              Create a new project
        ↓
-  edit config       Define your entities in ninjadog.json
+  edit config              Define your entities in ninjadog.json
        ↓
-ninjadog build      Run the generators
+ninjadog add-entity        (Optional) Add more entities from the CLI
        ↓
-  dotnet run        Launch your API
+ninjadog build             Run the generators
+       ↓
+  dotnet run               Launch your API
 ```
 
 ## Commands
@@ -50,6 +52,44 @@ Initializes a new Ninjadog project in the current directory with a default confi
 ```bash
 ninjadog init
 ```
+
+### `ninjadog add-entity`
+
+Adds a new entity to your existing `ninjadog.json` configuration file. The entity is created with a default `Guid` primary key.
+
+```bash
+ninjadog add-entity <EntityName>
+```
+
+{: .note }
+> The entity name should be in **PascalCase** (e.g., `Product`, `OrderItem`). A `ninjadog.json` file must already exist in the current directory — run `ninjadog init` first if you haven't already.
+
+**Example:**
+
+```bash
+ninjadog add-entity Product
+```
+
+This appends a `Product` entity to the `entities` section of your `ninjadog.json`:
+
+```json
+{
+  "entities": {
+    "Person": { ... },
+    "Product": {
+      "properties": {
+        "Id": {
+          "type": "Guid",
+          "isKey": true
+        }
+      }
+    }
+  }
+}
+```
+
+{: .tip }
+> After adding an entity, open `ninjadog.json` to define additional properties before running `ninjadog build`.
 
 ### `ninjadog build`
 
