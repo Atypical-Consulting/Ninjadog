@@ -53,6 +53,10 @@ app.Configure(config =>
     config.AddCommand<BuildCommand>("build")
         .WithDescription("Builds and compiles the project.")
         .WithExample(["build"]);
+
+    config.AddCommand<AddEntityCommand>("add-entity")
+        .WithDescription("Adds a new entity to the ninjadog.json file.")
+        .WithExample(["add-entity", "Product"]);
 });
 
 try
