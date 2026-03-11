@@ -28,25 +28,15 @@ Get a full CRUD REST API running in under 2 minutes.
 
 ## Installation
 
-Choose one of the following installation methods:
+### Option 1 -- CLI tool (recommended)
 
-### Option 1 -- NuGet Package (recommended)
-
-Add Ninjadog directly to your project:
-
-```bash
-dotnet add package Ninjadog
-```
-
-### Option 2 -- Global CLI tool
-
-Install the CLI for project scaffolding:
+Install the Ninjadog CLI as a global .NET tool:
 
 ```bash
 dotnet tool install -g Ninjadog.CLI
 ```
 
-### Option 3 -- From Source
+### Option 2 -- From Source
 
 ```bash
 git clone https://github.com/Atypical-Consulting/Ninjadog.git
@@ -56,45 +46,62 @@ dotnet build
 
 ## Your First API
 
-Follow these steps to create a fully functional REST API from a single entity class.
+Follow these steps to create a fully functional REST API from a simple JSON configuration.
 
-### Step 1 -- Create a new project
+### Step 1 -- Initialize a new project
 
 ```bash
-dotnet new web -n MyApi
-cd MyApi
-dotnet add package Ninjadog
+mkdir MyApi && cd MyApi
+ninjadog init
 ```
 
-### Step 2 -- Define your domain entity
+This creates a `ninjadog.json` configuration file with a default `Person` entity (Id, FirstName, LastName, BirthDate) to get you started.
 
-Open `Program.cs` (or create a new file) and add:
+### Step 2 -- Define your domain entities
 
-```csharp
-using Ninjadog;
+Open `ninjadog.json` and edit it to define the entities you need. For example, replace the default content with a `Product` entity:
 
-[Ninjadog]
-public class Product
+```json
 {
-    public Guid Id { get; set; }
-    public string Name { get; set; }
-    public decimal Price { get; set; }
+  "config": {
+    "name": "MyApi",
+    "version": "1.0.0",
+    "description": "My API",
+    "rootNamespace": "MyApi",
+    "outputPath": "src/applications/MyApi",
+    "saveGeneratedFiles": true
+  },
+  "entities": {
+    "Product": {
+      "properties": {
+        "Id": { "type": "Guid", "isKey": true },
+        "Name": { "type": "string" },
+        "Price": { "type": "decimal" }
+      }
+    }
+  }
 }
 ```
 
-The `[Ninjadog]` attribute tells the source generator to produce the full API stack for this entity.
-
-### Step 3 -- Build and run
+### Step 3 -- Generate the code
 
 ```bash
-dotnet build
-dotnet run
+ninjadog build
 ```
 
 {: .note }
-> During the build, Ninjadog generates ~30 files including endpoints, DTOs, validators, repositories, services, mappers, and OpenAPI documentation. These files are generated at compile time and do not appear on disk.
+> Ninjadog generates ~30 files to disk including endpoints, DTOs, validators, repositories, services, mappers, a database initializer, and a complete project structure (`.sln`, `.csproj`, `Program.cs`). All files are written to the `outputPath` directory specified in your configuration.
 
-### Step 4 -- Verify it works
+### Step 4 -- Run the API
+
+Navigate to the generated project and start it:
+
+```bash
+cd src/applications/MyApi
+dotnet run
+```
+
+### Step 5 -- Verify it works
 
 Open your browser or use `curl` to test the endpoints:
 
@@ -123,42 +130,65 @@ You should see JSON responses for each operation. The GetAll endpoint returns pa
 
 ## Multiple Entities
 
-Each entity gets its own isolated set of generated files. Add as many entities as you need:
+Each entity gets its own isolated set of generated files. Add as many entities as you need in `ninjadog.json`:
 
-```csharp
-[Ninjadog]
-public class Movie
+```json
 {
-    public Guid Id { get; set; }
-    public string Title { get; set; }
-    public int Year { get; set; }
-}
-
-[Ninjadog]
-public class Order
-{
-    public int OrderId { get; set; }    // int key -- routes use :int constraint
-    public string CustomerName { get; set; }
-    public decimal Total { get; set; }
+  "config": {
+    "name": "MyApi",
+    "version": "1.0.0",
+    "description": "My API",
+    "rootNamespace": "MyApi",
+    "outputPath": "src/applications/MyApi",
+    "saveGeneratedFiles": true
+  },
+  "entities": {
+    "Product": {
+      "properties": {
+        "Id": { "type": "Guid", "isKey": true },
+        "Name": { "type": "string" },
+        "Price": { "type": "decimal" }
+      }
+    },
+    "Movie": {
+      "properties": {
+        "Id": { "type": "Guid", "isKey": true },
+        "Title": { "type": "string" },
+        "Year": { "type": "int" }
+      }
+    },
+    "Order": {
+      "properties": {
+        "OrderId": { "type": "int", "isKey": true },
+        "CustomerName": { "type": "string" },
+        "Total": { "type": "decimal" }
+      }
+    }
+  }
 }
 ```
+
+Then regenerate with `ninjadog build`. Each entity produces its own full set of CRUD files.
 
 {: .tip }
 > Route constraints are dynamic -- `:guid`, `:int`, or untyped -- based on your entity's key type. An `int` key produces `/orders/{id:int}`, while a `Guid` key produces `/movies/{id:guid}`.
 
 ## What Happens Under the Hood
 
-When you build, Ninjadog's source generators scan your code for `[Ninjadog]`-annotated classes and produce:
+When you run `ninjadog build`, the CLI reads your `ninjadog.json` configuration and generates a complete .NET web API project to disk:
 
 | What | Example for `Product` |
 |---|---|
-| **Endpoints** | `CreateProductEndpoint`, `GetAllProductsEndpoint`, etc. |
+| **Project** | `.sln`, `.csproj`, `Program.cs` with `AddNinjadog()` and `UseNinjadog()` |
+| **Endpoints** | `CreateProductEndpoint`, `GetAllProductsEndpoint`, etc. (FastEndpoints) |
 | **Contracts** | `CreateProductRequest`, `ProductResponse`, `ProductDto` |
-| **Validation** | `CreateProductRequestValidator` with `.NotEmpty()` for strings |
-| **Data Layer** | `IProductRepository`, `ProductRepository`, `IProductService`, `ProductService` |
+| **Validation** | `CreateProductRequestValidator` with FluentValidation rules |
+| **Data Layer** | `IProductRepository`, `ProductRepository` (Dapper + SQLite), `IProductService`, `ProductService` |
 | **Mapping** | Extension methods like `.ToProductResponse()`, `.ToProductDto()` |
 | **Database** | `DatabaseInitializer` with SQLite `CREATE TABLE` for all entities |
-| **OpenAPI** | Swagger summaries for every endpoint |
+
+{: .note }
+> The generated code uses primary constructor injection, FastEndpoints for routing, Dapper with SQLite for data access, and FluentValidation for request validation.
 
 ---
 

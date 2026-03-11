@@ -20,7 +20,7 @@ public partial class CreateCategoryRequestValidator : Validator<CreateCategoryRe
 {
     public CreateCategoryRequestValidator()
     {
-                RuleFor(x => x.Name)
+        RuleFor(x => x.Name)
             .NotEmpty()
             .WithMessage("Name is required!");
 

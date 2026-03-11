@@ -41,7 +41,7 @@ public sealed class UpdateRequestValidatorTemplate
               {
                   public {{st.ClassUpdateModelRequestValidator}}()
                   {
-                      {{GenerateValidationRules(entity)}}
+              {{GenerateValidationRules(entity)}}
                   }
               }
               """;

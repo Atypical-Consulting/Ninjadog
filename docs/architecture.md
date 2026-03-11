@@ -7,7 +7,7 @@ nav_order: 3
 # Architecture
 {: .no_toc }
 
-How Ninjadog turns a single annotated class into a full REST API at compile time.
+How Ninjadog's CLI turns a simple configuration file into a full REST API project.
 {: .fs-6 .fw-300 }
 
 <details open markdown="block">
@@ -21,30 +21,30 @@ How Ninjadog turns a single annotated class into a full REST API at compile time
 
 ## How It Works
 
-When you build your project, Ninjadog hooks into the Roslyn compiler as a source generator. It discovers all classes annotated with `[Ninjadog]`, inspects their properties, and emits C# source files for every layer of the API stack.
+When you run the Ninjadog CLI, it reads your `ninjadog.json` configuration file, discovers all defined entities and their properties, and uses template-based code generation to emit C# source files for every layer of the API stack.
 
 ```mermaid
 flowchart TB
-    A["Your C# Source<br/>[Ninjadog] Domain Entities"] --> B["Roslyn Compiler<br/>Ninjadog Source Generators"]
+    A["ninjadog.json<br/>Entity Definitions"] --> B["Ninjadog CLI<br/>Template Engine"]
     B --> C["Contracts<br/>Requests, Responses"]
     B --> D["Data Layer<br/>DTOs, Mappers"]
     B --> E["Clients<br/>C#, TypeScript"]
     C --> F["Endpoints<br/>CRUD"]
     D --> G["Repos<br/>Services"]
     E --> H["Validators<br/>OpenAPI"]
-    F --> I["Compiled Assembly<br/>Full REST API"]
+    F --> I["Generated .NET Project<br/>sln, csproj, Source Files"]
     G --> I
     H --> I
 ```
 
-The key insight: **everything happens at compile time**. No runtime reflection, no startup penalty, no external code-gen step. The generated files are part of your compiled assembly just like hand-written code.
+The key insight: **everything is generated before you build**. The CLI creates a complete .NET project -- solution file, project files, NuGet references, and all source files -- written to disk via `DiskOutputProcessor`. The generated code is plain C# that compiles like any hand-written code.
 
 ## Key Design Decisions
 
 | Decision | Rationale |
 |---|---|
-| **Compile-time generation** | No runtime reflection, no startup penalty, instant error feedback |
-| **Source Generators (not T4/CLI)** | Integrated into the standard `dotnet build` pipeline -- no extra steps |
+| **CLI-based generation** | No runtime reflection, no startup penalty, full control over output |
+| **Template engine (NinjadogTemplate subclasses)** | Uses `IndentedStringBuilder` for clean, readable generated code -- no Roslyn APIs needed |
 | **Per-entity isolation** | Each entity gets independent files; no cross-entity coupling or shared state |
 | **Convention over configuration** | Sensible defaults for routes, validation, and database schema -- zero config needed |
 | **Type-aware output** | Route constraints, SQL column types, and validation rules adapt automatically to property types |
@@ -54,7 +54,7 @@ The key insight: **everything happens at compile time**. No runtime reflection, 
 | Layer | Technology |
 |---|---|
 | Runtime | .NET 10, C# 13 |
-| Code Generation | Roslyn Source Generators |
+| Code Generation | Template-based Code Generation |
 | API Framework | FastEndpoints |
 | Database | SQLite + Dapper |
 | Validation | FluentValidation |
@@ -69,7 +69,7 @@ The key insight: **everything happens at compile time**. No runtime reflection, 
 ninjadog/
 ├── src/
 │   ├── library/                             # Core generator libraries
-│   │   ├── Ninjadog.Engine/                 # Main source generator engine
+│   │   ├── Ninjadog.Engine/                 # Main code generation engine
 │   │   ├── Ninjadog.Engine.Core/            # Core generator abstractions
 │   │   ├── Ninjadog.Engine.Infrastructure/  # Infrastructure utilities
 │   │   ├── Ninjadog.Helpers/                # Shared helper functions
@@ -91,7 +91,7 @@ ninjadog/
 
 | Package | Description |
 |---|---|
-| `Ninjadog.Engine` | Main source generator engine |
+| `Ninjadog.Engine` | Main code generation engine |
 | `Ninjadog.Engine.Core` | Core generator abstractions |
 | `Ninjadog.Engine.Infrastructure` | Infrastructure utilities |
 | `Ninjadog.Helpers` | Shared helper functions |

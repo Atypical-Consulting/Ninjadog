@@ -66,14 +66,22 @@ public sealed class DatabaseInitializerTemplate
             .IncrementIndent().IncrementIndent().IncrementIndent()
             .AppendLine($"{entityKey.Key} {MapToSqliteType(entityKey.Type)} PRIMARY KEY,");
 
-        // Using LINQ to filter out ID property and then joining them with String.Join
-        var columnDefinitions = entity.Properties
+        var nonKeyProperties = entity.Properties
             .Where(p => !p.Value.IsKey)
-            .Select(p => $"{p.Key} {MapToSqliteType(p.Value.Type)} NOT NULL");
+            .ToList();
 
-        stringBuilder
-            .Append(string.Join(",\n", columnDefinitions))
-            .Append(")");
+        for (var i = 0; i < nonKeyProperties.Count; i++)
+        {
+            var p = nonKeyProperties[i];
+            if (i < nonKeyProperties.Count - 1)
+            {
+                stringBuilder.AppendLine($"{p.Key} {MapToSqliteType(p.Value.Type)} NOT NULL,");
+            }
+            else
+            {
+                stringBuilder.Append($"{p.Key} {MapToSqliteType(p.Value.Type)} NOT NULL)");
+            }
+        }
 
         return stringBuilder.ToString();
     }

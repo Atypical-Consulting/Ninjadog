@@ -32,7 +32,7 @@ Ninjadog includes **30 generators** organized into 11 categories. Each generator
 ## Generation Modes
 
 - **Single File** -- One file generated regardless of how many entities exist (e.g., the database initializer creates tables for all entities in one file)
-- **Per Entity** -- One file per `[Ninjadog]`-annotated entity (e.g., each entity gets its own repository, service, and endpoints)
+- **Per Entity** -- One file per entity defined in `ninjadog.json` (e.g., each entity gets its own repository, service, and endpoints)
 
 {: .tip }
 > All generated classes are `partial`, so you can extend them with custom logic without modifying generated code.
