@@ -66,6 +66,7 @@ Generates an `IDbConnectionFactory` interface and a provider-specific implementa
 {: .note }
 > When using `postgresql` or `sqlserver`, the corresponding NuGet packages (`Npgsql` or `Microsoft.Data.SqlClient`) are automatically added to the generated project manifest.
 
+
 ### DatabaseSeederGenerator
 
 | Scope | Single File |

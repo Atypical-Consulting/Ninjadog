@@ -8,7 +8,7 @@ nav_order: 6
 # Generated Output Examples
 {: .no_toc }
 
-Real generated code from Ninjadog's verified snapshot tests -- this is exactly what the CLI produces.
+Real generated code from Ninjadog verified snapshot tests -- this is exactly what the CLI produces.
 {: .fs-6 .fw-300 }
 
 <details open markdown="block">
@@ -222,6 +222,7 @@ public partial class CreateContactRequestValidator : Validator<CreateContactRequ
 > Validation attributes compose with type-aware rules. Value types like `Int32` are only validated when explicit constraints (`min`, `max`) are declared -- otherwise they are skipped entirely.
 
 ## Database -- Schema with Type-Aware Columns
+
 
 The `DatabaseInitializer` creates tables for **all** entities in your project. Column types are mapped from C# types automatically (see [Data Layer](/Ninjadog/generators/data-layer) for the full mapping table).
 

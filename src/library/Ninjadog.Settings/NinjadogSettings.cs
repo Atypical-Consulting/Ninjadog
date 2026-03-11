@@ -82,6 +82,15 @@ public abstract record NinjadogSettings(
             }
         }
 
+        var databaseProvider = "sqlite";
+        if (configElement.TryGetProperty("database", out var dbElement))
+        {
+            if (dbElement.TryGetProperty("provider", out var provEl))
+            {
+                databaseProvider = provEl.GetString()!;
+            }
+        }
+
         var config = new NinjadogLoadedConfiguration(
             Name: name,
             Version: configElement.GetProperty("version").GetString()!,
@@ -91,7 +100,8 @@ public abstract record NinjadogSettings(
             SaveGeneratedFiles: configElement.TryGetProperty("saveGeneratedFiles", out var sgf) && sgf.GetBoolean(),
             Cors: cors,
             SoftDelete: softDelete,
-            Auditing: auditing);
+            Auditing: auditing,
+            DatabaseProvider: databaseProvider);
 
         var entities = new NinjadogLoadedEntities();
 
