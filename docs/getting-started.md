@@ -56,7 +56,12 @@ mkdir MyApi && cd MyApi
 ninjadog init
 ```
 
-This creates a `ninjadog.json` configuration file with a default `Person` entity (Id, FirstName, LastName, BirthDate) to get you started.
+The CLI walks you through a series of interactive prompts (project name, version, description, root namespace, and output path). Press <kbd>Enter</kbd> at each prompt to accept the defaults, or type your own values.
+
+Once complete, a `ninjadog.json` configuration file is created with a sample `Person` entity (Id, FirstName, LastName, BirthDate) to get you started.
+
+{: .tip }
+> See the [CLI Reference -- `ninjadog init`](/Ninjadog/cli#ninjadog-init) for the full list of prompts and their default values.
 
 ### Step 2 -- Define your domain entities
 
