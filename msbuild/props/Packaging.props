@@ -5,7 +5,7 @@
     <!--<PackageValidationBaselineVersion>1.0.0</PackageValidationBaselineVersion>-->
 
     <Description>
-      Ninjadog: One attribute. Full REST API. Zero boilerplate.
+      Ninjadog: One config. Full REST API. Zero boilerplate.
     </Description>
     <Authors>Philippe Matray</Authors>
     <Copyright>Philippe Matray</Copyright>

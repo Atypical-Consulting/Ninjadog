@@ -2,10 +2,12 @@
 
   <PropertyGroup>
     <AssemblyName>Ninjadog</AssemblyName>
+    <PackageId>Ninjadog.CLI</PackageId>
     <OutputType>Exe</OutputType>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>ninjadog</ToolCommandName>
     <IsPackable>true</IsPackable>
+    <EnablePackageValidation>false</EnablePackageValidation>
   </PropertyGroup>
 
   <ItemGroup>

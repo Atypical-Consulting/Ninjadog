@@ -24,12 +24,7 @@
 ## Quick Start
 
 ```bash
-git clone https://github.com/Atypical-Consulting/ninjadog.git
-cd ninjadog
-dotnet build
-```
-
-```bash
+dotnet tool install -g Ninjadog.CLI
 mkdir MyApi && cd MyApi
 ninjadog init
 ```
@@ -276,15 +271,19 @@ public partial class DatabaseInitializer(IDbConnectionFactory connectionFactory)
 
 ### Installation
 
-**From Source** *(recommended)*
+**Option 1 — Global CLI tool** *(recommended)*
+
+```bash
+dotnet tool install -g Ninjadog.CLI
+```
+
+**Option 2 — From Source**
 
 ```bash
 git clone https://github.com/Atypical-Consulting/ninjadog.git
 cd ninjadog
 dotnet build
 ```
-
-> NuGet package publishing is on the [roadmap](#roadmap). Once published, you'll be able to install via `dotnet tool install -g Ninjadog.CLI`.
 
 ## Usage
 
@@ -436,7 +435,13 @@ Full documentation for each generator is available in [`doc/generators/`](./doc/
 
 ## CLI
 
-After building from source, the CLI is available. Available commands:
+Install the CLI as a global dotnet tool:
+
+```bash
+dotnet tool install -g Ninjadog.CLI
+```
+
+Available commands:
 
 ```bash
 ninjadog init              # Initialize a new Ninjadog project
@@ -460,7 +465,7 @@ ninjadog ninjadog          # Generate a new Ninjadog project
 - [ ] Target audience definition
 - [ ] Write documentation
 - [ ] A client demo
-- [ ] NuGet package publishing
+- [x] NuGet package publishing
 
 > Want to contribute? Pick any roadmap item and open a PR!
 

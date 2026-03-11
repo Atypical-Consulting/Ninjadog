@@ -28,16 +28,21 @@ Get a full CRUD REST API running in under 2 minutes.
 
 ## Installation
 
-### From Source (recommended)
+### Option 1 -- CLI tool (recommended)
+
+Install the Ninjadog CLI as a global .NET tool:
+
+```bash
+dotnet tool install -g Ninjadog.CLI
+```
+
+### Option 2 -- From Source
 
 ```bash
 git clone https://github.com/Atypical-Consulting/Ninjadog.git
 cd ninjadog
 dotnet build
 ```
-
-{: .note }
-> NuGet package publishing is on the roadmap. Once published, you'll be able to install via `dotnet tool install -g Ninjadog.CLI`.
 
 ## Your First API
 

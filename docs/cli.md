@@ -21,16 +21,12 @@ The `ninjadog` CLI is distributed as a .NET global tool for project scaffolding 
 
 ## Installation
 
-### From Source (recommended)
-
 ```bash
-git clone https://github.com/Atypical-Consulting/Ninjadog.git
-cd ninjadog
-dotnet build
+dotnet tool install -g Ninjadog.CLI
 ```
 
-{: .note }
-> NuGet package publishing is on the roadmap. Once published, you'll be able to install via `dotnet tool install -g Ninjadog.CLI`.
+{: .tip }
+> After installation, run `ninjadog --help` to verify the tool is available.
 
 ## Typical Workflow
 
