@@ -1,5 +1,6 @@
 ---
-title: OpenAPI Summaries
+title: OpenAPI Summary Generators
+description: "Ninjadog OpenAPI generators: automatic Swagger documentation summaries for Create, Delete, GetAll, Get, and Update endpoints."
 layout: default
 parent: Generators
 nav_order: 7

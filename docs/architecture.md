@@ -1,5 +1,6 @@
 ---
 title: Architecture
+description: "How Ninjadog's template-based code generation works: design decisions, tech stack (.NET 10, FastEndpoints, Dapper, SQLite), and project structure."
 layout: default
 nav_order: 3
 ---
@@ -28,10 +29,10 @@ flowchart TB
     A["ninjadog.json<br/>Entity Definitions"] --> B["Ninjadog CLI<br/>Template Engine"]
     B --> C["Contracts<br/>Requests, Responses"]
     B --> D["Data Layer<br/>DTOs, Mappers"]
-    B --> E["Clients<br/>C#, TypeScript"]
+    B --> E["Validators<br/>OpenAPI"]
     C --> F["Endpoints<br/>CRUD"]
     D --> G["Repos<br/>Services"]
-    E --> H["Validators<br/>OpenAPI"]
+    E --> H["Project Setup<br/>Program, Domain Entities"]
     F --> I["Generated .NET Project<br/>sln, csproj, Source Files"]
     G --> I
     H --> I

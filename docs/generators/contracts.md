@@ -1,5 +1,6 @@
 ---
-title: Contracts
+title: Contract Generators
+description: "Ninjadog contract generators: DTOs, request objects (Create, Delete, Get, Update), and response objects with pagination support."
 layout: default
 parent: Generators
 nav_order: 3

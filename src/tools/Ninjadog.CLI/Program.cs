@@ -53,10 +53,6 @@ app.Configure(config =>
     config.AddCommand<BuildCommand>("build")
         .WithDescription("Builds and compiles the project.")
         .WithExample(["build"]);
-
-    config.AddCommand<NinjadogCommand>("ninjadog")
-        .WithDescription("Generates a new Ninjadog project.")
-        .WithExample(["ninjadog"]);
 });
 
 try

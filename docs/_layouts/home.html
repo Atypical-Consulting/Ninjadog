@@ -3,9 +3,50 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ page.title | default: site.title }}</title>
-  <meta name="description" content="{{ site.description }}">
+  <title>Ninjadog -- .NET REST API Code Generator | One Config, Full API, Zero Boilerplate</title>
+  <meta name="description" content="{{ page.description | default: site.description }}">
+  <link rel="canonical" href="{{ page.url | absolute_url }}">
   <link rel="icon" href="{{ '/assets/images/favicon.ico' | relative_url }}">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Ninjadog -- .NET REST API Code Generator">
+  <meta property="og:description" content="{{ page.description | default: site.description }}">
+  <meta property="og:url" content="{{ page.url | absolute_url }}">
+  <meta property="og:site_name" content="{{ site.title }}">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="{{ '/assets/images/logo.png' | absolute_url }}">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Ninjadog -- .NET REST API Code Generator">
+  <meta name="twitter:description" content="{{ page.description | default: site.description }}">
+  <meta name="twitter:image" content="{{ '/assets/images/logo.png' | absolute_url }}">
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Ninjadog",
+    "description": "{{ site.description | strip_html | strip_newlines }}",
+    "url": "{{ site.url }}{{ site.baseurl }}/",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Cross-platform",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "Atypical Consulting",
+      "url": "https://github.com/Atypical-Consulting"
+    },
+    "license": "https://opensource.org/licenses/Apache-2.0",
+    "programmingLanguage": "C#",
+    "runtimePlatform": ".NET 10"
+  }
+  </script>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1013,7 +1054,7 @@
   <!-- Stats -->
   <div class="stats reveal" data-reveal>
     <div class="stat">
-      <div class="stat__number">~30</div>
+      <div class="stat__number">~33</div>
       <div class="stat__label">Files generated</div>
     </div>
     <div class="stat">
@@ -1110,7 +1151,7 @@
     <div class="section__inner">
       <div class="reveal" data-reveal>
         <span class="section__label">Generated output</span>
-        <h2 class="section__title">30 files from one entity</h2>
+        <h2 class="section__title">33 files from one entity</h2>
         <p class="section__desc">
           Each entity defined in <code style="background:var(--bg-elevated);padding:0.15em 0.4em;border-radius:4px;font-family:var(--font-mono);font-size:0.9em;color:var(--accent-orange);">ninjadog.json</code> produces a complete, production-ready API layer.
         </p>
@@ -1184,9 +1225,9 @@
           <div class="gen-card__icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
           </div>
-          <div class="gen-card__title">Clients</div>
-          <div class="gen-card__count">2 files</div>
-          <div class="gen-card__desc">Auto-generated C# and TypeScript API client libraries</div>
+          <div class="gen-card__title">Project Setup</div>
+          <div class="gen-card__count">4 files</div>
+          <div class="gen-card__desc">Program.cs, appsettings.json, DI extensions, and domain entity classes</div>
         </div>
       </div>
 
@@ -1226,7 +1267,7 @@
 <span class="cm"># Generate the API</span>
 <span class="tp">$</span> ninjadog build
 <span class="str">Build succeeded.</span>
-<span class="cm">    30 files generated for Product</span>
+<span class="cm">    33 files generated for Product</span>
 
 <span class="cm"># Run the API</span>
 <span class="tp">$</span> cd src/applications/MyApi && dotnet run

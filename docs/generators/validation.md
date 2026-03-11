@@ -1,5 +1,6 @@
 ---
-title: Validation
+title: Validation Generators
+description: "Ninjadog validation generators: type-aware FluentValidation rules that automatically skip value types and validate reference type properties."
 layout: default
 parent: Generators
 nav_order: 6
@@ -35,10 +36,12 @@ public partial class CreateTodoItemRequestValidator : Validator<CreateTodoItemRe
             .NotEmpty()
             .WithMessage("DueDate is required!");
 
-        // IsCompleted (bool), Priority (int), Cost (decimal) -- skipped, value types
     }
 }
 ```
+
+{: .note }
+> Notice that `IsCompleted` (bool), `Priority` (int), and `Cost` (decimal) are skipped because they are value types.
 
 ## UpdateRequestValidatorGenerator
 

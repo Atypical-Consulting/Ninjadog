@@ -1,5 +1,6 @@
 ---
 title: Getting Started
+description: "Step-by-step tutorial to install Ninjadog, create a JSON config, and generate a full CRUD REST API with .NET in under 2 minutes."
 layout: default
 nav_order: 2
 ---
@@ -90,7 +91,7 @@ ninjadog build
 ```
 
 {: .note }
-> Ninjadog generates ~30 files to disk including endpoints, DTOs, validators, repositories, services, mappers, a database initializer, and a complete project structure (`.sln`, `.csproj`, `Program.cs`). All files are written to the `outputPath` directory specified in your configuration.
+> Ninjadog generates ~33 files to disk including endpoints, DTOs, validators, repositories, services, mappers, domain entities, a database initializer, and a complete project structure (`.sln`, `.csproj`, `Program.cs`, `appsettings.json`). All files are written to the `outputPath` directory specified in your configuration.
 
 ### Step 4 -- Run the API
 

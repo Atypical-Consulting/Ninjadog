@@ -1,5 +1,6 @@
 ---
-title: Core
+title: Core Generator
+description: "Ninjadog's core NinjadogGenerator: the root orchestrator that reads entity definitions and produces dependency injection registration code."
 layout: default
 parent: Generators
 nav_order: 1

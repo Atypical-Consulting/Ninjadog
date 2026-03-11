@@ -1,5 +1,6 @@
 ---
-title: CLI
+title: CLI Reference
+description: "Ninjadog CLI reference: install the .NET global tool, initialize projects with ninjadog init, and generate APIs with ninjadog build."
 layout: default
 nav_order: 4
 ---
@@ -56,14 +57,6 @@ Builds and runs the generator engine against your project configuration. This re
 
 ```bash
 ninjadog build
-```
-
-### `ninjadog ninjadog`
-
-Generates a complete Ninjadog project with full scaffolding -- ready to build and run.
-
-```bash
-ninjadog ninjadog
 ```
 
 ---

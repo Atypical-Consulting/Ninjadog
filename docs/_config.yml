@@ -1,7 +1,8 @@
 title: Ninjadog
-description: One config. Full REST API. Zero boilerplate.
+description: "Ninjadog is a .NET CLI tool that generates a complete, production-ready REST API from a single JSON config file. One config. Full REST API. Zero boilerplate."
 url: https://atypical-consulting.github.io
 baseurl: /Ninjadog
+lang: en
 
 remote_theme: just-the-docs/just-the-docs@v0.10.1
 
@@ -9,6 +10,10 @@ logo: /assets/images/logo.png
 favicon_ico: /assets/images/favicon.ico
 
 permalink: pretty
+
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
 
 aux_links:
   GitHub: https://github.com/Atypical-Consulting/Ninjadog

@@ -1,5 +1,6 @@
 ---
-title: Mapping
+title: Mapping Generators
+description: "Ninjadog mapping generators: static extension methods for domain-to-DTO, DTO-to-domain, request-to-domain, and domain-to-response conversions."
 layout: default
 parent: Generators
 nav_order: 5

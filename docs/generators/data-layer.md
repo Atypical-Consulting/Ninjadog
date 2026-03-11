@@ -1,5 +1,6 @@
 ---
-title: Data Layer
+title: Data Layer Generators
+description: "Ninjadog data layer generators: SQLite database initializer, Dapper repositories, service layer, and connection factory with automatic type mapping."
 layout: default
 parent: Generators
 nav_order: 4

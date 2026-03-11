@@ -1,5 +1,6 @@
 ---
-title: Endpoints
+title: Endpoint Generators
+description: "Ninjadog endpoint generators: Create, GetAll (paginated), Get (with typed route constraints), Update, and Delete using FastEndpoints."
 layout: default
 parent: Generators
 nav_order: 2
