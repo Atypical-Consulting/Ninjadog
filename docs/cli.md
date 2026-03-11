@@ -38,6 +38,8 @@ ninjadog init              Create a new project
        ↓
 ninjadog add-entity        (Optional) Add more entities from the CLI
        ↓
+ninjadog validate          Check your configuration for errors
+       ↓
 ninjadog build             Run the generators
        ↓
   dotnet run               Launch your API
@@ -90,6 +92,52 @@ This appends a `Product` entity to the `entities` section of your `ninjadog.json
 
 {: .tip }
 > After adding an entity, open `ninjadog.json` to define additional properties before running `ninjadog build`.
+
+### `ninjadog validate`
+
+Validates your `ninjadog.json` configuration file by running two passes:
+
+1. **Schema validation** -- checks that the JSON structure conforms to the ninjadog schema (required fields, correct types, allowed values).
+2. **Semantic validation** -- checks logical rules such as every entity having exactly one key property, relationship references pointing to existing entities, seed data fields matching property names, and more.
+
+```bash
+ninjadog validate
+```
+
+**Options:**
+
+| Option | Description |
+|:---|:---|
+| `-f`, `--file <path>` | Path to the `ninjadog.json` file to validate. Defaults to `ninjadog.json` in the current directory. |
+| `--strict` | Treat warnings as errors. The command returns a non-zero exit code if any warnings are present. |
+
+**Example -- validating with a custom path:**
+
+```bash
+ninjadog validate --file ./config/ninjadog.json
+```
+
+**Example output (valid configuration):**
+
+```
+Validating ninjadog.json...
+
+[v] Configuration is valid!
+```
+
+**Example output (errors found):**
+
+```
+Validating ninjadog.json...
+
+  [x] NINJ001: Entity 'Product' has no key property. Exactly one property must have isKey: true. at entities.Product
+  [!] NINJ008: Entity name 'product_item' is not PascalCase. at entities.product_item
+
+Validation failed: 1 error(s), 1 warning(s)
+```
+
+{: .tip }
+> Run `ninjadog validate` before `ninjadog build` to catch configuration mistakes early. In CI pipelines, use `--strict` to ensure warnings are not ignored.
 
 ### `ninjadog build`
 
