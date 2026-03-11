@@ -5,14 +5,14 @@
 namespace Ninjadog.Settings.Validation;
 
 /// <summary>
-/// Represents a single validation diagnostic with a code, message, severity, and optional JSON path.
+/// Represents a single validation diagnostic containing a code, message, severity, and JSON path.
 /// </summary>
 /// <param name="Code">The diagnostic code (e.g., NINJ001).</param>
 /// <param name="Message">A human-readable description of the issue.</param>
 /// <param name="Severity">The severity level of the diagnostic.</param>
-/// <param name="Path">The optional JSON path where the issue was found.</param>
+/// <param name="Path">The JSON path where the issue was found.</param>
 public sealed record ValidationDiagnostic(
     string Code,
     string Message,
     ValidationSeverity Severity,
-    string? Path = null);
+    string Path);

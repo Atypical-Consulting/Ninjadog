@@ -3,100 +3,88 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Json.Schema;
 using Ninjadog.Settings.Schema;
 
 namespace Ninjadog.Settings.Validation;
 
 /// <summary>
-/// Validates JSON content against the embedded ninjadog JSON schema.
+/// Validates raw JSON strings against the Ninjadog JSON Schema.
 /// </summary>
 public static class SchemaValidator
 {
-    private static readonly Lazy<JsonSchema> _schema = new(
-        () => JsonSchema.FromText(SchemaProvider.LoadSchemaJson()));
-
     /// <summary>
-    /// Validates the given JSON content against the ninjadog schema.
+    /// Validates a JSON string against the Ninjadog schema.
     /// </summary>
-    /// <param name="jsonContent">The raw JSON string to validate.</param>
-    /// <returns>A list of validation diagnostics. Empty if the JSON is schema-valid.</returns>
-    public static List<ValidationDiagnostic> Validate(string jsonContent)
+    /// <param name="json">The raw JSON string to validate.</param>
+    /// <returns>A <see cref="SchemaValidationResult"/> containing any schema violations.</returns>
+    public static SchemaValidationResult Validate(string json)
     {
-        var diagnostics = new List<ValidationDiagnostic>();
-
-        JsonDocument document;
+        JsonNode? node;
         try
         {
-            document = JsonDocument.Parse(jsonContent);
+            node = JsonNode.Parse(json);
         }
         catch (JsonException ex)
         {
-            diagnostics.Add(new ValidationDiagnostic(
-                "SCHEMA",
-                $"Invalid JSON: {ex.Message}",
-                ValidationSeverity.Error));
-            return diagnostics;
+            return new SchemaValidationResult(
+                false,
+                [
+                    new ValidationDiagnostic(
+                        "SCHEMA",
+                        $"Invalid JSON: {ex.Message}",
+                        ValidationSeverity.Error,
+                        "$")
+                ]);
         }
 
-        using (document)
+        var evaluationOptions = new EvaluationOptions
         {
-            var options = new EvaluationOptions
-            {
-                OutputFormat = OutputFormat.List
-            };
+            OutputFormat = OutputFormat.List
+        };
 
-            var result = _schema.Value.Evaluate(document, options);
+        var result = SchemaProvider.Schema.Evaluate(node, evaluationOptions);
 
-            if (!result.IsValid)
-            {
-                CollectErrors(result, diagnostics);
-            }
+        if (result.IsValid)
+        {
+            return SchemaValidationResult.Success();
         }
 
-        return diagnostics;
-    }
+        var diagnostics = new List<ValidationDiagnostic>();
 
-    private static void CollectErrors(EvaluationResults results, List<ValidationDiagnostic> diagnostics)
-    {
-        if (results.Details is null || results.Details.Count == 0)
+        if (result.Details is not null)
         {
-            if (!results.IsValid && results.Errors is not null)
+            foreach (var detail in result.Details)
             {
-                foreach (var error in results.Errors)
+                if (detail.IsValid || !detail.HasErrors)
+                {
+                    continue;
+                }
+
+                var path = detail.InstanceLocation?.ToString() ?? "$";
+
+                foreach (var error in detail.Errors!)
                 {
                     diagnostics.Add(new ValidationDiagnostic(
                         "SCHEMA",
                         error.Value,
                         ValidationSeverity.Error,
-                        results.InstanceLocation.ToString()));
+                        path));
                 }
             }
-
-            return;
         }
 
-        foreach (var detail in results.Details)
+        // If we got no specific diagnostics but validation failed, add a generic one
+        if (diagnostics.Count == 0)
         {
-            if (!detail.IsValid)
-            {
-                if (detail.Errors is not null)
-                {
-                    foreach (var error in detail.Errors)
-                    {
-                        diagnostics.Add(new ValidationDiagnostic(
-                            "SCHEMA",
-                            error.Value,
-                            ValidationSeverity.Error,
-                            detail.InstanceLocation.ToString()));
-                    }
-                }
-
-                if (detail.Details is not null && detail.Details.Count > 0)
-                {
-                    CollectErrors(detail, diagnostics);
-                }
-            }
+            diagnostics.Add(new ValidationDiagnostic(
+                "SCHEMA",
+                "JSON does not conform to the Ninjadog schema.",
+                ValidationSeverity.Error,
+                "$"));
         }
+
+        return new SchemaValidationResult(false, diagnostics);
     }
 }

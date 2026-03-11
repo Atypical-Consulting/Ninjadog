@@ -9,12 +9,18 @@ namespace Ninjadog.Settings.Validation;
 /// </summary>
 public enum ValidationSeverity
 {
-    /// <summary>A validation error that prevents the configuration from being used.</summary>
+    /// <summary>
+    /// An error that prevents the configuration from being used.
+    /// </summary>
     Error,
 
-    /// <summary>A validation warning that indicates a potential issue.</summary>
+    /// <summary>
+    /// A warning that indicates a potential issue but does not prevent usage.
+    /// </summary>
     Warning,
 
-    /// <summary>An informational validation message.</summary>
+    /// <summary>
+    /// An informational message about the configuration.
+    /// </summary>
     Info
 }

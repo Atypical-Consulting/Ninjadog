@@ -1,13 +1,13 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Ninjadog Configuration",
-  "description": "Schema for ninjadog.json configuration files.",
+  "description": "Schema for ninjadog.json configuration files used by the Ninjadog code generator.",
   "type": "object",
   "required": ["config", "entities"],
   "properties": {
     "$schema": {
       "type": "string",
-      "description": "The JSON Schema reference."
+      "description": "Reference to the JSON schema for editor support."
     },
     "config": {
       "type": "object",
@@ -16,23 +16,23 @@
       "properties": {
         "name": {
           "type": "string",
-          "description": "The name of the project."
+          "description": "The name of the application or project."
         },
         "version": {
           "type": "string",
-          "description": "The version of the project."
+          "description": "The version of the application or project."
         },
         "description": {
           "type": "string",
-          "description": "A description of the project."
+          "description": "A brief description of the application or project."
         },
         "rootNamespace": {
           "type": "string",
-          "description": "The root namespace for generated code."
+          "description": "The root namespace for the generated code."
         },
         "outputPath": {
           "type": "string",
-          "description": "The output path for generated files."
+          "description": "The path where generated files will be saved."
         },
         "saveGeneratedFiles": {
           "type": "boolean",
@@ -40,13 +40,13 @@
         },
         "cors": {
           "type": "object",
-          "description": "CORS configuration.",
+          "description": "CORS configuration for the application.",
           "required": ["origins"],
           "properties": {
             "origins": {
               "type": "array",
               "items": { "type": "string" },
-              "description": "Allowed origins."
+              "description": "Allowed CORS origins."
             },
             "methods": {
               "type": "array",
@@ -56,22 +56,22 @@
             "headers": {
               "type": "array",
               "items": { "type": "string" },
-              "description": "Allowed headers."
+              "description": "Allowed HTTP headers."
             }
           },
           "additionalProperties": false
         },
         "features": {
           "type": "object",
-          "description": "Feature flags.",
+          "description": "Feature toggles for the code generator.",
           "properties": {
             "softDelete": {
               "type": "boolean",
-              "description": "Enable soft delete for entities."
+              "description": "Enable soft delete support."
             },
             "auditing": {
               "type": "boolean",
-              "description": "Enable audit fields for entities."
+              "description": "Enable audit fields (CreatedAt, UpdatedAt)."
             }
           },
           "additionalProperties": false
@@ -93,14 +93,14 @@
     },
     "entities": {
       "type": "object",
-      "description": "Entity definitions.",
+      "description": "Entity definitions for code generation.",
       "additionalProperties": {
         "type": "object",
         "required": ["properties"],
         "properties": {
           "properties": {
             "type": "object",
-            "description": "The properties of the entity.",
+            "description": "Property definitions for the entity.",
             "additionalProperties": {
               "type": "object",
               "required": ["type"],
@@ -111,7 +111,7 @@
                 },
                 "isKey": {
                   "type": "boolean",
-                  "description": "Whether this property is the entity key."
+                  "description": "Whether this property is the primary key."
                 },
                 "required": {
                   "type": "boolean",
@@ -135,7 +135,7 @@
                 },
                 "pattern": {
                   "type": "string",
-                  "description": "A regex pattern constraint for string properties."
+                  "description": "Regex pattern constraint for string properties."
                 }
               },
               "additionalProperties": false
@@ -143,17 +143,18 @@
           },
           "relationships": {
             "type": "object",
-            "description": "Relationships to other entities.",
+            "description": "Relationship definitions for the entity.",
             "additionalProperties": {
               "type": "object",
-              "required": ["relatedEntity", "relationshipType"],
+              "required": ["relatedEntity", "type"],
               "properties": {
                 "relatedEntity": {
                   "type": "string",
                   "description": "The name of the related entity."
                 },
-                "relationshipType": {
+                "type": {
                   "type": "string",
+                  "enum": ["OneToOne", "OneToMany", "ManyToMany", "OneWay", "ManyWay"],
                   "description": "The type of relationship."
                 }
               },
@@ -164,8 +165,7 @@
             "type": "array",
             "description": "Seed data for the entity.",
             "items": {
-              "type": "object",
-              "additionalProperties": true
+              "type": "object"
             }
           }
         },
@@ -174,7 +174,7 @@
     },
     "enums": {
       "type": "object",
-      "description": "Enum definitions.",
+      "description": "Enum definitions for code generation.",
       "additionalProperties": {
         "type": "array",
         "items": { "type": "string" }

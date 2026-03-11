@@ -5,7 +5,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Schema\ninjadog.schema.json" />
+    <EmbeddedResource Include="Schema/ninjadog.schema.json" />
   </ItemGroup>
 
 </Project>

@@ -3,33 +3,41 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Reflection;
+using Json.Schema;
 
 namespace Ninjadog.Settings.Schema;
 
 /// <summary>
-/// Provides access to the embedded ninjadog JSON schema.
+/// Provides access to the embedded Ninjadog JSON Schema.
 /// </summary>
 public static class SchemaProvider
 {
-    private const string ResourceName = "Ninjadog.Settings.Schema.ninjadog.schema.json";
-
-    private static readonly Lazy<string> _schemaJson = new(LoadSchemaJsonCore);
+    private const string SchemaResourceName = "Ninjadog.Settings.Schema.ninjadog.schema.json";
+    private static readonly Lazy<JsonSchema> _schema = new(LoadSchema);
 
     /// <summary>
-    /// Loads the embedded ninjadog.schema.json as a string. The result is cached after the first call.
+    /// Gets the Ninjadog JSON Schema instance.
     /// </summary>
-    /// <returns>The JSON schema content.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when the embedded resource cannot be found.</exception>
-    public static string LoadSchemaJson() => _schemaJson.Value;
+    public static JsonSchema Schema => _schema.Value;
 
-    private static string LoadSchemaJsonCore()
+    /// <summary>
+    /// Gets the raw JSON Schema text as a string.
+    /// </summary>
+    /// <returns>The JSON Schema content as a string.</returns>
+    public static string GetSchemaText()
     {
-        var assembly = Assembly.GetExecutingAssembly();
-        using var stream = assembly.GetManifestResourceStream(ResourceName)
+        using var stream = Assembly.GetExecutingAssembly()
+            .GetManifestResourceStream(SchemaResourceName)
             ?? throw new InvalidOperationException(
-                $"Embedded resource '{ResourceName}' not found in assembly '{assembly.FullName}'.");
+                $"Embedded resource '{SchemaResourceName}' not found.");
 
         using var reader = new StreamReader(stream);
         return reader.ReadToEnd();
+    }
+
+    private static JsonSchema LoadSchema()
+    {
+        var schemaText = GetSchemaText();
+        return JsonSchema.FromText(schemaText);
     }
 }

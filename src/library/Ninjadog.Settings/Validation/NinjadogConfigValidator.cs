@@ -5,45 +5,45 @@
 namespace Ninjadog.Settings.Validation;
 
 /// <summary>
-/// Orchestrates schema and semantic validation of a ninjadog.json configuration file.
+/// Orchestrates validation of Ninjadog configuration files.
+/// Performs schema validation first, then semantic validation if schema is valid.
 /// </summary>
 public static class NinjadogConfigValidator
 {
     /// <summary>
-    /// Validates the given JSON content by running schema validation followed by semantic validation.
+    /// Validates a raw JSON string by first checking schema conformance,
+    /// then parsing and running semantic checks.
     /// </summary>
-    /// <param name="jsonContent">The raw JSON string of the ninjadog.json file.</param>
+    /// <param name="json">The raw JSON string to validate.</param>
     /// <returns>A <see cref="SchemaValidationResult"/> containing all diagnostics.</returns>
-    public static SchemaValidationResult Validate(string jsonContent)
+    public static SchemaValidationResult Validate(string json)
     {
-        var diagnostics = new List<ValidationDiagnostic>();
-
         // Step 1: Schema validation
-        var schemaDiagnostics = SchemaValidator.Validate(jsonContent);
-        diagnostics.AddRange(schemaDiagnostics);
-
-        // If schema validation failed with errors, skip semantic validation
-        if (schemaDiagnostics.Any(d => d.Severity == ValidationSeverity.Error))
+        var schemaResult = SchemaValidator.Validate(json);
+        if (!schemaResult.IsValid)
         {
-            return new SchemaValidationResult(false, diagnostics);
+            return schemaResult;
         }
 
-        // Step 2: Semantic validation (requires parseable JSON)
+        // Step 2: Parse and run semantic validation
+        NinjadogSettings settings;
         try
         {
-            var settings = NinjadogSettings.FromJsonString(jsonContent);
-            var semanticDiagnostics = SemanticValidator.Validate(settings);
-            diagnostics.AddRange(semanticDiagnostics);
+            settings = NinjadogSettings.FromJsonString(json);
         }
         catch (Exception ex)
         {
-            diagnostics.Add(new ValidationDiagnostic(
-                "PARSE",
-                $"Failed to parse configuration: {ex.Message}",
-                ValidationSeverity.Error));
+            return new SchemaValidationResult(
+                false,
+                [
+                    new ValidationDiagnostic(
+                        "PARSE",
+                        $"Failed to parse configuration: {ex.Message}",
+                        ValidationSeverity.Error,
+                        "$")
+                ]);
         }
 
-        var hasErrors = diagnostics.Any(d => d.Severity == ValidationSeverity.Error);
-        return new SchemaValidationResult(!hasErrors, diagnostics);
+        return SemanticValidator.Validate(settings);
     }
 }

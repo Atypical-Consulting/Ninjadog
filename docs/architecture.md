@@ -26,7 +26,9 @@ When you run the Ninjadog CLI, it reads your `ninjadog.json` configuration file,
 
 ```mermaid
 flowchart TB
-    A["ninjadog.json<br/>Entity Definitions"] --> B["Ninjadog CLI<br/>Template Engine"]
+    A["ninjadog.json<br/>Entity Definitions"] --> V["Validation<br/>Schema + Semantic"]
+    V -->|Valid| B["Ninjadog CLI<br/>Template Engine"]
+    V -->|Invalid| X["Diagnostics<br/>Errors & Warnings"]
     B --> C["Contracts<br/>Requests, Responses"]
     B --> D["Data Layer<br/>DTOs, Mappers"]
     B --> E["Validators<br/>OpenAPI"]
@@ -49,6 +51,7 @@ The key insight: **everything is generated before you build**. The CLI creates a
 | **Per-entity isolation** | Each entity gets independent files; no cross-entity coupling or shared state |
 | **Convention over configuration** | Sensible defaults for routes, validation, and database schema -- zero config needed |
 | **Type-aware output** | Route constraints, SQL column types, and validation rules adapt automatically to property types |
+| **Two-phase config validation** | JSON Schema checks structure first, then semantic rules catch logical errors (duplicate keys, invalid references) -- fail fast before generation |
 
 ## Tech Stack
 
@@ -101,5 +104,6 @@ The `Ninjadog` package is a global .NET tool that bundles the engine, templates,
 ## Next Steps
 
 - [Getting Started](/Ninjadog/getting-started) -- Build your first API
+- [Validation](/Ninjadog/validation) -- Schema and semantic validation for ninjadog.json
 - [Generators](/Ninjadog/generators) -- Deep dive into all 30 generators
 - [Generated Examples](/Ninjadog/examples) -- See real output code
