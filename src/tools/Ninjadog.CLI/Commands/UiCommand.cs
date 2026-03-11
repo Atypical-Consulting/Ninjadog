@@ -118,7 +118,7 @@ internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
         // API: Get schema
         app.MapGet("/api/schema", () =>
         {
-            var schemaJson = SchemaProvider.GetSchemaJson();
+            var schemaJson = SchemaProvider.GetSchemaText();
             return Results.Content(schemaJson, "application/json");
         });
 
