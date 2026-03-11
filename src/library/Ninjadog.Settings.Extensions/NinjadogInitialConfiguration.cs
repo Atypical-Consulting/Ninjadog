@@ -27,20 +27,32 @@ public sealed record NinjadogInitialConfiguration : NinjadogConfiguration
     /// <param name="rootNamespace">The root namespace of the Ninjadog app. Default is "NinjadogApp".</param>
     /// <param name="outputPath">The output path of the Ninjadog app. Defaults to ".".</param>
     /// <param name="saveGeneratedFiles">Whether to save generated files to disk. Default is true.</param>
+    /// <param name="cors">The optional CORS configuration.</param>
+    /// <param name="softDelete">Whether soft delete is enabled. Default is false.</param>
+    /// <param name="auditing">Whether auditing is enabled. Default is false.</param>
+    /// <param name="databaseProvider">The database provider to use. Default is "sqlite".</param>
     public NinjadogInitialConfiguration(
         string? name = null,
         string? version = null,
         string? description = null,
         string? rootNamespace = null,
         string? outputPath = null,
-        bool saveGeneratedFiles = true)
+        bool saveGeneratedFiles = true,
+        NinjadogCorsConfiguration? cors = null,
+        bool softDelete = false,
+        bool auditing = false,
+        string? databaseProvider = null)
         : base(
             Name: name ?? DefaultName,
             Version: version ?? DefaultVersion,
             Description: description ?? DefaultDescription,
             RootNamespace: rootNamespace ?? DefaultRootNamespace,
             OutputPath: outputPath ?? ".",
-            SaveGeneratedFiles: saveGeneratedFiles)
+            SaveGeneratedFiles: saveGeneratedFiles,
+            Cors: cors,
+            SoftDelete: softDelete,
+            Auditing: auditing,
+            DatabaseProvider: databaseProvider ?? "sqlite")
     {
     }
 }
