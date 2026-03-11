@@ -17,6 +17,7 @@ public class ProgramTemplate : NinjadogTemplate
     {
         var rootNamespace = ninjadogSettings.Config.RootNamespace;
         var cors = ninjadogSettings.Config.Cors;
+        var hasSeedData = ninjadogSettings.Entities.FromKeys().Any(e => e.SeedData is { Count: > 0 });
         const string fileName = "Program.cs";
 
         var content =
@@ -51,7 +52,7 @@ public class ProgramTemplate : NinjadogTemplate
                   .GetRequiredService<DatabaseInitializer>()
                   .InitializeAsync()
                   .ConfigureAwait(false);
-
+              {{GenerateSeederCall(hasSeedData)}}
               app.Run();
               """;
 
@@ -88,5 +89,21 @@ public class ProgramTemplate : NinjadogTemplate
         }
 
         return result + ";";
+    }
+
+    private static string GenerateSeederCall(bool hasSeedData)
+    {
+        if (!hasSeedData)
+        {
+            return string.Empty;
+        }
+
+        return """
+
+              await app.Services
+                  .GetRequiredService<DatabaseSeeder>()
+                  .SeedAsync()
+                  .ConfigureAwait(false);
+              """;
     }
 }

@@ -59,4 +59,22 @@ public static class TestEntities
 
         return new NinjadogEntityWithKey("Contact", properties, null);
     }
+
+    public static NinjadogEntityWithKey CreateSeededEntity()
+    {
+        var properties = new NinjadogEntityProperties
+        {
+            { "Id", new NinjadogEntityId() },
+            { "Name", new NinjadogEntityProperty<string>() },
+            { "IsActive", new NinjadogEntityProperty<bool>() },
+        };
+
+        var seedData = new List<Dictionary<string, object>>
+        {
+            new() { ["Id"] = "550e8400-e29b-41d4-a716-446655440001", ["Name"] = "Default Category", ["IsActive"] = true },
+            new() { ["Id"] = "550e8400-e29b-41d4-a716-446655440002", ["Name"] = "Archive", ["IsActive"] = false },
+        };
+
+        return new NinjadogEntityWithKey("Category", properties, null, seedData);
+    }
 }

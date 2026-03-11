@@ -15,8 +15,9 @@ namespace Ninjadog.Settings.Extensions.Entities;
 public sealed record NinjadogEntityWithKey(
     string Key,
     NinjadogEntityProperties Properties,
-    NinjadogEntityRelationships? Relationships)
-    : NinjadogEntity(Properties, Relationships)
+    NinjadogEntityRelationships? Relationships,
+    List<Dictionary<string, object>>? SeedData = null)
+    : NinjadogEntity(Properties, Relationships, SeedData)
 {
     /// <summary>
     /// Gets the string tokens generated from the entity key.

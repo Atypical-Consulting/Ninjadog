@@ -109,7 +109,30 @@ public abstract record NinjadogSettings(
                         relsElement.GetRawText(), _deserializeOptions);
                 }
 
-                entities.Add(entityName, new NinjadogEntity(properties, relationships));
+                List<Dictionary<string, object>>? seedData = null;
+                if (entityProp.Value.TryGetProperty("seedData", out var seedElement))
+                {
+                    seedData = [];
+                    foreach (var seedItem in seedElement.EnumerateArray())
+                    {
+                        var row = new Dictionary<string, object>();
+                        foreach (var field in seedItem.EnumerateObject())
+                        {
+                            row[field.Name] = field.Value.ValueKind switch
+                            {
+                                JsonValueKind.String => field.Value.GetString()!,
+                                JsonValueKind.Number => field.Value.TryGetInt32(out var intVal) ? intVal : field.Value.GetDecimal(),
+                                JsonValueKind.True => true,
+                                JsonValueKind.False => false,
+                                _ => field.Value.GetRawText()
+                            };
+                        }
+
+                        seedData.Add(row);
+                    }
+                }
+
+                entities.Add(entityName, new NinjadogEntity(properties, relationships, seedData));
             }
         }
 

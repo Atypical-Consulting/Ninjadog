@@ -34,3 +34,15 @@ public sealed record EnumTestSettings()
             ["Priority"] = ["Low", "Medium", "High", "Critical"],
             ["Status"] = ["Draft", "Active", "Archived"],
         });
+
+public sealed class SeededEntitiesCollection : NinjadogEntities
+{
+    public SeededEntitiesCollection()
+    {
+        var entity = TestEntities.CreateSeededEntity();
+        Add(entity.Key, new(entity.Properties, null, entity.SeedData));
+    }
+}
+
+public sealed record SeededSettings()
+    : NinjadogSettings(new TestConfiguration(), new SeededEntitiesCollection());

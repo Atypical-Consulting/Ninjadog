@@ -52,7 +52,8 @@ public class CrudTemplates : NinjadogTemplates
         AddTemplates(
             "Database",
             new DatabaseInitializerTemplate(),
-            new DbConnectionFactoryTemplate());
+            new DbConnectionFactoryTemplate(),
+            new DatabaseSeederTemplate());
 
         AddTemplates(
             "Domain",

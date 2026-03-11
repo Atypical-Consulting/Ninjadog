@@ -17,6 +17,7 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
     {
         var rootNamespace = ninjadogSettings.Config.RootNamespace;
         var entities = ninjadogSettings.Entities.FromKeys();
+        var hasSeedData = entities.Any(e => e.SeedData is { Count: > 0 });
         const string fileName = "CrudWebApiExtensions.cs";
 
         var content =
@@ -58,7 +59,7 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
 
                       services.AddSingleton<IDbConnectionFactory>(_ => new SqliteConnectionFactory(connectionString));
                       services.AddSingleton<DatabaseInitializer>();
-
+              {{GenerateSeederRegistration(hasSeedData)}}
               {{GenerateModelDependenciesInjection(entities)}}
                       return services;
                   }
@@ -116,6 +117,16 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
               """;
 
         return CreateNinjadogContentFile(fileName, content);
+    }
+
+    private static string GenerateSeederRegistration(bool hasSeedData)
+    {
+        if (!hasSeedData)
+        {
+            return string.Empty;
+        }
+
+        return "        services.AddSingleton<DatabaseSeeder>();\n";
     }
 
     private static string GenerateModelDependenciesInjection(List<NinjadogEntityWithKey> entities)
