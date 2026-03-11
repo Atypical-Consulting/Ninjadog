@@ -26,6 +26,7 @@ Generates a `DatabaseInitializer` class that creates SQLite tables for all entit
 | `DateTime` | TEXT |
 | `DateOnly` | TEXT |
 | `Guid` | CHAR(36) |
+| `enum` | INTEGER |
 
 ### DbConnectionFactoryGenerator
 

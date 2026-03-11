@@ -9,7 +9,7 @@ has_children: true
 # Generators
 {: .no_toc }
 
-Ninjadog includes **33 generators** organized into 12 categories. Each generator produces either a single shared file or a per-entity file.
+Ninjadog includes **34 generators** organized into 13 categories. Each generator produces either a single shared file or a per-entity file.
 {: .fs-6 .fw-300 }
 
 ---
@@ -19,6 +19,7 @@ Ninjadog includes **33 generators** organized into 12 categories. Each generator
 | Category | Generators | Scope |
 |---|---|---|
 | **[Project Setup](/Ninjadog/generators/project-setup)** | ProgramGenerator, AppSettingsGenerator, DomainEntityGenerator | Single file / Per entity |
+| **Domain** | DomainEntityGenerator, EnumGenerator | Per entity |
 | **[Core](/Ninjadog/generators/core)** | NinjadogGenerator | Single file |
 | **[Contracts -- Data](/Ninjadog/generators/contracts)** | DtoGenerator | Per entity |
 | **[Contracts -- Requests](/Ninjadog/generators/contracts)** | Create, Delete, Get, Update | Per entity |

@@ -155,6 +155,49 @@ public partial class DatabaseInitializer(IDbConnectionFactory connectionFactory)
 
 ---
 
+## Enum -- C# Code Generation
+
+Ninjadog can generate C# enum types from your `ninjadog.json` configuration. Define enums as named arrays of string values:
+
+```json
+{
+  "enums": {
+    "Priority": ["Low", "Medium", "High", "Critical"],
+    "Status": ["Draft", "Active", "Archived"]
+  }
+}
+```
+
+Ninjadog generates a separate `.cs` file for each enum under the `Domain` namespace:
+
+```csharp
+namespace TestApp.Api.Domain;
+
+public enum Priority
+{
+    Low,
+    Medium,
+    High,
+    Critical
+}
+```
+
+```csharp
+namespace TestApp.Api.Domain;
+
+public enum Status
+{
+    Draft,
+    Active,
+    Archived
+}
+```
+
+{: .note }
+> Enum-typed columns are mapped to `INTEGER` in the SQLite database. The DatabaseInitializer automatically uses `INTEGER` for any property whose type matches a defined enum name.
+
+---
+
 ## Next Steps
 
 - [Generators](/Ninjadog/generators) -- Explore all 30 generators in detail
