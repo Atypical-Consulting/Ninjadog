@@ -45,4 +45,18 @@ public static class TestEntities
 
         return new NinjadogEntityWithKey("Category", properties, null);
     }
+
+    public static NinjadogEntityWithKey CreateValidatedEntity()
+    {
+        var properties = new NinjadogEntityProperties
+        {
+            { "Id", new NinjadogEntityId() },
+            { "Name", new NinjadogEntityProperty("String", Required: true, MaxLength: 100, MinLength: 2) },
+            { "Email", new NinjadogEntityProperty("String", Required: true, Pattern: @"^[^@]+@[^@]+\.[^@]+$") },
+            { "Age", new NinjadogEntityProperty("Int32", Min: 0, Max: 150) },
+            { "Bio", new NinjadogEntityProperty("String", MaxLength: 500) },
+        };
+
+        return new NinjadogEntityWithKey("Contact", properties, null);
+    }
 }
