@@ -174,6 +174,69 @@ Then regenerate with `ninjadog build`. Each entity produces its own full set of 
 {: .tip }
 > Route constraints are dynamic -- `:guid`, `:int`, or untyped -- based on your entity's key type. An `int` key produces `/orders/{id:int}`, while a `Guid` key produces `/movies/{id:guid}`.
 
+## CORS Configuration
+
+By default, the generated API allows requests from `https://localhost:7270`. You can customize the CORS policy by adding a `cors` block inside `config` in your `ninjadog.json`:
+
+```json
+{
+  "config": {
+    "name": "MyApi",
+    "version": "1.0.0",
+    "description": "My API",
+    "rootNamespace": "MyApi",
+    "outputPath": "src/applications/MyApi",
+    "saveGeneratedFiles": true,
+    "cors": {
+      "origins": ["https://myapp.com", "https://staging.myapp.com"],
+      "methods": ["GET", "POST", "PUT", "DELETE"],
+      "headers": ["Content-Type", "Authorization"]
+    }
+  },
+  "entities": {
+    "Product": {
+      "properties": {
+        "Id": { "type": "Guid", "isKey": true },
+        "Name": { "type": "string" },
+        "Price": { "type": "decimal" }
+      }
+    }
+  }
+}
+```
+
+### CORS Options
+
+| Option | Type | Required | Description |
+|---|---|---|---|
+| `origins` | `string[]` | Yes | The allowed origins for cross-origin requests. |
+| `methods` | `string[]` | No | The allowed HTTP methods. When omitted, all methods are allowed. |
+| `headers` | `string[]` | No | The allowed request headers. When omitted, all headers are allowed. |
+
+{: .tip }
+> If you omit the `cors` block entirely, Ninjadog defaults to allowing `https://localhost:7270` as the only origin -- useful for local development without extra configuration.
+
+### Generated CORS Policy
+
+When you provide a `cors` configuration, the generated `Program.cs` includes a named CORS policy that is registered and applied automatically:
+
+```csharp
+services.AddCors(options =>
+{
+    options.AddPolicy(name: myAllowSpecificOrigins,
+        policy =>
+        {
+            policy.WithOrigins("https://myapp.com", "https://staging.myapp.com")
+                .WithMethods("GET", "POST", "PUT", "DELETE")
+                .WithHeaders("Content-Type", "Authorization");
+        });
+});
+
+// ...
+
+app.UseCors(myAllowSpecificOrigins);
+```
+
 ## What Happens Under the Hood
 
 When you run `ninjadog build`, the CLI reads your `ninjadog.json` configuration and generates a complete .NET web API project to disk:
