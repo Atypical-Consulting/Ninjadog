@@ -1,13 +1,12 @@
 <Project>
-  <Import Project="../msbuild/props/General.props"/>
-<!--  <Import Project="../msbuild/props/Dependencies.props"/>-->
-  <Import Project="../msbuild/props/Documentation.props"/>
-  <Import Project="../msbuild/props/CodeAnalysis.props"/>
-  <Import Project="../msbuild/props/ContinuousIntegration.props"/>
-  <Import Project="../msbuild/props/Packaging.props"/>
-  <Import Project="../msbuild/props/SourceLink.props"/>
-  <Import Project="../msbuild/props/FileInclusion.props"/>
-  <Import Project="../msbuild/props/Versioning.props"/>
+  <Import Project="../msbuild/General.props"/>
+  <Import Project="../msbuild/Documentation.props"/>
+  <Import Project="../msbuild/CodeAnalysis.props"/>
+  <Import Project="../msbuild/ContinuousIntegration.props"/>
+  <Import Project="../msbuild/Packaging.props"/>
+  <Import Project="../msbuild/SourceLink.props"/>
+  <Import Project="../msbuild/FileInclusion.props"/>
+  <Import Project="../msbuild/Versioning.props"/>
   
   <!-- Properties -->
   <PropertyGroup>
