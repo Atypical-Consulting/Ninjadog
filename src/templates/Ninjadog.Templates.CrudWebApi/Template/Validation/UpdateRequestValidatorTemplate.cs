@@ -63,7 +63,16 @@ public sealed class UpdateRequestValidatorTemplate
                 continue;
             }
 
-            if (_valueTypes.Contains(propertyValue.Type))
+            var isValueType = _valueTypes.Contains(propertyValue.Type);
+            var hasValidationAttrs = propertyValue.Required
+                || propertyValue.MaxLength.HasValue
+                || propertyValue.MinLength.HasValue
+                || propertyValue.Min.HasValue
+                || propertyValue.Max.HasValue
+                || propertyValue.Pattern != null;
+
+            // Skip value types that have no validation attributes
+            if (isValueType && !hasValidationAttrs)
             {
                 continue;
             }
@@ -73,7 +82,64 @@ public sealed class UpdateRequestValidatorTemplate
                 sb.AppendLine();
             }
 
-            sb.AppendLine($"RuleFor(x => x.{propertyName}).NotEmpty();");
+            if (!isValueType && !hasValidationAttrs)
+            {
+                // Existing behavior for non-value-type properties without validation attributes
+                sb.AppendLine($"RuleFor(x => x.{propertyName}).NotEmpty();");
+            }
+            else
+            {
+                // Generate rules based on validation attributes
+                var rules = new List<string>();
+
+                if (propertyValue.Required || !isValueType)
+                {
+                    rules.Add(".NotEmpty()");
+                }
+
+                if (propertyValue.MaxLength.HasValue)
+                {
+                    rules.Add($".MaximumLength({propertyValue.MaxLength.Value})");
+                }
+
+                if (propertyValue.MinLength.HasValue)
+                {
+                    rules.Add($".MinimumLength({propertyValue.MinLength.Value})");
+                }
+
+                if (propertyValue.Min.HasValue)
+                {
+                    rules.Add($".GreaterThanOrEqualTo({propertyValue.Min.Value})");
+                }
+
+                if (propertyValue.Max.HasValue)
+                {
+                    rules.Add($".LessThanOrEqualTo({propertyValue.Max.Value})");
+                }
+
+                if (propertyValue.Pattern != null)
+                {
+                    rules.Add($".Matches(\"{propertyValue.Pattern}\")");
+                }
+
+                sb
+                    .AppendLine($"RuleFor(x => x.{propertyName})")
+                    .IncrementIndent();
+
+                for (var i = 0; i < rules.Count; i++)
+                {
+                    if (i == rules.Count - 1)
+                    {
+                        sb.AppendLine($"{rules[i]};");
+                    }
+                    else
+                    {
+                        sb.AppendLine(rules[i]);
+                    }
+                }
+
+                sb.DecrementIndent();
+            }
 
             hasWrittenRule = true;
         }

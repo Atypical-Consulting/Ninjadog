@@ -91,7 +91,13 @@ public abstract record NinjadogSettings(
                         var propName = prop.Name;
                         var type = prop.Value.GetProperty("type").GetString()!;
                         var isKey = prop.Value.TryGetProperty("isKey", out var ik) && ik.GetBoolean();
-                        properties.Add(propName, new NinjadogEntityProperty(type, isKey));
+                        var required = prop.Value.TryGetProperty("required", out var req) && req.GetBoolean();
+                        int? maxLength = prop.Value.TryGetProperty("maxLength", out var ml) ? ml.GetInt32() : null;
+                        int? minLength = prop.Value.TryGetProperty("minLength", out var mnl) ? mnl.GetInt32() : null;
+                        int? min = prop.Value.TryGetProperty("min", out var mn) ? mn.GetInt32() : null;
+                        int? max = prop.Value.TryGetProperty("max", out var mx) ? mx.GetInt32() : null;
+                        var pattern = prop.Value.TryGetProperty("pattern", out var pat) ? pat.GetString() : null;
+                        properties.Add(propName, new NinjadogEntityProperty(type, isKey, required, maxLength, minLength, min, max, pattern));
                     }
                 }
 

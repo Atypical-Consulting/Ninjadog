@@ -1,6 +1,6 @@
 ---
 title: Generated Examples
-description: "Real generated C# code from Ninjadog: FastEndpoints with pagination, route constraints, FluentValidation validators, and SQLite schema generation."
+description: "Real generated C# code from Ninjadog: FastEndpoints with pagination, route constraints, FluentValidation validators, and multi-provider database schema generation."
 layout: default
 nav_order: 6
 ---
@@ -129,6 +129,54 @@ public partial class CreateTodoItemRequestValidator : Validator<CreateTodoItemRe
 }
 ```
 
+## Validator -- Validation Attributes
+
+When you add validation attributes (`required`, `maxLength`, `minLength`, `min`, `max`, `pattern`) to your property definitions, Ninjadog generates the corresponding FluentValidation rules automatically.
+
+Given this entity configuration:
+
+```json
+{
+  "Contact": {
+    "properties": {
+      "Id": { "type": "Guid", "isKey": true },
+      "Name": { "type": "String", "required": true, "maxLength": 100, "minLength": 2 },
+      "Email": { "type": "String", "required": true, "pattern": "^[^@]+@[^@]+\\.[^@]+$" },
+      "Age": { "type": "Int32", "min": 0, "max": 150 }
+    }
+  }
+}
+```
+
+The generated validator includes all declared constraints:
+
+```csharp
+public partial class CreateContactRequestValidator : Validator<CreateContactRequest>
+{
+    public CreateContactRequestValidator()
+    {
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .WithMessage("Name is required!")
+            .MinimumLength(2)
+            .MaximumLength(100);
+
+        RuleFor(x => x.Email)
+            .NotEmpty()
+            .WithMessage("Email is required!")
+            .Matches("^[^@]+@[^@]+\\.[^@]+$");
+
+        RuleFor(x => x.Age)
+            .GreaterThanOrEqualTo(0)
+            .LessThanOrEqualTo(150);
+
+    }
+}
+```
+
+{: .note }
+> Validation attributes compose with type-aware rules. Value types like `Int32` are only validated when explicit constraints (`min`, `max`) are declared -- otherwise they are skipped entirely.
+
 ## Database -- SQLite Schema with Type-Aware Columns
 
 The `DatabaseInitializer` creates SQLite tables for **all** entities in your project. Column types are mapped from C# types automatically (see [Data Layer](/Ninjadog/generators/data-layer) for the full mapping table).
@@ -152,6 +200,49 @@ public partial class DatabaseInitializer(IDbConnectionFactory connectionFactory)
     }
 }
 ```
+
+## Database -- Audit Fields
+
+When `config.features.auditing` is set to `true`, the generated schema gains `CreatedAt` and `UpdatedAt` columns, and the repository SQL manages their values automatically.
+
+```csharp
+public partial class DatabaseInitializer(IDbConnectionFactory connectionFactory)
+{
+    public async Task InitializeAsync()
+    {
+        using var connection = await connectionFactory.CreateConnectionAsync();
+
+        await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS TodoItems (
+            Id CHAR(36) PRIMARY KEY,
+            Title TEXT NOT NULL,
+            Description TEXT NOT NULL,
+            IsCompleted INTEGER NOT NULL,
+            DueDate TEXT NOT NULL,
+            Priority INTEGER NOT NULL,
+            Cost REAL NOT NULL,
+            CreatedAt TEXT NOT NULL,
+            UpdatedAt TEXT)");
+
+    }
+}
+```
+
+The repository INSERT sets both timestamps, while UPDATE only refreshes `UpdatedAt`:
+
+```csharp
+// INSERT
+await connection.ExecuteAsync(
+    @"INSERT INTO TodoItems (Id, Title, Description, IsCompleted, DueDate, Priority, Cost, CreatedAt, UpdatedAt) VALUES (@Id, @Title, @Description, @IsCompleted, @DueDate, @Priority, @Cost, datetime('now'), datetime('now'))",
+    todoItem);
+
+// UPDATE
+await connection.ExecuteAsync(
+    @"UPDATE TodoItems SET Title = @Title, Description = @Description, IsCompleted = @IsCompleted, DueDate = @DueDate, Priority = @Priority, Cost = @Cost, UpdatedAt = datetime('now') WHERE Id = @Id",
+    todoItem);
+```
+
+{: .note }
+> Audit fields are opt-in. Without `"auditing": true` in your config, the generated output is identical to the standard schema shown above.
 
 ---
 
