@@ -7,7 +7,7 @@ nav_order: 6
 # Generated Output Examples
 {: .no_toc }
 
-Real generated code from Ninjadog's verified snapshot tests -- this is exactly what the source generator produces.
+Real generated code from Ninjadog's verified snapshot tests -- this is exactly what the CLI produces.
 {: .fs-6 .fw-300 }
 
 <details open markdown="block">
@@ -21,19 +21,21 @@ Real generated code from Ninjadog's verified snapshot tests -- this is exactly w
 
 ## Source Entity
 
-All examples below are generated from this `TodoItem` entity:
+All examples below are generated from this `TodoItem` entity defined in `ninjadog.json`:
 
-```csharp
-[Ninjadog]
-public class TodoItem
+```json
 {
-    public Guid Id { get; set; }
-    public string Title { get; set; }
-    public string Description { get; set; }
-    public bool IsCompleted { get; set; }
-    public DateTime DueDate { get; set; }
-    public int Priority { get; set; }
-    public decimal Cost { get; set; }
+  "TodoItem": {
+    "properties": {
+      "Id": { "type": "Guid", "isKey": true },
+      "Title": { "type": "string" },
+      "Description": { "type": "string" },
+      "IsCompleted": { "type": "bool" },
+      "DueDate": { "type": "DateTime" },
+      "Priority": { "type": "int" },
+      "Cost": { "type": "decimal" }
+    }
+  }
 }
 ```
 
@@ -47,11 +49,9 @@ public class TodoItem
 The GetAll endpoint provides built-in pagination via query parameters. Default values are `page=1` and `pageSize=10`.
 
 ```csharp
-public partial class GetAllTodoItemsEndpoint
+public partial class GetAllTodoItemsEndpoint(ITodoItemService todoItemService)
     : EndpointWithoutRequest<GetAllTodoItemsResponse>
 {
-    public ITodoItemService TodoItemService { get; private set; } = null!;
-
     public override void Configure()
     {
         Get("/todo-items");
@@ -63,7 +63,7 @@ public partial class GetAllTodoItemsEndpoint
         var page = int.TryParse(HttpContext.Request.Query["page"], out var p) && p > 0 ? p : 1;
         var pageSize = int.TryParse(HttpContext.Request.Query["pageSize"], out var ps) && ps > 0 ? ps : 10;
 
-        var (todoItems, totalCount) = await TodoItemService.GetAllAsync(page, pageSize);
+        var (todoItems, totalCount) = await todoItemService.GetAllAsync(page, pageSize);
         var todoItemsResponse = todoItems.ToTodoItemsResponse(page, pageSize, totalCount);
         await SendOkAsync(todoItemsResponse, ct);
     }
@@ -71,18 +71,16 @@ public partial class GetAllTodoItemsEndpoint
 ```
 
 {: .tip }
-> The endpoint uses **FastEndpoints** conventions -- `Configure()` sets the route and auth, `HandleAsync()` contains the logic. Dependencies like `ITodoItemService` are resolved via property injection.
+> The endpoint uses **FastEndpoints** conventions -- `Configure()` sets the route and auth, `HandleAsync()` contains the logic. Dependencies like `ITodoItemService` are resolved via primary constructor injection.
 
 ## Endpoint -- GetOne with Route Constraint
 
 The route constraint `{id:guid}` is generated automatically because the `Id` property is a `Guid`. For an `int` key, the constraint would be `{id:int}`.
 
 ```csharp
-public partial class GetTodoItemEndpoint
+public partial class GetTodoItemEndpoint(ITodoItemService todoItemService)
     : Endpoint<GetTodoItemRequest, TodoItemResponse>
 {
-    public ITodoItemService TodoItemService { get; private set; } = null!;
-
     public override void Configure()
     {
         Get("/todo-items/{id:guid}");
@@ -91,7 +89,7 @@ public partial class GetTodoItemEndpoint
 
     public override async Task HandleAsync(GetTodoItemRequest req, CancellationToken ct)
     {
-        var todoItem = await TodoItemService.GetAsync(req.Id);
+        var todoItem = await todoItemService.GetAsync(req.Id);
 
         if (todoItem is null)
         {
@@ -126,7 +124,6 @@ public partial class CreateTodoItemRequestValidator : Validator<CreateTodoItemRe
             .NotEmpty()
             .WithMessage("DueDate is required!");
 
-        // IsCompleted (bool), Priority (int), Cost (decimal) -- skipped, value types always have defaults
     }
 }
 ```
@@ -150,6 +147,7 @@ public partial class DatabaseInitializer(IDbConnectionFactory connectionFactory)
             DueDate TEXT NOT NULL,
             Priority INTEGER NOT NULL,
             Cost REAL NOT NULL)");
+
     }
 }
 ```

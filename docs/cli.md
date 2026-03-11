@@ -33,7 +33,7 @@ dotnet tool install -g Ninjadog.CLI
 ```
 ninjadog init       Create a new project
        ↓
-  edit entities     Add [Ninjadog] attributes to your classes
+  edit config       Define your entities in ninjadog.json
        ↓
 ninjadog build      Run the generators
        ↓

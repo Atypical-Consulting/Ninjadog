@@ -20,7 +20,7 @@ public partial class CreateTodoItemRequestValidator : Validator<CreateTodoItemRe
 {
     public CreateTodoItemRequestValidator()
     {
-                RuleFor(x => x.Title)
+        RuleFor(x => x.Title)
             .NotEmpty()
             .WithMessage("Title is required!");
 
