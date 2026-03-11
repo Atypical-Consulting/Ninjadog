@@ -18,6 +18,7 @@ namespace Ninjadog.Settings.Config;
 /// <param name="Cors">The optional CORS configuration for the application.</param>
 /// <param name="SoftDelete">Indicates whether soft delete is enabled. When true, DELETE operations set IsDeleted=1 instead of removing rows. Default is false.</param>
 /// <param name="Auditing">Indicates whether audit fields (CreatedAt, UpdatedAt) should be added to generated tables. Default is false.</param>
+/// <param name="DatabaseProvider">The database provider to use (sqlite, postgresql, sqlserver). Default is sqlite.</param>
 public abstract record NinjadogConfiguration(
     string Name,
     string Version,
@@ -27,4 +28,5 @@ public abstract record NinjadogConfiguration(
     bool SaveGeneratedFiles = true,
     NinjadogCorsConfiguration? Cors = null,
     bool SoftDelete = false,
-    bool Auditing = false);
+    bool Auditing = false,
+    string DatabaseProvider = "sqlite");

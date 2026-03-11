@@ -16,5 +16,6 @@ public sealed record NinjadogLoadedConfiguration(
     bool SaveGeneratedFiles = true,
     NinjadogCorsConfiguration? Cors = null,
     bool SoftDelete = false,
-    bool Auditing = false)
-    : NinjadogConfiguration(Name, Version, Description, RootNamespace, OutputPath, SaveGeneratedFiles, Cors, SoftDelete, Auditing);
+    bool Auditing = false,
+    string DatabaseProvider = "sqlite")
+    : NinjadogConfiguration(Name, Version, Description, RootNamespace, OutputPath, SaveGeneratedFiles, Cors, SoftDelete, Auditing, DatabaseProvider);

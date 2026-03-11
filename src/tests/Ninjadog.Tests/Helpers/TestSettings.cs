@@ -72,3 +72,29 @@ public sealed record AuditConfiguration()
 
 public sealed record AuditSettings()
     : NinjadogSettings(new AuditConfiguration(), new TestEntitiesCollection());
+
+public sealed record PostgresConfiguration()
+    : NinjadogConfiguration(
+        Name: "TestApp",
+        Version: "1.0.0",
+        Description: "Test application",
+        RootNamespace: "TestApp.Api",
+        OutputPath: "output",
+        SaveGeneratedFiles: false,
+        DatabaseProvider: "postgresql");
+
+public sealed record PostgresSettings()
+    : NinjadogSettings(new PostgresConfiguration(), new TestEntitiesCollection());
+
+public sealed record SqlServerConfiguration()
+    : NinjadogConfiguration(
+        Name: "TestApp",
+        Version: "1.0.0",
+        Description: "Test application",
+        RootNamespace: "TestApp.Api",
+        OutputPath: "output",
+        SaveGeneratedFiles: false,
+        DatabaseProvider: "sqlserver");
+
+public sealed record SqlServerSettings()
+    : NinjadogSettings(new SqlServerConfiguration(), new TestEntitiesCollection());

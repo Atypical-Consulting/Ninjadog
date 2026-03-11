@@ -33,7 +33,9 @@ public class CrudTemplateManifest : NinjadogTemplateManifest
         "FastEndpoints.Swagger:5.32.0",
         "FluentValidation:12.1.1",
         "ValueOf:2.0.31",
-        "Microsoft.Data.Sqlite:10.0.4"
+        "Microsoft.Data.Sqlite:10.0.4",
+        "Npgsql:9.0.3",
+        "Microsoft.Data.SqlClient:6.0.1"
     ];
 
     /// <inheritdoc />
