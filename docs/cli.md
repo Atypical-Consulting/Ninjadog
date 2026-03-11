@@ -35,12 +35,12 @@ dotnet tool install -g Ninjadog
 ninjadog init              Create a new project (interactive)
        |
   edit config              Define your entities in ninjadog.json
-       |
-ninjadog validate          Check your config for errors
-       |
-ninjadog add-entity        (Optional) Add more entities from the CLI
-       |
-ninjadog build             Run the generators
+       |                       --- or ---
+ninjadog add-entity        (Optional) Add more      ninjadog ui
+       |                   entities from the CLI    Launch the visual
+ninjadog validate          Check your config         config builder
+       |                   for errors                    |
+ninjadog build             Run the generators        ninjadog build
        |
   dotnet run               Launch your API
 ```
@@ -233,7 +233,7 @@ ninjadog build
 
 ### `ninjadog ui`
 
-Starts a local web server with a visual configuration builder for your `ninjadog.json`.
+Launches a local web server that hosts a visual configuration builder for your `ninjadog.json` file. The UI lets you create and edit entities, enums, and seed data through a browser-based interface instead of editing JSON by hand.
 
 ```bash
 ninjadog ui [OPTIONS]
@@ -241,22 +241,25 @@ ninjadog ui [OPTIONS]
 
 **Options:**
 
-| Option | Description |
-|---|---|
-| `--port <number>` | Port number for the web server. Default: `5391` |
-| `--no-browser` | Do not open a browser window automatically. |
+| Option | Description | Default |
+|---|---|---|
+| `--port <number>` | Port number for the local web server | `5111` |
+| `--path <path>` | Path to the `ninjadog.json` file to edit | `./ninjadog.json` |
+| `--no-open` | Do not open the browser automatically | `false` |
 
-**What it does:**
+**Visual builder features:**
 
-The web UI provides a browser-based interface for editing your Ninjadog configuration. Features include:
-
-- **Form-based editing** -- Add and configure entities, properties, enums, and relationships without writing JSON by hand.
-- **Live JSON preview** -- See the resulting `ninjadog.json` update in real time as you make changes.
-- **Validation** -- Errors and warnings are displayed inline as you edit.
-- **Build trigger** -- Run `ninjadog build` directly from the UI and see the output.
+- **Entity editor** -- Add, rename, and remove entities. Define properties with types, key markers, and validation rules.
+- **Enum editor** -- Define enums with named members and optional integer values.
+- **Seed data editor** -- Populate initial data rows for each entity directly from the UI.
+- **Live JSON preview** -- See the generated `ninjadog.json` update in real time as you make changes.
+- **Validation** -- The UI validates your configuration before saving, highlighting errors inline.
 
 {: .tip }
-> The web UI is especially useful for exploring configuration options and getting started with a new project. It reads and writes the same `ninjadog.json` file that the CLI uses.
+> By default, `ninjadog ui` opens your browser automatically. Use `--no-open` if you are running on a headless server or want to open the URL manually.
+
+{: .note }
+> A `ninjadog.json` file must already exist in the target directory. Run `ninjadog init` first if you haven't already.
 
 **Example:**
 
@@ -265,7 +268,7 @@ The web UI provides a browser-based interface for editing your Ninjadog configur
 ninjadog ui
 
 # Start on a custom port without opening a browser
-ninjadog ui --port 8080 --no-browser
+ninjadog ui --port 8080 --no-open
 ```
 
 ---

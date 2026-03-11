@@ -53,6 +53,9 @@
     <PackageVersion Include="Roslynator.Analyzers" Version="4.15.0" />
     <!-- Source Linking -->
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.200" />
+    <!-- JSON Schema -->
+    <PackageVersion Include="JsonSchema.Net" Version="7.3.2" />
+    <PackageVersion Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.4" />
     <!-- Other Tools -->
     <PackageVersion Include="DotNet.ReproducibleBuilds" Version="2.0.2" />
     <PackageVersion Include="MinVer" Version="7.0.0" />

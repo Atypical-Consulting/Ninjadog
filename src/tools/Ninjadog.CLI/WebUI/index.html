@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ninjadog Config Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        ninja: {
+                            50:  '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/css/app.css" />
+</head>
+<body class="dark h-full bg-gray-900 text-gray-100">
+    <div id="app" class="flex flex-col h-full">
+        <!-- Header -->
+        <header class="flex items-center justify-between px-6 py-3 bg-gray-800 border-b border-gray-700 shrink-0">
+            <div class="flex items-center gap-3">
+                <h1 class="text-xl font-bold text-ninja-400">Ninjadog Config Builder</h1>
+                <span id="status-badge" class="text-xs px-2 py-0.5 rounded-full bg-gray-700 text-gray-400 hidden"></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="btn-save" class="px-4 py-1.5 text-sm font-medium rounded bg-ninja-600 hover:bg-ninja-700 text-white transition">Save</button>
+                <button id="btn-build" class="px-4 py-1.5 text-sm font-medium rounded bg-emerald-600 hover:bg-emerald-700 text-white transition">Build</button>
+            </div>
+        </header>
+
+        <!-- Main content -->
+        <div class="flex flex-1 overflow-hidden">
+            <!-- Left panel: Tabs + form -->
+            <div class="flex flex-col flex-1 min-w-0">
+                <!-- Tab bar -->
+                <nav class="flex border-b border-gray-700 bg-gray-800 shrink-0">
+                    <button class="tab-btn active px-4 py-2 text-sm font-medium" data-tab="config">Config</button>
+                    <button class="tab-btn px-4 py-2 text-sm font-medium" data-tab="entities">Entities</button>
+                    <button class="tab-btn px-4 py-2 text-sm font-medium" data-tab="enums">Enums</button>
+                    <button class="tab-btn px-4 py-2 text-sm font-medium" data-tab="seed">Seed Data</button>
+                </nav>
+
+                <!-- Tab content -->
+                <div class="flex-1 overflow-auto p-6">
+                    <div id="tab-config" class="tab-content"></div>
+                    <div id="tab-entities" class="tab-content hidden"></div>
+                    <div id="tab-enums" class="tab-content hidden"></div>
+                    <div id="tab-seed" class="tab-content hidden"></div>
+                </div>
+            </div>
+
+            <!-- Right panel: JSON preview -->
+            <div id="json-panel" class="w-[420px] flex flex-col border-l border-gray-700 bg-gray-850 shrink-0">
+                <div class="flex items-center justify-between px-4 py-2 border-b border-gray-700 bg-gray-800">
+                    <span class="text-sm font-medium text-gray-300">JSON Preview</span>
+                    <button id="btn-toggle-raw" class="text-xs px-2 py-0.5 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 transition">Raw Edit</button>
+                </div>
+                <div id="json-preview" class="flex-1 overflow-auto p-4 font-mono text-xs leading-relaxed"></div>
+                <textarea id="json-raw" class="hidden flex-1 p-4 bg-gray-900 text-green-400 font-mono text-xs resize-none border-none outline-none"></textarea>
+            </div>
+        </div>
+
+        <!-- Validation panel -->
+        <div id="validation-panel" class="shrink-0 border-t border-gray-700 bg-gray-800 max-h-40 overflow-auto">
+            <div class="px-4 py-2 text-xs font-medium text-gray-400 border-b border-gray-700">Validation</div>
+            <div id="validation-messages" class="px-4 py-2 space-y-1"></div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/config-editor.js"></script>
+    <script src="/js/entity-editor.js"></script>
+    <script src="/js/enum-editor.js"></script>
+    <script src="/js/seed-editor.js"></script>
+    <script src="/js/json-preview.js"></script>
+    <script src="/js/validation.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>

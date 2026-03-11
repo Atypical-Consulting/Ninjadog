@@ -1,0 +1,182 @@
+/* Ninjadog Config Builder — custom styles */
+
+.tab-btn {
+    color: #9ca3af;
+    border-bottom: 2px solid transparent;
+    transition: all 150ms;
+}
+.tab-btn:hover {
+    color: #e5e7eb;
+}
+.tab-btn.active {
+    color: #38bdf8;
+    border-bottom-color: #38bdf8;
+}
+
+.tab-content {
+    /* shown via JS */
+}
+
+/* Form field styles */
+.field-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #9ca3af;
+    margin-bottom: 0.25rem;
+}
+
+.field-input {
+    width: 100%;
+    padding: 0.375rem 0.625rem;
+    font-size: 0.875rem;
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 0.375rem;
+    color: #f3f4f6;
+    outline: none;
+    transition: border-color 150ms;
+}
+.field-input:focus {
+    border-color: #38bdf8;
+}
+
+.field-select {
+    width: 100%;
+    padding: 0.375rem 0.625rem;
+    font-size: 0.875rem;
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 0.375rem;
+    color: #f3f4f6;
+    outline: none;
+    transition: border-color 150ms;
+    appearance: auto;
+}
+.field-select:focus {
+    border-color: #38bdf8;
+}
+
+.field-checkbox {
+    width: 1rem;
+    height: 1rem;
+    accent-color: #38bdf8;
+}
+
+/* Button variants */
+.btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 0.25rem;
+    transition: all 150ms;
+}
+.btn-primary {
+    background: #0ea5e9;
+    color: white;
+}
+.btn-primary:hover {
+    background: #0284c7;
+}
+.btn-danger {
+    background: #dc2626;
+    color: white;
+}
+.btn-danger:hover {
+    background: #b91c1c;
+}
+.btn-ghost {
+    background: transparent;
+    color: #9ca3af;
+    border: 1px solid #374151;
+}
+.btn-ghost:hover {
+    background: #374151;
+    color: #e5e7eb;
+}
+
+/* JSON syntax highlighting */
+.json-key { color: #7dd3fc; }
+.json-string { color: #86efac; }
+.json-number { color: #fbbf24; }
+.json-bool { color: #c084fc; }
+.json-null { color: #6b7280; }
+.json-brace { color: #9ca3af; }
+
+/* Section cards */
+.section-card {
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+.section-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #e5e7eb;
+    margin-bottom: 0.75rem;
+}
+
+/* Table */
+.data-table {
+    width: 100%;
+    font-size: 0.8125rem;
+    border-collapse: collapse;
+}
+.data-table th {
+    text-align: left;
+    font-weight: 500;
+    color: #9ca3af;
+    padding: 0.375rem 0.5rem;
+    border-bottom: 1px solid #374151;
+}
+.data-table td {
+    padding: 0.375rem 0.5rem;
+    border-bottom: 1px solid #1f2937;
+}
+
+/* Validation severity */
+.diag-error { color: #ef4444; }
+.diag-warning { color: #f59e0b; }
+.diag-info { color: #38bdf8; }
+
+/* Entity card */
+.entity-card {
+    background: #111827;
+    border: 1px solid #374151;
+    border-radius: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+.entity-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    user-select: none;
+}
+.entity-header:hover {
+    background: #1f2937;
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+.entity-body {
+    padding: 0.75rem;
+    border-top: 1px solid #374151;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #374151;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #4b5563;
+}
