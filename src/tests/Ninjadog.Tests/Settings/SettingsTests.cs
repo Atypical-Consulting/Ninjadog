@@ -227,7 +227,7 @@ public class NinjadogInitialSettingsTests
         var settings = NinjadogSettings.FromJsonString(json);
 
         Assert.Equal("TodoApp", settings.Config.Name);
-        Assert.Equal("src/applications/TodoApp", settings.Config.OutputPath);
+        Assert.Equal(".", settings.Config.OutputPath);
         Assert.False(settings.Config.SaveGeneratedFiles);
         Assert.Null(settings.Config.Cors);
         Assert.False(settings.Config.SoftDelete);

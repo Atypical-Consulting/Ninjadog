@@ -87,7 +87,7 @@ public abstract record NinjadogSettings(
             Version: GetRequiredString(configElement, "version"),
             Description: GetRequiredString(configElement, "description"),
             RootNamespace: GetRequiredString(configElement, "rootNamespace"),
-            OutputPath: GetOptionalString(configElement, "outputPath") ?? $"src/applications/{name}",
+            OutputPath: GetOptionalString(configElement, "outputPath") ?? ".",
             SaveGeneratedFiles: GetOptionalBoolean(configElement, "saveGeneratedFiles"),
             Cors: cors,
             SoftDelete: softDelete,

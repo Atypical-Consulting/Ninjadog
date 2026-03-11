@@ -34,7 +34,8 @@ public class NinjadogAppService : INinjadogAppService
         _fileService = fileService;
 
         AppName = settings.Config.Name;
-        AppDirectory ??= fileService.CreateAppFolder(AppName);
+        AppDirectory = Path.GetFullPath(settings.Config.OutputPath);
+        Directory.CreateDirectory(AppDirectory);
         ProjectPath = Path.Combine(AppDirectory, "src", $"{AppName}.{_manifest.Name}");
     }
 
@@ -50,9 +51,9 @@ public class NinjadogAppService : INinjadogAppService
     /// <inheritdoc />
     public virtual async Task CreateAppAsync(bool deleteIfExists = true)
     {
-        if (deleteIfExists)
+        if (deleteIfExists && Directory.Exists(ProjectPath))
         {
-            _fileService.DeleteAppFolder(_settings.Config.Name);
+            Directory.Delete(ProjectPath, true);
         }
 
         await NewNinjadogSettingsFileAsync();
