@@ -98,7 +98,7 @@ ninjadog/
 | `Ninjadog.Settings` | Generator configuration |
 | `Ninjadog.Settings.Extensions` | Settings extension methods |
 | `Ninjadog.Templates.CrudWebApi` | CRUD Web API template |
-| `Ninjadog.CLI` | Command-line tool (`dotnet tool install -g Ninjadog.CLI`) |
+| `Ninjadog.CLI` | Command-line tool (build from source) |
 
 ---
 

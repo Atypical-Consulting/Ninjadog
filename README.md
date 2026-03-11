@@ -4,7 +4,7 @@
 
 # Ninjadog
 
-> **One attribute. Full REST API. Zero boilerplate.**
+> **One config. Full REST API. Zero boilerplate.**
 
 <!-- Badges: Row 1 — Identity -->
 [![Atypical-Consulting - ninjadog](https://img.shields.io/static/v1?label=Atypical-Consulting&message=ninjadog&color=blue&logo=github)](https://github.com/Atypical-Consulting/ninjadog)
@@ -24,25 +24,47 @@
 ## Quick Start
 
 ```bash
-dotnet new web -n MyApi && cd MyApi
-dotnet add package Ninjadog
+git clone https://github.com/Atypical-Consulting/ninjadog.git
+cd ninjadog
+dotnet build
 ```
 
-```csharp
-[Ninjadog]
-public class Product
+```bash
+mkdir MyApi && cd MyApi
+ninjadog init
+```
+
+Edit `ninjadog.json` to define your entities:
+
+```json
 {
-    public Guid Id { get; set; }
-    public string Name { get; set; }
-    public decimal Price { get; set; }
+  "config": {
+    "name": "MyApi",
+    "version": "1.0.0",
+    "description": "My API",
+    "rootNamespace": "MyApi",
+    "outputPath": "src/applications/MyApi",
+    "saveGeneratedFiles": true
+  },
+  "entities": {
+    "Product": {
+      "properties": {
+        "Id": { "type": "Guid", "isKey": true },
+        "Name": { "type": "string" },
+        "Price": { "type": "decimal" }
+      }
+    }
+  }
 }
 ```
 
 ```bash
-dotnet build && dotnet run
+ninjadog build
+cd src/applications/MyApi
+dotnet run
 ```
 
-That's it. You now have a full CRUD API with endpoints, DTOs, validation, repositories, services, mappers, and OpenAPI docs.
+That's it. You now have a full CRUD API with endpoints, DTOs, validation, repositories, services, mappers, and OpenAPI docs — all generated from a single JSON config.
 
 ---
 
@@ -72,18 +94,18 @@ Writing boilerplate C# code for REST APIs is repetitive and error-prone — DTOs
 
 | | Without Ninjadog | With Ninjadog |
 |---|---|---|
-| **Code you write** | ~500+ lines per entity | ~10 lines per entity |
-| **Files to maintain** | 20+ per entity | 1 per entity |
+| **Code you write** | ~500+ lines per entity | ~10 lines of JSON per entity |
+| **Files to maintain** | 20+ per entity | 1 config file |
 | **Layers in sync** | Manual | Automatic |
 | **Runtime cost** | Depends on approach | Zero (compile-time) |
 | **Reflection** | Often required | None |
 | **Time to full CRUD** | Hours | Seconds |
 
-Ninjadog uses **C# Source Generators** to produce your entire API stack at compile time. No runtime reflection, no code-gen CLI step, no files to keep in sync. Change your entity, rebuild, done.
+Ninjadog uses **template-based code generation** via its CLI to produce your entire API stack before you build. No runtime reflection, no files to keep in sync. Change your config, regenerate, done.
 
 ## What Gets Generated
 
-For **each** entity annotated with `[Ninjadog]`, the generator produces:
+For **each** entity defined in `ninjadog.json`, the generator produces:
 
 | Category | Generated Files | Description |
 |---|---|---|
@@ -117,11 +139,9 @@ All examples below are **real generated code** from Ninjadog's verified snapshot
 <summary><strong>Endpoint — GetAll with pagination</strong></summary>
 
 ```csharp
-public partial class GetAllTodoItemsEndpoint
+public partial class GetAllTodoItemsEndpoint(ITodoItemService todoItemService)
     : EndpointWithoutRequest<GetAllTodoItemsResponse>
 {
-    public ITodoItemService TodoItemService { get; private set; } = null!;
-
     public override void Configure()
     {
         Get("/todo-items");
@@ -133,7 +153,7 @@ public partial class GetAllTodoItemsEndpoint
         var page = int.TryParse(HttpContext.Request.Query["page"], out var p) && p > 0 ? p : 1;
         var pageSize = int.TryParse(HttpContext.Request.Query["pageSize"], out var ps) && ps > 0 ? ps : 10;
 
-        var (todoItems, totalCount) = await TodoItemService.GetAllAsync(page, pageSize);
+        var (todoItems, totalCount) = await todoItemService.GetAllAsync(page, pageSize);
         var todoItemsResponse = todoItems.ToTodoItemsResponse(page, pageSize, totalCount);
         await SendOkAsync(todoItemsResponse, ct);
     }
@@ -145,11 +165,9 @@ public partial class GetAllTodoItemsEndpoint
 <summary><strong>Endpoint — GetOne with route constraint</strong></summary>
 
 ```csharp
-public partial class GetTodoItemEndpoint
+public partial class GetTodoItemEndpoint(ITodoItemService todoItemService)
     : Endpoint<GetTodoItemRequest, TodoItemResponse>
 {
-    public ITodoItemService TodoItemService { get; private set; } = null!;
-
     public override void Configure()
     {
         Get("/todo-items/{id:guid}");
@@ -158,7 +176,7 @@ public partial class GetTodoItemEndpoint
 
     public override async Task HandleAsync(GetTodoItemRequest req, CancellationToken ct)
     {
-        var todoItem = await TodoItemService.GetAsync(req.Id);
+        var todoItem = await todoItemService.GetAsync(req.Id);
 
         if (todoItem is null)
         {
@@ -241,7 +259,7 @@ public partial class DatabaseInitializer(IDbConnectionFactory connectionFactory)
 | Layer | Technology |
 |---|---|
 | Runtime | .NET 10, C# 13 |
-| Code Generation | Roslyn Source Generators |
+| Code Generation | Template-based Code Generation |
 | API Framework | FastEndpoints |
 | Database | SQLite + Dapper |
 | Validation | FluentValidation |
@@ -258,19 +276,7 @@ public partial class DatabaseInitializer(IDbConnectionFactory connectionFactory)
 
 ### Installation
 
-**Option 1 — Global CLI tool** *(recommended)*
-
-```bash
-dotnet tool install -g Ninjadog.CLI
-```
-
-**Option 2 — NuGet Package** *(for library use)*
-
-```bash
-dotnet add package Ninjadog
-```
-
-**Option 3 — From Source**
+**From Source** *(recommended)*
 
 ```bash
 git clone https://github.com/Atypical-Consulting/ninjadog.git
@@ -278,36 +284,48 @@ cd ninjadog
 dotnet build
 ```
 
+> NuGet package publishing is on the [roadmap](#roadmap). Once published, you'll be able to install via `dotnet tool install -g Ninjadog.CLI`.
+
 ## Usage
 
 ### Basic Example
 
-1. Create a new .NET 10 Web API project:
+1. Initialize a new project:
 
 ```bash
-dotnet new web -n MyApi
-cd MyApi
-dotnet add package Ninjadog
+mkdir MyApi && cd MyApi
+ninjadog init
 ```
 
-2. Define your domain entity with the `[Ninjadog]` attribute:
+2. Edit `ninjadog.json` to define your entities:
 
-```csharp
-using Ninjadog;
-
-[Ninjadog]
-public class Product
+```json
 {
-    public Guid Id { get; set; }
-    public string Name { get; set; }
-    public decimal Price { get; set; }
+  "config": {
+    "name": "MyApi",
+    "version": "1.0.0",
+    "description": "My API",
+    "rootNamespace": "MyApi",
+    "outputPath": "src/applications/MyApi",
+    "saveGeneratedFiles": true
+  },
+  "entities": {
+    "Product": {
+      "properties": {
+        "Id": { "type": "Guid", "isKey": true },
+        "Name": { "type": "string" },
+        "Price": { "type": "decimal" }
+      }
+    }
+  }
 }
 ```
 
-3. Build and run — all REST endpoints, contracts, repositories, services, mappers, and validators are generated automatically:
+3. Generate and run — all REST endpoints, contracts, repositories, services, mappers, and validators are produced automatically:
 
 ```bash
-dotnet build
+ninjadog build
+cd src/applications/MyApi
 dotnet run
 ```
 
@@ -315,23 +333,26 @@ Your API is now live with full CRUD endpoints for `Product`.
 
 ### Multiple Entities
 
-Each entity gets its own isolated set of generated files:
+Each entity gets its own isolated set of generated files. Add as many entities as you need in `ninjadog.json`:
 
-```csharp
-[Ninjadog]
-public class Movie
+```json
 {
-    public Guid Id { get; set; }
-    public string Title { get; set; }
-    public int Year { get; set; }
-}
-
-[Ninjadog]
-public class Order
-{
-    public int OrderId { get; set; }    // int key — routes use :int constraint
-    public string CustomerName { get; set; }
-    public decimal Total { get; set; }
+  "entities": {
+    "Movie": {
+      "properties": {
+        "Id": { "type": "Guid", "isKey": true },
+        "Title": { "type": "string" },
+        "Year": { "type": "int" }
+      }
+    },
+    "Order": {
+      "properties": {
+        "OrderId": { "type": "int", "isKey": true },
+        "CustomerName": { "type": "string" },
+        "Total": { "type": "decimal" }
+      }
+    }
+  }
 }
 ```
 
@@ -339,14 +360,14 @@ public class Order
 
 ```
 ┌───────────────────────────────────────────────┐
-│              Your C# Source                    │
-│         [Ninjadog] Domain Entities            │
+│            ninjadog.json                       │
+│         Entity Definitions                    │
 └──────────────────┬────────────────────────────┘
                    │
                    ▼
 ┌───────────────────────────────────────────────┐
-│            Roslyn Compiler                    │
-│       Ninjadog Source Generators              │
+│            Ninjadog CLI                       │
+│       Template-based Code Generation          │
 └──────────────────┬────────────────────────────┘
                    │
      ┌─────────────┼─────────────┐
@@ -365,7 +386,7 @@ public class Order
                    │
                    ▼
 ┌───────────────────────────────────────────────┐
-│           Compiled Assembly                   │
+│        Generated .NET Project                 │
 │      Full REST API — Zero Boilerplate         │
 └───────────────────────────────────────────────┘
 ```
@@ -376,7 +397,7 @@ public class Order
 ninjadog/
 ├── src/
 │   ├── library/                             # Core generator libraries
-│   │   ├── Ninjadog.Engine/                 # Main source generator engine
+│   │   ├── Ninjadog.Engine/                 # Main code generation engine
 │   │   ├── Ninjadog.Engine.Core/            # Core generator abstractions
 │   │   ├── Ninjadog.Engine.Infrastructure/  # Infrastructure utilities
 │   │   ├── Ninjadog.Helpers/                # Shared helper functions
@@ -415,13 +436,7 @@ Full documentation for each generator is available in [`doc/generators/`](./doc/
 
 ## CLI
 
-Install the CLI as a global dotnet tool:
-
-```bash
-dotnet tool install -g Ninjadog.CLI
-```
-
-Available commands:
+After building from source, the CLI is available. Available commands:
 
 ```bash
 ninjadog init              # Initialize a new Ninjadog project
@@ -474,7 +489,7 @@ dotnet test
 
 ### Where to Look
 
-- **Generator templates** — `src/library/Ninjadog.Engine/`
+- **Generator templates** — `src/templates/Ninjadog.Templates.CrudWebApi/`
 - **Snapshot tests** — `src/tests/Ninjadog.Tests/Templates/`
 - **CLI commands** — `src/tools/Ninjadog.CLI/`
 - **Generator docs** — `doc/generators/`

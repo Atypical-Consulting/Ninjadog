@@ -1219,16 +1219,17 @@
             <span class="code-window__filename">Terminal</span>
           </div>
           <div class="code-window__body">
-            <pre><span class="cm"># Add the package</span>
-<span class="tp">$</span> dotnet add package <span class="str">Ninjadog</span>
+            <pre><span class="cm"># Initialize a new project</span>
+<span class="tp">$</span> ninjadog init
+<span class="str">Ninjadog settings file created successfully.</span>
 
-<span class="cm"># Build your project</span>
-<span class="tp">$</span> dotnet build
+<span class="cm"># Generate the API</span>
+<span class="tp">$</span> ninjadog build
 <span class="str">Build succeeded.</span>
 <span class="cm">    30 files generated for Product</span>
 
 <span class="cm"># Run the API</span>
-<span class="tp">$</span> dotnet run
+<span class="tp">$</span> cd src/applications/MyApi && dotnet run
 <span class="str">Now listening on: https://localhost:5001</span></pre>
           </div>
         </div>
@@ -1285,7 +1286,7 @@
       <div class="install-block">
         <div class="install-cmd">
           <span class="install-cmd__prompt">$</span>
-          <span class="install-cmd__text" id="installText">dotnet tool install -g Ninjadog.CLI</span>
+          <span class="install-cmd__text" id="installText">git clone https://github.com/Atypical-Consulting/Ninjadog.git && cd Ninjadog && dotnet build</span>
           <button class="install-cmd__copy" id="copyBtn" aria-label="Copy install command">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           </button>

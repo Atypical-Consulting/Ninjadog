@@ -44,7 +44,7 @@ dotnet test
 
 | Area | Path |
 |---|---|
-| Generator templates | `src/library/Ninjadog.Engine/` |
+| Generator templates | `src/templates/Ninjadog.Templates.CrudWebApi/` |
 | Snapshot tests | `src/tests/Ninjadog.Tests/Templates/` |
 | CLI commands | `src/tools/Ninjadog.CLI/` |
 | Generator docs | `doc/generators/` |

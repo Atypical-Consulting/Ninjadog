@@ -42,4 +42,4 @@ Generates the single-entity response object, wrapping the DTO.
 
 ### GetAllResponseGenerator
 
-Generates the paginated response object with `Items`, `Page`, `PageSize`, and `TotalCount` properties.
+Generates the paginated response object with properties for the entity collection (named after the plural entity, e.g., `Products`, `TodoItems`), `Page`, `PageSize`, and `TotalCount`.
