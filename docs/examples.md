@@ -427,6 +427,8 @@ public enum Status
 
 ## Next Steps
 
-- [Generators](/Ninjadog/generators) -- Explore all 30 generators in detail
+- [Configuration Reference](/Ninjadog/configuration) -- Full reference for ninjadog.json options used in these examples
+- [Generators](/Ninjadog/generators) -- Explore all 34 generators in detail
+- [Seed Data Generator](/Ninjadog/generators/seed-data) -- Deep dive into the DatabaseSeeder
 - [Architecture](/Ninjadog/architecture) -- Understand the full pipeline
 - [Getting Started](/Ninjadog/getting-started) -- Try it yourself

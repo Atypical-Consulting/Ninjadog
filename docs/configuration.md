@@ -1,6 +1,6 @@
 ---
 title: Configuration Reference
-description: Complete reference for the ninjadog.json configuration file format
+description: "Complete ninjadog.json configuration reference: project settings, CORS, features, database providers, entities, enums, relationships, seed data, and validation rules."
 layout: default
 nav_order: 4
 ---
@@ -19,6 +19,59 @@ Everything Ninjadog generates is driven by a single `ninjadog.json` file in your
 </details>
 
 ---
+
+## Quick Reference
+
+The following skeleton shows **every** configuration option at a glance. Required fields are marked with a comment. All other fields are optional.
+
+```json
+{
+  "$schema": "./ninjadog.schema.json",
+  "config": {
+    "name": "MyApi",                          // required
+    "version": "1.0.0",                       // required
+    "description": "My REST API",             // required
+    "rootNamespace": "MyApi",                 // required
+    "outputPath": "src/applications/MyApi",   // default: "."
+    "saveGeneratedFiles": true,               // default: true
+    "cors": {
+      "origins": ["https://example.com"],     // required if cors is set
+      "methods": ["GET", "POST"],             // optional
+      "headers": ["Content-Type"]             // optional
+    },
+    "features": {
+      "softDelete": false,                    // default: false
+      "auditing": false                       // default: false
+    },
+    "database": {
+      "provider": "sqlite"                    // "sqlite" | "postgresql" | "sqlserver"
+    }
+  },
+  "enums": {
+    "Priority": ["Low", "Medium", "High"]
+  },
+  "entities": {
+    "Product": {
+      "properties": {
+        "Id": { "type": "Guid", "isKey": true },
+        "Name": { "type": "string", "required": true, "minLength": 1, "maxLength": 200 },
+        "Price": { "type": "decimal", "min": 0, "max": 9999 },
+        "Email": { "type": "string", "pattern": "^[^@]+@[^@]+\\.[^@]+$" },
+        "Status": { "type": "Priority" }
+      },
+      "relationships": {
+        "Orders": { "relatedEntity": "Order", "type": "OneToMany" }
+      },
+      "seedData": [
+        { "Id": "...", "Name": "Sample", "Price": 9.99, "Email": "a@b.com", "Status": 0 }
+      ]
+    }
+  }
+}
+```
+
+{: .tip }
+> New to Ninjadog? Start with the [Getting Started](/Ninjadog/getting-started) tutorial -- it walks you through creating your first API from a minimal config. Come back here when you need the full reference.
 
 ## Overview
 
@@ -299,6 +352,8 @@ A full `ninjadog.json` demonstrating all features:
 
 ## Next Steps
 
+- [Getting Started](/Ninjadog/getting-started) -- Step-by-step tutorial using this configuration
 - [CLI Reference](/Ninjadog/cli) -- Commands for initializing, validating, and building projects
-- [Generators](/Ninjadog/generators) -- Deep dive into all generated files
+- [Generators](/Ninjadog/generators) -- Deep dive into all 34 generated files
 - [Generated Examples](/Ninjadog/examples) -- See real generated code output
+- [Seed Data Generator](/Ninjadog/generators/seed-data) -- Details on the DatabaseSeeder

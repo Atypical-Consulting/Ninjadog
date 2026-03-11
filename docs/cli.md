@@ -276,3 +276,4 @@ ninjadog ui --port 8080 --no-browser
 - [Configuration Reference](/Ninjadog/configuration) -- Full reference for ninjadog.json
 - [Architecture](/Ninjadog/architecture) -- Understand the project structure
 - [Generators](/Ninjadog/generators) -- See what gets generated
+- [Generated Examples](/Ninjadog/examples) -- Real generated code from snapshot tests

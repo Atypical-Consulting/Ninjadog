@@ -137,3 +137,4 @@ The generated seeder includes INSERT statements for both `Categories` and `Tags`
 - [Configuration Reference](/Ninjadog/configuration#seed-data) -- Full seed data configuration options
 - [Generated Examples](/Ninjadog/examples#database----seed-data) -- See the generated seeder in context
 - [Data Layer Generators](/Ninjadog/generators/data-layer) -- Database initializer and repositories
+- [Getting Started](/Ninjadog/getting-started) -- End-to-end tutorial for creating your first API

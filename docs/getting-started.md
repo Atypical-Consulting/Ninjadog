@@ -276,10 +276,84 @@ When you run `ninjadog build`, the CLI reads your `ninjadog.json` configuration 
 
 ---
 
+## Troubleshooting
+
+### .NET SDK version mismatch
+
+If you see an error like `The framework 'Microsoft.NETCore.App', version '10.0.0' was not found`, your .NET SDK is too old.
+
+```bash
+dotnet --version
+```
+
+{: .warning }
+> Ninjadog requires **.NET 10 SDK** or later. Download it from [dotnet.microsoft.com](https://dotnet.microsoft.com/download/dotnet/10.0). If you have multiple SDKs installed, check that a `global.json` in a parent directory is not pinning an older version.
+
+### Missing `ninjadog.json`
+
+If `ninjadog build` reports that it cannot find a configuration file, make sure you are running the command from the directory that contains `ninjadog.json`.
+
+```bash
+# Verify the file exists
+ls ninjadog.json
+
+# If missing, initialize a new project
+ninjadog init
+```
+
+{: .tip }
+> You can also run `ninjadog validate` to check whether the file is present and well-formed. See the [CLI Reference](/Ninjadog/cli#ninjadog-validate) for details.
+
+### Port already in use
+
+If `dotnet run` fails with `Address already in use` or `Failed to bind to address`, another process is occupying the default port.
+
+```bash
+# Find what is using port 5000
+lsof -i :5000
+
+# Option 1 -- stop the other process
+kill <PID>
+
+# Option 2 -- run on a different port
+dotnet run --urls "http://localhost:5050"
+```
+
+### Generated project does not compile
+
+If the generated code fails to build, check the following:
+
+1. **Outdated generation** -- Re-run `ninjadog build` after every change to `ninjadog.json`.
+2. **Invalid property types** -- Make sure all `type` values are [supported types](/Ninjadog/configuration#supported-types). Run `ninjadog validate` to catch type errors.
+3. **Duplicate entity names** -- Entity names must be unique and in PascalCase.
+
+{: .note }
+> If you modified a generated file and then re-ran `ninjadog build`, your changes will be overwritten. Use `partial` classes in separate files to add custom logic safely.
+
+### `ninjadog` command not found
+
+If your shell cannot find the `ninjadog` command after installation:
+
+```bash
+# Verify the tool is installed
+dotnet tool list -g
+
+# If missing, install it
+dotnet tool install -g Ninjadog
+
+# If installed but not on PATH, add the .NET tools directory
+export PATH="$PATH:$HOME/.dotnet/tools"
+```
+
+{: .tip }
+> On macOS and Linux, you may need to add `$HOME/.dotnet/tools` to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.) for the path to persist across sessions.
+
+---
+
 ## Next Steps
 
 - [Configuration Reference](/Ninjadog/configuration) -- Full reference for ninjadog.json
 - [Architecture](/Ninjadog/architecture) -- Understand the design decisions and tech stack
 - [CLI Reference](/Ninjadog/cli) -- Scaffold projects with the CLI tool
-- [Generators](/Ninjadog/generators) -- Deep dive into all 30 generators
+- [Generators](/Ninjadog/generators) -- Deep dive into all 34 generators
 - [Generated Examples](/Ninjadog/examples) -- See real generated code output
