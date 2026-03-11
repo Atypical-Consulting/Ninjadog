@@ -1,0 +1,185 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Ninjadog Configuration",
+  "description": "Schema for ninjadog.json configuration files.",
+  "type": "object",
+  "required": ["config", "entities"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "The JSON Schema reference."
+    },
+    "config": {
+      "type": "object",
+      "description": "General configuration settings for the Ninjadog Engine.",
+      "required": ["name", "version", "description", "rootNamespace"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the project."
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the project."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the project."
+        },
+        "rootNamespace": {
+          "type": "string",
+          "description": "The root namespace for generated code."
+        },
+        "outputPath": {
+          "type": "string",
+          "description": "The output path for generated files."
+        },
+        "saveGeneratedFiles": {
+          "type": "boolean",
+          "description": "Whether to save generated files to disk."
+        },
+        "cors": {
+          "type": "object",
+          "description": "CORS configuration.",
+          "required": ["origins"],
+          "properties": {
+            "origins": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Allowed origins."
+            },
+            "methods": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Allowed HTTP methods."
+            },
+            "headers": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Allowed headers."
+            }
+          },
+          "additionalProperties": false
+        },
+        "features": {
+          "type": "object",
+          "description": "Feature flags.",
+          "properties": {
+            "softDelete": {
+              "type": "boolean",
+              "description": "Enable soft delete for entities."
+            },
+            "auditing": {
+              "type": "boolean",
+              "description": "Enable audit fields for entities."
+            }
+          },
+          "additionalProperties": false
+        },
+        "database": {
+          "type": "object",
+          "description": "Database configuration.",
+          "properties": {
+            "provider": {
+              "type": "string",
+              "enum": ["sqlite", "postgresql", "sqlserver"],
+              "description": "The database provider to use."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "entities": {
+      "type": "object",
+      "description": "Entity definitions.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["properties"],
+        "properties": {
+          "properties": {
+            "type": "object",
+            "description": "The properties of the entity.",
+            "additionalProperties": {
+              "type": "object",
+              "required": ["type"],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "The data type of the property."
+                },
+                "isKey": {
+                  "type": "boolean",
+                  "description": "Whether this property is the entity key."
+                },
+                "required": {
+                  "type": "boolean",
+                  "description": "Whether this property is required."
+                },
+                "maxLength": {
+                  "type": "integer",
+                  "description": "Maximum length constraint for string properties."
+                },
+                "minLength": {
+                  "type": "integer",
+                  "description": "Minimum length constraint for string properties."
+                },
+                "min": {
+                  "type": "integer",
+                  "description": "Minimum value constraint for numeric properties."
+                },
+                "max": {
+                  "type": "integer",
+                  "description": "Maximum value constraint for numeric properties."
+                },
+                "pattern": {
+                  "type": "string",
+                  "description": "A regex pattern constraint for string properties."
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "relationships": {
+            "type": "object",
+            "description": "Relationships to other entities.",
+            "additionalProperties": {
+              "type": "object",
+              "required": ["relatedEntity", "relationshipType"],
+              "properties": {
+                "relatedEntity": {
+                  "type": "string",
+                  "description": "The name of the related entity."
+                },
+                "relationshipType": {
+                  "type": "string",
+                  "description": "The type of relationship."
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "seedData": {
+            "type": "array",
+            "description": "Seed data for the entity.",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "enums": {
+      "type": "object",
+      "description": "Enum definitions.",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -9,6 +9,8 @@
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.4" />
     <!-- Validation -->
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
+    <!-- JSON Schema -->
+    <PackageVersion Include="JsonSchema.Net" Version="7.3.2" />
     <!-- DDD -->
     <PackageVersion Include="ValueOf" Version="2.0.31" />
     <!-- Spectre.Console -->
