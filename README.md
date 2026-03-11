@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.png" alt="Ninjadog logo" width="256" />
+  <img src="https://raw.githubusercontent.com/Atypical-Consulting/Ninjadog/dev/logo.png" alt="Ninjadog logo" width="256" />
 </p>
 
 # Ninjadog
