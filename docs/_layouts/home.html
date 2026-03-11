@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ninjadog -- .NET REST API Code Generator | One Config, Full API, Zero Boilerplate</title>
+  <meta name="description" content="{{ page.description | default: site.description }}">
+  <link rel="canonical" href="{{ page.url | absolute_url }}">
+  <link rel="icon" href="{{ '/assets/images/favicon.ico' | relative_url }}">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Ninjadog -- .NET REST API Code Generator">
+  <meta property="og:description" content="{{ page.description | default: site.description }}">
+  <meta property="og:url" content="{{ page.url | absolute_url }}">
+  <meta property="og:site_name" content="{{ site.title }}">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="{{ '/assets/images/logo.png' | absolute_url }}">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Ninjadog -- .NET REST API Code Generator">
+  <meta name="twitter:description" content="{{ page.description | default: site.description }}">
+  <meta name="twitter:image" content="{{ '/assets/images/logo.png' | absolute_url }}">
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Ninjadog",
+    "description": "{{ site.description | strip_html | strip_newlines }}",
+    "url": "{{ site.url }}{{ site.baseurl }}/",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Cross-platform",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "Atypical Consulting",
+      "url": "https://github.com/Atypical-Consulting"
+    },
+    "license": "https://opensource.org/licenses/Apache-2.0",
+    "programmingLanguage": "C#",
+    "runtimePlatform": ".NET 10"
+  }
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-deep: #060a14;
+      --bg-base: #0a0e1a;
+      --bg-surface: #111827;
+      --bg-elevated: #1e293b;
+      --bg-glass: rgba(17, 24, 39, 0.6);
+      --border-subtle: rgba(0, 212, 255, 0.08);
+      --border-glow: rgba(0, 212, 255, 0.25);
+      --accent-cyan: #00d4ff;
+      --accent-blue: #3b82f6;
+      --accent-indigo: #6366f1;
+      --accent-violet: #8b5cf6;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-orange: #f59e0b;
+      --text-primary: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --text-bright: #f1f5f9;
+      --glow-cyan: 0 0 20px rgba(0, 212, 255, 0.3), 0 0 60px rgba(0, 212, 255, 0.1);
+      --glow-indigo: 0 0 20px rgba(99, 102, 241, 0.3), 0 0 60px rgba(99, 102, 241, 0.1);
+      --font-display: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: var(--font-display);
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    a { color: var(--accent-cyan); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: #5ce1ff; }
+
+    /* ===== ANIMATED BACKGROUND ===== */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 20%, transparent 70%);
+    }
+
+    .bg-glow-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      z-index: 0;
+      pointer-events: none;
+      animation: orbFloat 20s ease-in-out infinite;
+    }
+
+    .bg-glow-orb--cyan {
+      width: 500px; height: 500px;
+      background: rgba(0, 212, 255, 0.07);
+      top: -100px; right: -100px;
+      animation-delay: 0s;
+    }
+
+    .bg-glow-orb--indigo {
+      width: 600px; height: 600px;
+      background: rgba(99, 102, 241, 0.05);
+      bottom: -200px; left: -200px;
+      animation-delay: -10s;
+    }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -40px) scale(1.05); }
+      66% { transform: translate(-20px, 20px) scale(0.95); }
+    }
+
+    /* ===== NAVIGATION ===== */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(6, 10, 20, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+
+    .nav--scrolled {
+      background: rgba(6, 10, 20, 0.95);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav__brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .nav__logo {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+    }
+
+    .nav__title {
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: -0.02em;
+      color: var(--text-bright);
+    }
+
+    .nav__title span {
+      color: var(--accent-cyan);
+    }
+
+    .nav__links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav__links a {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      transition: color 0.2s;
+    }
+
+    .nav__links a:hover { color: var(--text-bright); }
+
+    .nav__cta {
+      padding: 0.5rem 1.25rem;
+      background: var(--accent-cyan);
+      color: var(--bg-deep) !important;
+      font-weight: 600;
+      font-size: 0.85rem;
+      border-radius: 8px;
+      transition: transform 0.2s var(--ease-out-back), box-shadow 0.2s;
+    }
+
+    .nav__cta:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--glow-cyan);
+      color: var(--bg-deep) !important;
+    }
+
+    /* Mobile nav */
+    .nav__toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      cursor: pointer;
+      padding: 0.5rem;
+    }
+
+    .nav__toggle svg { width: 24px; height: 24px; }
+
+    @media (max-width: 768px) {
+      .nav__links { display: none; }
+      .nav__toggle { display: block; }
+      .nav__links--open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(6, 10, 20, 0.98);
+        backdrop-filter: blur(20px);
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border-subtle);
+        gap: 1rem;
+      }
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8rem 2rem 6rem;
+    }
+
+    .hero__content {
+      max-width: 900px;
+      text-align: center;
+    }
+
+    .hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem 0.4rem 0.6rem;
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glow);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--accent-cyan);
+      margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+      animation: fadeInUp 0.8s var(--ease-out-expo) both;
+    }
+
+    .hero__badge-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .hero__title {
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      margin-bottom: 1.5rem;
+      animation: fadeInUp 0.8s var(--ease-out-expo) 0.1s both;
+    }
+
+    .hero__title-line {
+      display: block;
+    }
+
+    .hero__title .accent {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-indigo));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero__subtitle {
+      font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+      font-weight: 300;
+      color: var(--text-secondary);
+      max-width: 640px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.7;
+      animation: fadeInUp 0.8s var(--ease-out-expo) 0.2s both;
+    }
+
+    .hero__actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.8s var(--ease-out-expo) 0.3s both;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 2rem;
+      border-radius: 12px;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.25s var(--ease-out-back);
+      text-decoration: none;
+    }
+
+    .btn--primary {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      color: var(--bg-deep);
+      box-shadow: 0 4px 20px rgba(0, 212, 255, 0.25);
+    }
+
+    .btn--primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 212, 255, 0.35);
+      color: var(--bg-deep);
+    }
+
+    .btn--ghost {
+      background: var(--bg-glass);
+      color: var(--text-primary);
+      border: 1px solid var(--border-glow);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn--ghost:hover {
+      transform: translateY(-2px);
+      background: rgba(17, 24, 39, 0.8);
+      border-color: var(--accent-cyan);
+      color: var(--text-bright);
+    }
+
+    .btn svg { width: 18px; height: 18px; }
+
+    /* Hero code preview */
+    .hero__code {
+      margin-top: 4rem;
+      animation: fadeInUp 0.8s var(--ease-out-expo) 0.5s both;
+    }
+
+    .code-window {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      overflow: hidden;
+      text-align: left;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5), var(--glow-cyan);
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .code-window__bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.25rem;
+      background: rgba(30, 41, 59, 0.5);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .code-window__dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+
+    .code-window__dot--red { background: #ef4444; }
+    .code-window__dot--yellow { background: #f59e0b; }
+    .code-window__dot--green { background: #10b981; }
+
+    .code-window__filename {
+      margin-left: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .code-window__body {
+      padding: 1.5rem;
+      overflow-x: auto;
+    }
+
+    .code-window__body pre {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: var(--text-secondary);
+    }
+
+    .code-window__body .kw { color: var(--accent-indigo); }
+    .code-window__body .tp { color: var(--accent-cyan); }
+    .code-window__body .attr { color: var(--accent-orange); }
+    .code-window__body .str { color: var(--accent-green); }
+    .code-window__body .cm { color: var(--text-muted); font-style: italic; }
+    .code-window__body .prop { color: var(--text-bright); }
+    .code-window__body .punct { color: var(--text-muted); }
+
+    /* ===== SECTIONS ===== */
+    .section {
+      position: relative;
+      z-index: 1;
+      padding: 7rem 2rem;
+    }
+
+    .section__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section__label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+
+    .section__label::before {
+      content: '';
+      width: 24px; height: 2px;
+      background: var(--accent-cyan);
+      border-radius: 2px;
+    }
+
+    .section__title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+
+    .section__desc {
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: var(--text-secondary);
+      max-width: 600px;
+      line-height: 1.7;
+      margin-bottom: 3.5rem;
+    }
+
+    /* ===== COMPARISON TABLE ===== */
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    @media (max-width: 768px) {
+      .comparison { grid-template-columns: 1fr; }
+    }
+
+    .comparison__card {
+      border-radius: 20px;
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .comparison__card--without {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(239, 68, 68, 0.02));
+      border: 1px solid rgba(239, 68, 68, 0.15);
+    }
+
+    .comparison__card--with {
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.08), rgba(99, 102, 241, 0.05));
+      border: 1px solid var(--border-glow);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .comparison__card-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 2rem;
+    }
+
+    .comparison__card--without .comparison__card-label { color: var(--accent-red); }
+    .comparison__card--with .comparison__card-label { color: var(--accent-cyan); }
+
+    .comparison__item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .comparison__item:last-child { border-bottom: none; }
+
+    .comparison__item-label {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .comparison__item-value {
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .comparison__card--without .comparison__item-value { color: var(--text-muted); }
+    .comparison__card--with .comparison__item-value { color: var(--accent-cyan); }
+
+    /* ===== GENERATORS GRID ===== */
+    .gen-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .gen-card {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 1.75rem;
+      transition: all 0.3s var(--ease-out-expo);
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gen-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--card-accent, var(--accent-cyan)), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .gen-card:hover {
+      border-color: var(--border-glow);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .gen-card:hover::before { opacity: 1; }
+
+    .gen-card__icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      background: rgba(0, 212, 255, 0.08);
+      border: 1px solid rgba(0, 212, 255, 0.12);
+    }
+
+    .gen-card__title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      color: var(--text-bright);
+    }
+
+    .gen-card__count {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent-cyan);
+      margin-bottom: 0.5rem;
+    }
+
+    .gen-card__desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Card accent colors */
+    .gen-card--endpoints { --card-accent: #3b82f6; }
+    .gen-card--endpoints .gen-card__icon { background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.2); }
+    .gen-card--contracts { --card-accent: #8b5cf6; }
+    .gen-card--contracts .gen-card__icon { background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.2); }
+    .gen-card--data { --card-accent: #10b981; }
+    .gen-card--data .gen-card__icon { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); }
+    .gen-card--mapping { --card-accent: #f59e0b; }
+    .gen-card--mapping .gen-card__icon { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2); }
+    .gen-card--validation { --card-accent: #ef4444; }
+    .gen-card--validation .gen-card__icon { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); }
+    .gen-card--openapi { --card-accent: #06b6d4; }
+    .gen-card--openapi .gen-card__icon { background: rgba(6, 182, 212, 0.1); border-color: rgba(6, 182, 212, 0.2); }
+    .gen-card--database { --card-accent: #ec4899; }
+    .gen-card--database .gen-card__icon { background: rgba(236, 72, 153, 0.1); border-color: rgba(236, 72, 153, 0.2); }
+    .gen-card--clients { --card-accent: #14b8a6; }
+    .gen-card--clients .gen-card__icon { background: rgba(20, 184, 166, 0.1); border-color: rgba(20, 184, 166, 0.2); }
+
+    /* ===== ENDPOINTS RESULT ===== */
+    .endpoints-demo {
+      margin-top: 3rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .endpoints-demo { grid-template-columns: 1fr; }
+    }
+
+    .endpoint-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .endpoint {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: var(--bg-glass);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      transition: all 0.2s;
+    }
+
+    .endpoint:hover {
+      border-color: var(--border-glow);
+      transform: translateX(4px);
+    }
+
+    .endpoint__method {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      min-width: 60px;
+      text-align: center;
+      letter-spacing: 0.05em;
+    }
+
+    .endpoint__method--post { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+    .endpoint__method--get { background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); }
+    .endpoint__method--put { background: rgba(245, 158, 11, 0.15); color: var(--accent-orange); }
+    .endpoint__method--delete { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
+
+    .endpoint__path {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .endpoint__desc {
+      margin-left: auto;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 600px) {
+      .endpoint__desc { display: none; }
+    }
+
+    /* ===== STATS BAR ===== */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 4rem;
+      flex-wrap: wrap;
+      padding: 4rem 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat__number {
+      font-size: clamp(2.5rem, 5vw, 3.5rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-indigo));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 0.3rem;
+    }
+
+    .stat__label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: 0.03em;
+    }
+
+    /* ===== INSTALL SECTION ===== */
+    .install-block {
+      max-width: 620px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .install-cmd {
+      display: flex;
+      align-items: center;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-glow);
+      border-radius: 14px;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+      gap: 1rem;
+      box-shadow: var(--glow-cyan);
+    }
+
+    .install-cmd__prompt {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent-cyan);
+      user-select: none;
+    }
+
+    .install-cmd__text {
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      flex: 1;
+      text-align: left;
+    }
+
+    .install-cmd__copy {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.4rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+    }
+
+    .install-cmd__copy:hover { color: var(--accent-cyan); background: rgba(0, 212, 255, 0.08); }
+    .install-cmd__copy svg { width: 18px; height: 18px; }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border-subtle);
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+
+    .footer__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer__brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .footer__brand img { width: 24px; height: 24px; border-radius: 6px; }
+
+    .footer__links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .footer__links a {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+
+    .footer__links a:hover { color: var(--text-primary); }
+
+    .footer__copy {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 600px) {
+      .footer__inner { flex-direction: column; text-align: center; }
+    }
+
+    /* ===== CTA BOTTOM ===== */
+    .cta-bottom {
+      position: relative;
+      z-index: 1;
+      padding: 6rem 2rem;
+      text-align: center;
+    }
+
+    .cta-bottom__box {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 4rem 3rem;
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.06), rgba(99, 102, 241, 0.06));
+      border: 1px solid var(--border-glow);
+      border-radius: 24px;
+      backdrop-filter: blur(10px);
+    }
+
+    .cta-bottom__title {
+      font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+    }
+
+    .cta-bottom__desc {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+      font-weight: 300;
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s var(--ease-out-expo), transform 0.7s var(--ease-out-expo);
+    }
+
+    .reveal--visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Stagger children */
+    .stagger > * {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s var(--ease-out-expo), transform 0.5s var(--ease-out-expo);
+    }
+
+    .stagger--visible > *:nth-child(1) { transition-delay: 0s; }
+    .stagger--visible > *:nth-child(2) { transition-delay: 0.06s; }
+    .stagger--visible > *:nth-child(3) { transition-delay: 0.12s; }
+    .stagger--visible > *:nth-child(4) { transition-delay: 0.18s; }
+    .stagger--visible > *:nth-child(5) { transition-delay: 0.24s; }
+    .stagger--visible > *:nth-child(6) { transition-delay: 0.3s; }
+    .stagger--visible > *:nth-child(7) { transition-delay: 0.36s; }
+    .stagger--visible > *:nth-child(8) { transition-delay: 0.42s; }
+
+    .stagger--visible > * {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ===== DIVIDER ===== */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-glow), transparent);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ===== NOTE CALLOUT ===== */
+    .note-callout {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      background: rgba(0, 212, 255, 0.04);
+      border: 1px solid rgba(0, 212, 255, 0.12);
+      border-radius: 12px;
+      margin-top: 1.5rem;
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .note-callout__icon {
+      color: var(--accent-cyan);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .note-callout__text {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Docs navigation link */
+    .docs-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--accent-cyan);
+    }
+
+    .docs-link:hover { gap: 0.75rem; }
+    .docs-link svg { width: 16px; height: 16px; transition: transform 0.2s; }
+    .docs-link:hover svg { transform: translateX(3px); }
+  </style>
+</head>
+<body>
+
+  <!-- Animated background -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow-orb bg-glow-orb--cyan"></div>
+  <div class="bg-glow-orb bg-glow-orb--indigo"></div>
+
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <a href="{{ '/' | relative_url }}" class="nav__brand">
+      <img src="{{ '/assets/images/logo.png' | relative_url }}" alt="Ninjadog" class="nav__logo">
+      <span class="nav__title">Ninja<span>dog</span></span>
+    </a>
+    <button class="nav__toggle" id="navToggle" aria-label="Toggle navigation">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <ul class="nav__links" id="navLinks">
+      <li><a href="{{ '/getting-started' | relative_url }}">Get Started</a></li>
+      <li><a href="{{ '/architecture' | relative_url }}">Architecture</a></li>
+      <li><a href="{{ '/generators' | relative_url }}">Generators</a></li>
+      <li><a href="{{ '/cli' | relative_url }}">CLI</a></li>
+      <li><a href="{{ '/examples' | relative_url }}">Examples</a></li>
+      <li><a href="https://github.com/Atypical-Consulting/Ninjadog" target="_blank" rel="noopener" class="nav__cta">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub
+      </a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero__content">
+      <div class="hero__badge">
+        <span class="hero__badge-dot"></span>
+        v1.0 &mdash; Production Ready
+      </div>
+
+      <h1 class="hero__title">
+        <span class="hero__title-line">One config.</span>
+        <span class="hero__title-line"><span class="accent">Full REST API.</span></span>
+        <span class="hero__title-line">Zero boilerplate.</span>
+      </h1>
+
+      <p class="hero__subtitle">
+        Ninjadog uses a powerful template engine to generate your entire API stack from a single JSON config.
+        No runtime reflection, no manual wiring, no files to keep in sync.
+      </p>
+
+      <div class="hero__actions">
+        <a href="{{ '/getting-started' | relative_url }}" class="btn btn--primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Get Started
+        </a>
+        <a href="{{ '/architecture' | relative_url }}" class="btn btn--ghost">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          How It Works
+        </a>
+      </div>
+
+      <!-- Code Preview -->
+      <div class="hero__code">
+        <div class="code-window">
+          <div class="code-window__bar">
+            <span class="code-window__dot code-window__dot--red"></span>
+            <span class="code-window__dot code-window__dot--yellow"></span>
+            <span class="code-window__dot code-window__dot--green"></span>
+            <span class="code-window__filename">ninjadog.json</span>
+          </div>
+          <div class="code-window__body">
+            <pre><span class="punct">{</span>
+  <span class="prop">"entities"</span><span class="punct">:</span> <span class="punct">{</span>
+    <span class="tp">"Product"</span><span class="punct">:</span> <span class="punct">{</span>
+      <span class="prop">"properties"</span><span class="punct">:</span> <span class="punct">{</span>
+        <span class="attr">"Id"</span><span class="punct">:</span>    <span class="punct">{</span> <span class="prop">"type"</span><span class="punct">:</span> <span class="kw">"Guid"</span><span class="punct">,</span> <span class="prop">"isKey"</span><span class="punct">:</span> <span class="kw">true</span> <span class="punct">},</span>
+        <span class="attr">"Name"</span><span class="punct">:</span>  <span class="punct">{</span> <span class="prop">"type"</span><span class="punct">:</span> <span class="kw">"string"</span> <span class="punct">},</span>
+        <span class="attr">"Price"</span><span class="punct">:</span> <span class="punct">{</span> <span class="prop">"type"</span><span class="punct">:</span> <span class="kw">"decimal"</span> <span class="punct">}</span>
+      <span class="punct">}</span>
+    <span class="punct">}</span>
+  <span class="punct">}</span>
+<span class="punct">}</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <div class="stats reveal" data-reveal>
+    <div class="stat">
+      <div class="stat__number">~33</div>
+      <div class="stat__label">Files generated</div>
+    </div>
+    <div class="stat">
+      <div class="stat__number">~10</div>
+      <div class="stat__label">Lines you write</div>
+    </div>
+    <div class="stat">
+      <div class="stat__number">0</div>
+      <div class="stat__label">Runtime reflection</div>
+    </div>
+    <div class="stat">
+      <div class="stat__number">0s</div>
+      <div class="stat__label">To full CRUD</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Why Ninjadog -->
+  <section class="section" id="comparison">
+    <div class="section__inner">
+      <div class="reveal" data-reveal>
+        <span class="section__label">The difference</span>
+        <h2 class="section__title">Why Ninjadog?</h2>
+        <p class="section__desc">
+          Stop hand-rolling boilerplate. Annotate your entity and let the compiler do the heavy lifting.
+        </p>
+      </div>
+
+      <div class="comparison reveal" data-reveal>
+        <div class="comparison__card comparison__card--without">
+          <div class="comparison__card-label">Without Ninjadog</div>
+          <div class="comparison__item">
+            <span class="comparison__item-label">Code per entity</span>
+            <span class="comparison__item-value">~500+ lines</span>
+          </div>
+          <div class="comparison__item">
+            <span class="comparison__item-label">Files to maintain</span>
+            <span class="comparison__item-value">20+ files</span>
+          </div>
+          <div class="comparison__item">
+            <span class="comparison__item-label">Layer sync</span>
+            <span class="comparison__item-value">Manual</span>
+          </div>
+          <div class="comparison__item">
+            <span class="comparison__item-label">Runtime cost</span>
+            <span class="comparison__item-value">Depends</span>
+          </div>
+          <div class="comparison__item">
+            <span class="comparison__item-label">Reflection</span>
+            <span class="comparison__item-value">Often required</span>
+          </div>
+          <div class="comparison__item">
+            <span class="comparison__item-label">Time to full CRUD</span>
+            <span class="comparison__item-value">Hours</span>
+          </div>
+        </div>
+
+        <div class="comparison__card comparison__card--with">
+          <div class="comparison__card-label">With Ninjadog</div>
+          <div class="comparison__item">
+            <span class="comparison__item-label">Code per entity</span>
+            <span class="comparison__item-value">~10 lines</span>
+          </div>
+          <div class="comparison__item">
+            <span class="comparison__item-label">Files to maintain</span>
+            <span class="comparison__item-value">1 file</span>
+          </div>
+          <div class="comparison__item">
+            <span class="comparison__item-label">Layer sync</span>
+            <span class="comparison__item-value">Automatic</span>
+          </div>
+          <div class="comparison__item">
+            <span class="comparison__item-label">Runtime cost</span>
+            <span class="comparison__item-value">Zero</span>
+          </div>
+          <div class="comparison__item">
+            <span class="comparison__item-label">Reflection</span>
+            <span class="comparison__item-value">None</span>
+          </div>
+          <div class="comparison__item">
+            <span class="comparison__item-label">Time to full CRUD</span>
+            <span class="comparison__item-value">Seconds</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- What Gets Generated -->
+  <section class="section" id="generators">
+    <div class="section__inner">
+      <div class="reveal" data-reveal>
+        <span class="section__label">Generated output</span>
+        <h2 class="section__title">33 files from one entity</h2>
+        <p class="section__desc">
+          Each entity defined in <code style="background:var(--bg-elevated);padding:0.15em 0.4em;border-radius:4px;font-family:var(--font-mono);font-size:0.9em;color:var(--accent-orange);">ninjadog.json</code> produces a complete, production-ready API layer.
+        </p>
+      </div>
+
+      <div class="gen-grid stagger" data-stagger>
+        <div class="gen-card gen-card--endpoints">
+          <div class="gen-card__icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <div class="gen-card__title">Endpoints</div>
+          <div class="gen-card__count">5 files</div>
+          <div class="gen-card__desc">Create, GetAll, GetOne, Update, Delete &mdash; paginated, typed routes</div>
+        </div>
+
+        <div class="gen-card gen-card--contracts">
+          <div class="gen-card__icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+          </div>
+          <div class="gen-card__title">Contracts</div>
+          <div class="gen-card__count">7 files</div>
+          <div class="gen-card__desc">DTOs, request objects, and response objects for every operation</div>
+        </div>
+
+        <div class="gen-card gen-card--data">
+          <div class="gen-card__icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          </div>
+          <div class="gen-card__title">Data Layer</div>
+          <div class="gen-card__count">4 files</div>
+          <div class="gen-card__desc">Repository + interface, service + interface with Dapper &amp; SQLite</div>
+        </div>
+
+        <div class="gen-card gen-card--mapping">
+          <div class="gen-card__icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+          </div>
+          <div class="gen-card__title">Mapping</div>
+          <div class="gen-card__count">4 files</div>
+          <div class="gen-card__desc">Domain-to-DTO, DTO-to-Domain, and contract conversions</div>
+        </div>
+
+        <div class="gen-card gen-card--validation">
+          <div class="gen-card__icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="gen-card__title">Validation</div>
+          <div class="gen-card__count">2 files</div>
+          <div class="gen-card__desc">FluentValidation for Create &amp; Update, type-aware rules</div>
+        </div>
+
+        <div class="gen-card gen-card--openapi">
+          <div class="gen-card__icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <div class="gen-card__title">OpenAPI</div>
+          <div class="gen-card__count">5 files</div>
+          <div class="gen-card__desc">Full Swagger documentation summaries for each endpoint</div>
+        </div>
+
+        <div class="gen-card gen-card--database">
+          <div class="gen-card__icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+          </div>
+          <div class="gen-card__title">Database</div>
+          <div class="gen-card__count">2 files</div>
+          <div class="gen-card__desc">Schema initializer &amp; connection factory with type-correct columns</div>
+        </div>
+
+        <div class="gen-card gen-card--clients">
+          <div class="gen-card__icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </div>
+          <div class="gen-card__title">Project Setup</div>
+          <div class="gen-card__count">4 files</div>
+          <div class="gen-card__desc">Program.cs, appsettings.json, DI extensions, and domain entity classes</div>
+        </div>
+      </div>
+
+      <a href="{{ '/generators' | relative_url }}" class="docs-link">
+        Browse all generators
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Quick Example -->
+  <section class="section" id="example">
+    <div class="section__inner">
+      <div class="reveal" data-reveal>
+        <span class="section__label">See it in action</span>
+        <h2 class="section__title">Build &amp; run. That's it.</h2>
+        <p class="section__desc">
+          Annotate your class, run <code style="background:var(--bg-elevated);padding:0.15em 0.4em;border-radius:4px;font-family:var(--font-mono);font-size:0.9em;color:var(--accent-green);">dotnet build</code>, and your full CRUD API is ready.
+        </p>
+      </div>
+
+      <div class="endpoints-demo reveal" data-reveal>
+        <div class="code-window">
+          <div class="code-window__bar">
+            <span class="code-window__dot code-window__dot--red"></span>
+            <span class="code-window__dot code-window__dot--yellow"></span>
+            <span class="code-window__dot code-window__dot--green"></span>
+            <span class="code-window__filename">Terminal</span>
+          </div>
+          <div class="code-window__body">
+            <pre><span class="cm"># Initialize a new project</span>
+<span class="tp">$</span> ninjadog init
+<span class="str">Ninjadog settings file created successfully.</span>
+
+<span class="cm"># Generate the API</span>
+<span class="tp">$</span> ninjadog build
+<span class="str">Build succeeded.</span>
+<span class="cm">    33 files generated for Product</span>
+
+<span class="cm"># Run the API</span>
+<span class="tp">$</span> cd src/applications/MyApi && dotnet run
+<span class="str">Now listening on: https://localhost:5001</span></pre>
+          </div>
+        </div>
+
+        <div class="endpoint-list stagger" data-stagger>
+          <div class="endpoint">
+            <span class="endpoint__method endpoint__method--post">POST</span>
+            <span class="endpoint__path">/products</span>
+            <span class="endpoint__desc">Create</span>
+          </div>
+          <div class="endpoint">
+            <span class="endpoint__method endpoint__method--get">GET</span>
+            <span class="endpoint__path">/products</span>
+            <span class="endpoint__desc">List all</span>
+          </div>
+          <div class="endpoint">
+            <span class="endpoint__method endpoint__method--get">GET</span>
+            <span class="endpoint__path">/products/{id:guid}</span>
+            <span class="endpoint__desc">Get one</span>
+          </div>
+          <div class="endpoint">
+            <span class="endpoint__method endpoint__method--put">PUT</span>
+            <span class="endpoint__path">/products/{id:guid}</span>
+            <span class="endpoint__desc">Update</span>
+          </div>
+          <div class="endpoint">
+            <span class="endpoint__method endpoint__method--delete">DELETE</span>
+            <span class="endpoint__path">/products/{id:guid}</span>
+            <span class="endpoint__desc">Delete</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="note-callout reveal" data-reveal>
+        <svg class="note-callout__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        <span class="note-callout__text">
+          Route constraints are generated automatically based on your key type &mdash;
+          <code style="font-family:var(--font-mono);color:var(--accent-cyan);">:guid</code> for <code style="font-family:var(--font-mono);color:var(--accent-cyan);">Guid</code>,
+          <code style="font-family:var(--font-mono);color:var(--accent-cyan);">:int</code> for <code style="font-family:var(--font-mono);color:var(--accent-cyan);">int</code>,
+          and untyped for <code style="font-family:var(--font-mono);color:var(--accent-cyan);">string</code>.
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Install / CTA -->
+  <section class="cta-bottom">
+    <div class="cta-bottom__box reveal" data-reveal>
+      <h2 class="cta-bottom__title">Ready to ship faster?</h2>
+      <p class="cta-bottom__desc">Get started in under 2 minutes. One config, one command, full API.</p>
+
+      <div class="install-block">
+        <div class="install-cmd">
+          <span class="install-cmd__prompt">$</span>
+          <span class="install-cmd__text" id="installText">dotnet tool install -g Ninjadog</span>
+          <button class="install-cmd__copy" id="copyBtn" aria-label="Copy install command">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          </button>
+        </div>
+        <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;">
+          <a href="{{ '/getting-started' | relative_url }}" class="btn btn--primary">
+            Get Started in 2 Minutes
+          </a>
+          <a href="https://www.nuget.org/packages/Ninjadog.Engine" target="_blank" rel="noopener" class="btn btn--ghost">
+            View on NuGet
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <img src="{{ '/assets/images/logo.png' | relative_url }}" alt="Ninjadog">
+        <span>Ninjadog</span>
+      </div>
+      <ul class="footer__links">
+        <li><a href="{{ '/getting-started' | relative_url }}">Docs</a></li>
+        <li><a href="{{ '/contributing' | relative_url }}">Contributing</a></li>
+        <li><a href="https://github.com/Atypical-Consulting/Ninjadog" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="https://www.nuget.org/packages/Ninjadog.Engine" target="_blank" rel="noopener">NuGet</a></li>
+      </ul>
+      <div class="footer__copy">
+        Built by <a href="https://github.com/Atypical-Consulting">Atypical Consulting</a> &mdash; Apache 2.0
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Nav scroll effect
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('nav--scrolled', window.scrollY > 40);
+    });
+
+    // Mobile nav toggle
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+    navToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('nav__links--open');
+    });
+
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          if (entry.target.hasAttribute('data-stagger')) {
+            entry.target.classList.add('stagger--visible');
+          } else {
+            entry.target.classList.add('reveal--visible');
+          }
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('[data-reveal]').forEach(el => observer.observe(el));
+    document.querySelectorAll('[data-stagger]').forEach(el => observer.observe(el));
+
+    // Copy button
+    const copyBtn = document.getElementById('copyBtn');
+    const installText = document.getElementById('installText');
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(installText.textContent).then(() => {
+        copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>';
+        setTimeout(() => {
+          copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
+        }, 2000);
+      });
+    });
+  </script>
+</body>
+</html>

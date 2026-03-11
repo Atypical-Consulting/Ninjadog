@@ -10,8 +10,21 @@ namespace Ninjadog.Templates.CrudWebAPI.Template.Repositories;
 public sealed class RepositoryTemplate
     : NinjadogTemplate
 {
+    private bool _softDelete;
+    private bool _auditing;
+    private string _provider = "sqlite";
+
     /// <inheritdoc />
     public override string Name => "Repository";
+
+    /// <inheritdoc />
+    public override IEnumerable<NinjadogContentFile> GenerateMany(NinjadogSettings ninjadogSettings)
+    {
+        _softDelete = ninjadogSettings.Config.SoftDelete;
+        _auditing = ninjadogSettings.Config.Auditing;
+        _provider = ninjadogSettings.Config.DatabaseProvider;
+        return base.GenerateMany(ninjadogSettings);
+    }
 
     /// <inheritdoc />
     public override NinjadogContentFile GenerateOneByEntity(
@@ -39,7 +52,7 @@ public sealed class RepositoryTemplate
                       using var connection = await connectionFactory.CreateConnectionAsync();
 
                       var result = await connection.ExecuteAsync(
-                          @"{{GenerateSqlInsertQuery(entity)}}",
+                          @"{{GenerateSqlInsertQuery(entity, _auditing, _provider)}}",
                           {{st.VarModel}});
 
                       return result > 0;
@@ -50,7 +63,7 @@ public sealed class RepositoryTemplate
                       using var connection = await connectionFactory.CreateConnectionAsync();
 
                       return await connection.QuerySingleOrDefaultAsync<{{st.ClassModelDto}}>(
-                          "{{GenerateSqlSelectOneQuery(entity)}}",
+                          "{{GenerateSqlSelectOneQuery(entity, _softDelete, _provider)}}",
                           new { {{entityKey.Key}} = id.ToString() });
                   }
 
@@ -58,14 +71,14 @@ public sealed class RepositoryTemplate
                   {
                       using var connection = await connectionFactory.CreateConnectionAsync();
                       return await connection.QueryAsync<{{st.ClassModelDto}}>(
-                          "{{GenerateSqlSelectAllQuery(entity)}}",
+                          "{{GenerateSqlSelectAllQuery(entity, _softDelete, _provider)}}",
                           new { PageSize = pageSize, Offset = (page - 1) * pageSize });
                   }
 
                   public async Task<int> CountAsync()
                   {
                       using var connection = await connectionFactory.CreateConnectionAsync();
-                      return await connection.ExecuteScalarAsync<int>("{{GenerateSqlCountQuery(entity)}}");
+                      return await connection.ExecuteScalarAsync<int>("{{GenerateSqlCountQuery(entity, _softDelete)}}");
                   }
 
                   public async Task<bool> UpdateAsync({{st.ClassModelDto}} {{st.VarModel}})
@@ -73,7 +86,7 @@ public sealed class RepositoryTemplate
                       using var connection = await connectionFactory.CreateConnectionAsync();
 
                       var result = await connection.ExecuteAsync(
-                          @"{{GenerateSqlUpdateQuery(entity)}}",
+                          @"{{GenerateSqlUpdateQuery(entity, _auditing, _provider)}}",
                           {{st.VarModel}});
 
                           return result > 0;
@@ -84,7 +97,7 @@ public sealed class RepositoryTemplate
                       using var connection = await connectionFactory.CreateConnectionAsync();
 
                       var result = await connection.ExecuteAsync(
-                          @"{{GenerateSqlDeleteQuery(entity)}}",
+                          @"{{GenerateSqlDeleteQuery(entity, _softDelete, _provider)}}",
                           new { {{entityKey.Key}} = id.ToString() });
 
                       return result > 0;
@@ -95,42 +108,65 @@ public sealed class RepositoryTemplate
         return CreateNinjadogContentFile(fileName, content);
     }
 
-    private static string GenerateSqlInsertQuery(NinjadogEntityWithKey entity)
+    private static string GenerateSqlInsertQuery(NinjadogEntityWithKey entity, bool auditing, string provider)
     {
         var st = entity.StringTokens;
         var properties = entity.Properties;
 
+        var columns = properties.Keys.ToList();
+        var values = properties.Keys.Select(k => $"@{k}").ToList();
+
+        if (auditing)
+        {
+            columns.Add("CreatedAt");
+            columns.Add("UpdatedAt");
+            var nowFunc = GetNowFunction(provider);
+            values.Add(nowFunc);
+            values.Add(nowFunc);
+        }
+
         return new IndentedStringBuilder(0)
             .Append($"INSERT INTO {st.Models} (")
-            .Append(string.Join(", ", properties.Keys)) // Using String.Join to handle the comma-separated list
+            .Append(string.Join(", ", columns))
             .Append(") ")
             .IncrementIndent(3)
             .Append("VALUES (")
-            .Append(string.Join(", ", properties.Keys.Select(k => $"@{k}"))) // Again using String.Join for the values
+            .Append(string.Join(", ", values))
             .Append(")")
             .ToString();
     }
 
-    private static string GenerateSqlSelectOneQuery(NinjadogEntityWithKey entity)
+    private static string GenerateSqlSelectOneQuery(NinjadogEntityWithKey entity, bool softDelete, string provider)
     {
         var st = entity.StringTokens;
         var entityKey = entity.Properties.GetEntityKey();
-        return $"SELECT * FROM {st.Models} WHERE {entityKey.Key} = @{entityKey.Key} LIMIT 1";
+        var softDeleteFilter = softDelete ? " AND IsDeleted = 0" : string.Empty;
+        var limit = provider == "sqlserver" ? string.Empty : " LIMIT 1";
+        var top = provider == "sqlserver" ? "TOP 1 " : string.Empty;
+        return $"SELECT {top}* FROM {st.Models} WHERE {entityKey.Key} = @{entityKey.Key}{softDeleteFilter}{limit}";
     }
 
-    private static string GenerateSqlSelectAllQuery(NinjadogEntityWithKey entity)
+    private static string GenerateSqlSelectAllQuery(NinjadogEntityWithKey entity, bool softDelete, string provider)
     {
         var st = entity.StringTokens;
-        return $"SELECT * FROM {st.Models} LIMIT @PageSize OFFSET @Offset";
+        var whereClause = softDelete ? " WHERE IsDeleted = 0" : string.Empty;
+
+        return provider switch
+        {
+            "sqlserver" => $"SELECT * FROM {st.Models}{whereClause} ORDER BY (SELECT NULL) OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY",
+            _ => $"SELECT * FROM {st.Models}{whereClause} LIMIT @PageSize OFFSET @Offset"
+        };
     }
 
-    private static string GenerateSqlCountQuery(NinjadogEntityWithKey entity)
+    private static string GenerateSqlCountQuery(NinjadogEntityWithKey entity, bool softDelete)
     {
         var st = entity.StringTokens;
-        return $"SELECT COUNT(*) FROM {st.Models}";
+        return softDelete
+            ? $"SELECT COUNT(*) FROM {st.Models} WHERE IsDeleted = 0"
+            : $"SELECT COUNT(*) FROM {st.Models}";
     }
 
-    private static string GenerateSqlUpdateQuery(NinjadogEntityWithKey entity)
+    private static string GenerateSqlUpdateQuery(NinjadogEntityWithKey entity, bool auditing, string provider)
     {
         var st = entity.StringTokens;
         var properties = entity.Properties;
@@ -140,10 +176,15 @@ public sealed class RepositoryTemplate
 
         stringBuilder.Append($"UPDATE {st.Models} SET ");
 
-        // Using LINQ to filter out key properties and then joining them with String.Join
         var updateClauses = properties
             .Where(p => !p.Value.IsKey)
-            .Select(p => $"{p.Key} = @{p.Key}");
+            .Select(p => $"{p.Key} = @{p.Key}")
+            .ToList();
+
+        if (auditing)
+        {
+            updateClauses.Add($"UpdatedAt = {GetNowFunction(provider)}");
+        }
 
         return stringBuilder
             .Append(string.Join(", ", updateClauses))
@@ -151,10 +192,22 @@ public sealed class RepositoryTemplate
             .ToString();
     }
 
-    private static string GenerateSqlDeleteQuery(NinjadogEntityWithKey entity)
+    private static string GenerateSqlDeleteQuery(NinjadogEntityWithKey entity, bool softDelete, string provider)
     {
         var st = entity.StringTokens;
         var entityKey = entity.Properties.GetEntityKey();
-        return $"DELETE FROM {st.Models} WHERE {entityKey.Key} = @{entityKey.Key}";
+        return softDelete
+            ? $"UPDATE {st.Models} SET IsDeleted = 1, DeletedAt = {GetNowFunction(provider)} WHERE {entityKey.Key} = @{entityKey.Key}"
+            : $"DELETE FROM {st.Models} WHERE {entityKey.Key} = @{entityKey.Key}";
+    }
+
+    private static string GetNowFunction(string provider)
+    {
+        return provider switch
+        {
+            "postgresql" => "NOW()",
+            "sqlserver" => "GETUTCDATE()",
+            _ => "datetime('now')"
+        };
     }
 }

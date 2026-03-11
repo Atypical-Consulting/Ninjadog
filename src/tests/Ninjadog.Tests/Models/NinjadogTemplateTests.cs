@@ -82,7 +82,7 @@ public class NinjadogTemplateTests
         Assert.Contains("namespace MyApp.Api;", result.Content);
     }
 
-    private class TestSingleTemplate : NinjadogTemplate
+    private sealed class TestSingleTemplate : NinjadogTemplate
     {
         public override string Name => "TestSingle";
 
@@ -92,7 +92,7 @@ public class NinjadogTemplateTests
         }
     }
 
-    private class TestPerEntityTemplate : NinjadogTemplate
+    private sealed class TestPerEntityTemplate : NinjadogTemplate
     {
         public override string Name => "TestPerEntity";
 
@@ -108,8 +108,6 @@ public class NinjadogTemplateTests
 
 public class GetRouteConstraintTests
 {
-    private readonly RouteConstraintTestTemplate _template = new();
-
     [Theory]
     [InlineData("Guid", "guid")]
     [InlineData("Int32", "int")]
@@ -117,7 +115,7 @@ public class GetRouteConstraintTests
     [InlineData("String", "alpha")]
     public void GetRouteConstraint_ReturnsCorrectConstraint(string typeName, string expected)
     {
-        Assert.Equal(expected, _template.TestGetRouteConstraint(typeName));
+        Assert.Equal(expected, RouteConstraintTestTemplate.TestGetRouteConstraint(typeName));
     }
 
     [Theory]
@@ -126,14 +124,14 @@ public class GetRouteConstraintTests
     [InlineData("UnknownType")]
     public void GetRouteConstraint_UnknownType_ReturnsEmpty(string typeName)
     {
-        Assert.Equal(string.Empty, _template.TestGetRouteConstraint(typeName));
+        Assert.Equal(string.Empty, RouteConstraintTestTemplate.TestGetRouteConstraint(typeName));
     }
 
-    private class RouteConstraintTestTemplate : NinjadogTemplate
+    private sealed class RouteConstraintTestTemplate : NinjadogTemplate
     {
         public override string Name => "RouteTest";
 
-        public string TestGetRouteConstraint(string typeName)
+        public static string TestGetRouteConstraint(string typeName)
         {
             return GetRouteConstraint(typeName);
         }

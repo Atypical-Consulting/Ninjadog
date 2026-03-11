@@ -54,11 +54,29 @@ public sealed class CliDotnetService : ICliDotnetService
     }
 
     /// <inheritdoc />
-    public async Task ExecuteAddPackageAsync(string projectPath, string package)
+    public async Task ExecuteAddPackageAsync(string projectPath, string package, string? version = null)
+    {
+        var arguments = new List<string> { "add", projectPath, "package", package };
+
+        if (!string.IsNullOrWhiteSpace(version))
+        {
+            arguments.Add("--version");
+            arguments.Add(version);
+        }
+
+        var cmd = Cli
+            .Wrap(DotnetCommand)
+            .WithArguments(arguments);
+
+        await ListenCommandAsync(cmd);
+    }
+
+    /// <inheritdoc />
+    public async Task ExecuteAddProjectToSolutionAsync(string solutionDirectory, string projectPath)
     {
         var cmd = Cli
             .Wrap(DotnetCommand)
-            .WithArguments(["add", projectPath, "package", package]);
+            .WithArguments(["sln", solutionDirectory, "add", projectPath]);
 
         await ListenCommandAsync(cmd);
     }

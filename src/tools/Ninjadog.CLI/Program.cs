@@ -9,7 +9,6 @@ using Ninjadog.Engine;
 using Ninjadog.Engine.Core.DomainEvents;
 using Ninjadog.Engine.Infrastructure;
 using Ninjadog.Templates.CrudWebAPI.Setup;
-using Ninjadog.Templates.CrudWebAPI.UseCases.TodoApp;
 
 SpectreWriteHelpers.WriteNinjadog();
 
@@ -18,7 +17,23 @@ registrations.AddDomainEventDispatcher();
 registrations.AddInfrastructure();
 registrations.AddSingleton<INinjadogEngineFactory, NinjadogEngineFactory>();
 registrations.AddSingleton<NinjadogTemplateManifest, CrudTemplateManifest>();
-registrations.AddSingleton<NinjadogSettings, TodoAppSettings>();
+
+const string settingsFileName = "ninjadog.json";
+var settingsFilePath = Path.Combine(Directory.GetCurrentDirectory(), settingsFileName);
+
+if (File.Exists(settingsFilePath))
+{
+    var json = File.ReadAllText(settingsFilePath);
+    var settings = NinjadogSettings.FromJsonString(json);
+    registrations.AddSingleton(settings);
+}
+else
+{
+    AnsiConsole.MarkupLine($"[yellow]Warning:[/] No {settingsFileName} found in the current directory. Run [green]ninjadog init[/] first.");
+    AnsiConsole.MarkupLine("[yellow]Using default settings.[/]");
+    registrations.AddSingleton<NinjadogSettings>(new Ninjadog.Settings.Extensions.NinjadogInitialSettings());
+}
+
 var registrar = new Ninjadog.CLI.Infrastructure.TypeRegistrar(registrations);
 
 var app = new CommandApp(registrar);
@@ -39,47 +54,14 @@ app.Configure(config =>
         .WithDescription("Builds and compiles the project.")
         .WithExample(["build"]);
 
-    config.AddCommand<AddCommand>("add")
-        .WithDescription("Adds a new template or module.");
-
-    config.AddCommand<UpdateCommand>("update")
-        .WithDescription("Updates templates and project files.")
-        .WithExample(["update"]);
-
-    config.AddCommand<ValidateCommand>("validate")
-        .WithDescription("Validates project configuration.")
-        .WithExample(["validate"]);
-
-    config.AddCommand<DeployCommand>("deploy")
-        .WithDescription("Deploys project to an environment.");
-
-    config.AddCommand<ListTemplatesCommand>("list-templates")
-        .WithDescription("Lists available templates.")
-        .WithExample(["list-templates"]);
-
-    config.AddCommand<InfoCommand>("info")
-        .WithDescription("Displays project information.")
-        .WithExample(["info"]);
-
-    config.AddCommand<CleanCommand>("clean")
-        .WithDescription("Cleans up the project directory.")
-        .WithExample(["clean"]);
-
-    config.AddCommand<AddIntegrationCommand>("add-integration")
-        .WithDescription("Adds a new integration to the project.");
-
-    config.AddCommand<TestCommand>("test")
-        .WithDescription("Runs project tests.")
-        .WithExample(["test"]);
-
-    config.AddCommand<NinjadogCommand>("ninjadog")
-        .WithDescription("Generates a new Ninjadog project.")
-        .WithExample(["ninjadog"]);
+    config.AddCommand<AddEntityCommand>("add-entity")
+        .WithDescription("Adds a new entity to the ninjadog.json file.")
+        .WithExample(["add-entity", "Product"]);
 });
 
 try
 {
-    return app.Run(args);
+    return await app.RunAsync(args);
 }
 catch (Exception ex)
 {

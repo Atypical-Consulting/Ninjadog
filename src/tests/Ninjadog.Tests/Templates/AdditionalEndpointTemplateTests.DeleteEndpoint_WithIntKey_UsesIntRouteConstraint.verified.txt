@@ -17,11 +17,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace TestApp.Api.Endpoints;
 
-public partial class DeleteOrderEndpoint
+public partial class DeleteOrderEndpoint(IOrderService orderService)
     : Endpoint<DeleteOrderRequest>
 {
-    public IOrderService OrderService { get; private set; } = null!;
-
     public override void Configure()
     {
         Delete("/orders/{id:int}");
@@ -30,7 +28,7 @@ public partial class DeleteOrderEndpoint
 
     public override async Task HandleAsync(DeleteOrderRequest req, CancellationToken ct)
     {
-        var deleted = await OrderService.DeleteAsync(req.OrderId);
+        var deleted = await orderService.DeleteAsync(req.OrderId);
         if (!deleted)
         {
             await SendNotFoundAsync(ct);

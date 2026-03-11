@@ -12,17 +12,11 @@
   <!-- Properties -->
   <PropertyGroup>
     <IsPackable>false</IsPackable>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GenerateDocumentationFile Condition="'$(IsTestProject)' != 'true'">true</GenerateDocumentationFile>
     <LangVersion>latest</LangVersion>
     <IsTestProject>$(MSBuildProjectName.Contains('Tests'))</IsTestProject>
     <ImplicitUsings>true</ImplicitUsings>
     <Nullable>enable</Nullable>
-  </PropertyGroup>
-
-  <!-- MinVer Configuration -->
-  <PropertyGroup>
-    <!-- Set the minimum version to be used if no Git tags are found -->
-    <MinVerMinimumMajorMinor>2.0</MinVerMinimumMajorMinor>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(IsTestProject)' != 'true'">

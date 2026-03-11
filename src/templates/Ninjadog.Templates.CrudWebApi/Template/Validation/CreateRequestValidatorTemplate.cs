@@ -41,7 +41,7 @@ public sealed class CreateRequestValidatorTemplate
               {
                   public {{st.ClassCreateModelRequestValidator}}()
                   {
-                      {{GenerateValidationRules(entity)}}
+              {{GenerateValidationRules(entity)}}
                   }
               }
               """;
@@ -63,7 +63,16 @@ public sealed class CreateRequestValidatorTemplate
                 continue;
             }
 
-            if (_valueTypes.Contains(propertyValue.Type))
+            var isValueType = _valueTypes.Contains(propertyValue.Type);
+            var hasValidationAttrs = propertyValue.Required
+                || propertyValue.MaxLength.HasValue
+                || propertyValue.MinLength.HasValue
+                || propertyValue.Min.HasValue
+                || propertyValue.Max.HasValue
+                || propertyValue.Pattern != null;
+
+            // Skip value types that have no validation attributes
+            if (isValueType && !hasValidationAttrs)
             {
                 continue;
             }
@@ -73,12 +82,69 @@ public sealed class CreateRequestValidatorTemplate
                 stringBuilder.AppendLine();
             }
 
-            stringBuilder
-                .AppendLine($"RuleFor(x => x.{propertyName})")
-                .IncrementIndent()
-                .AppendLine(".NotEmpty()")
-                .AppendLine($".WithMessage(\"{propertyName} is required!\");")
-                .DecrementIndent();
+            if (!isValueType && !hasValidationAttrs)
+            {
+                // Existing behavior for non-value-type properties without validation attributes
+                stringBuilder
+                    .AppendLine($"RuleFor(x => x.{propertyName})")
+                    .IncrementIndent()
+                    .AppendLine(".NotEmpty()")
+                    .AppendLine($".WithMessage(\"{propertyName} is required!\");")
+                    .DecrementIndent();
+            }
+            else
+            {
+                // Generate rules based on validation attributes
+                var rules = new List<string>();
+
+                if (propertyValue.Required || !isValueType)
+                {
+                    rules.Add($".NotEmpty().WithMessage(\"{propertyName} is required!\")");
+                }
+
+                if (propertyValue.MaxLength.HasValue)
+                {
+                    rules.Add($".MaximumLength({propertyValue.MaxLength.Value})");
+                }
+
+                if (propertyValue.MinLength.HasValue)
+                {
+                    rules.Add($".MinimumLength({propertyValue.MinLength.Value})");
+                }
+
+                if (propertyValue.Min.HasValue)
+                {
+                    rules.Add($".GreaterThanOrEqualTo({propertyValue.Min.Value})");
+                }
+
+                if (propertyValue.Max.HasValue)
+                {
+                    rules.Add($".LessThanOrEqualTo({propertyValue.Max.Value})");
+                }
+
+                if (propertyValue.Pattern != null)
+                {
+                    rules.Add($".Matches(\"{propertyValue.Pattern}\")");
+                }
+
+                stringBuilder
+                    .AppendLine($"RuleFor(x => x.{propertyName})")
+                    .IncrementIndent();
+
+                for (var i = 0; i < rules.Count; i++)
+                {
+                    if (i == rules.Count - 1)
+                    {
+                        stringBuilder.AppendLine($"{rules[i]};");
+                    }
+                    else
+                    {
+                        stringBuilder.AppendLine(rules[i]);
+                    }
+                }
+
+                stringBuilder.DecrementIndent();
+            }
 
             hasWrittenRule = true;
         }

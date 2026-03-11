@@ -17,14 +17,22 @@ public sealed class DbConnectionFactoryTemplate
     public override NinjadogContentFile GenerateOne(NinjadogSettings ninjadogSettings)
     {
         var rootNamespace = ninjadogSettings.Config.RootNamespace;
+        var provider = ninjadogSettings.Config.DatabaseProvider;
         var ns = $"{rootNamespace}.Database";
         const string fileName = "DbConnectionFactory.cs";
+
+        var (usingDirective, className, connectionType) = provider switch
+        {
+            "postgresql" => ("using Npgsql;", "NpgsqlConnectionFactory", "NpgsqlConnection"),
+            "sqlserver" => ("using Microsoft.Data.SqlClient;", "SqlServerConnectionFactory", "SqlConnection"),
+            _ => ("using Microsoft.Data.Sqlite;", "SqliteConnectionFactory", "SqliteConnection")
+        };
 
         var content =
             $$"""
 
               using System.Data;
-              using Microsoft.Data.Sqlite;
+              {{usingDirective}}
 
               {{WriteFileScopedNamespace(ns)}}
 
@@ -37,12 +45,12 @@ public sealed class DbConnectionFactoryTemplate
               /// This class provides a factory for database connections.
               /// </summary>
               /// <param name="connectionString">The connection string to use.</param>
-              public class SqliteConnectionFactory(string connectionString)
+              public class {{className}}(string connectionString)
                   : IDbConnectionFactory
               {
                   public async Task<IDbConnection> CreateConnectionAsync()
                   {
-                      var connection = new SqliteConnection(connectionString);
+                      var connection = new {{connectionType}}(connectionString);
                       await connection.OpenAsync();
                       return connection;
                   }

@@ -1,0 +1,35 @@
+﻿//------------------------------------------------------------------------------
+// This code was powered by the Ninjadog Engine
+//
+// Developed by: Atypical Consulting SRL - Philippe Matray
+// Generated on: [SCRUBBED]
+// Version     : [SCRUBBED]
+//
+// This file is part of a custom software solution crafted to meet your
+// specific needs. For optimal performance and compatibility, modifications
+// should be coordinated with Ninjadog support services.
+//------------------------------------------------------------------------------
+
+using Dapper;
+
+namespace TestApp.Api.Database;
+
+public partial class DatabaseInitializer(IDbConnectionFactory connectionFactory)
+{
+    public async Task InitializeAsync()
+    {
+        using var connection = await connectionFactory.CreateConnectionAsync();
+        
+        await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS TodoItems (
+            Id CHAR(36) PRIMARY KEY,
+            Title TEXT NOT NULL,
+            Description TEXT NOT NULL,
+            IsCompleted INTEGER NOT NULL,
+            DueDate TEXT NOT NULL,
+            Priority INTEGER NOT NULL,
+            Cost REAL NOT NULL,
+            IsDeleted INTEGER NOT NULL DEFAULT 0,
+            DeletedAt TEXT)");
+
+    }
+}

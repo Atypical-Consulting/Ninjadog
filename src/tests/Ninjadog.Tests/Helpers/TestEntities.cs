@@ -1,4 +1,3 @@
-using Ninjadog.Settings.Entities;
 using Ninjadog.Settings.Entities.Properties;
 using Ninjadog.Settings.Extensions.Entities;
 using Ninjadog.Settings.Extensions.Entities.Properties;
@@ -45,5 +44,66 @@ public static class TestEntities
         };
 
         return new NinjadogEntityWithKey("Category", properties, null);
+    }
+
+    public static NinjadogEntityWithKey CreateValidatedEntity()
+    {
+        var properties = new NinjadogEntityProperties
+        {
+            { "Id", new NinjadogEntityId() },
+            { "Name", new NinjadogEntityProperty("String", Required: true, MaxLength: 100, MinLength: 2) },
+            { "Email", new NinjadogEntityProperty("String", Required: true, Pattern: @"^[^@]+@[^@]+\.[^@]+$") },
+            { "Age", new NinjadogEntityProperty("Int32", Min: 0, Max: 150) },
+            { "Bio", new NinjadogEntityProperty("String", MaxLength: 500) },
+        };
+
+        return new NinjadogEntityWithKey("Contact", properties, null);
+    }
+
+    public static NinjadogEntityWithKey CreateSeededEntity()
+    {
+        var properties = new NinjadogEntityProperties
+        {
+            { "Id", new NinjadogEntityId() },
+            { "Name", new NinjadogEntityProperty<string>() },
+            { "IsActive", new NinjadogEntityProperty<bool>() },
+        };
+
+        var seedData = new List<Dictionary<string, object>>
+        {
+            new() { ["Id"] = "550e8400-e29b-41d4-a716-446655440001", ["Name"] = "Default Category", ["IsActive"] = true },
+            new() { ["Id"] = "550e8400-e29b-41d4-a716-446655440002", ["Name"] = "Archive", ["IsActive"] = false },
+        };
+
+        return new NinjadogEntityWithKey("Category", properties, null, seedData);
+    }
+
+    public static NinjadogEntityWithKey CreateParentEntity()
+    {
+        var properties = new NinjadogEntityProperties
+        {
+            { "Id", new NinjadogEntityId() },
+            { "Name", new NinjadogEntityProperty<string>() },
+        };
+
+        var relationships = new NinjadogEntityRelationships
+        {
+            { "Posts", new NinjadogEntityRelationship("Post", NinjadogEntityRelationshipType.OneToMany) },
+        };
+
+        return new NinjadogEntityWithKey("Author", properties, relationships);
+    }
+
+    public static NinjadogEntityWithKey CreateChildEntity()
+    {
+        var properties = new NinjadogEntityProperties
+        {
+            { "Id", new NinjadogEntityId() },
+            { "Title", new NinjadogEntityProperty<string>() },
+            { "Content", new NinjadogEntityProperty<string>() },
+            { "AuthorId", new NinjadogEntityProperty("Guid") },
+        };
+
+        return new NinjadogEntityWithKey("Post", properties, null);
     }
 }

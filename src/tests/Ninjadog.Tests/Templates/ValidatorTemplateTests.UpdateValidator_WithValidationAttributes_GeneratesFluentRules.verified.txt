@@ -1,0 +1,41 @@
+//------------------------------------------------------------------------------
+// This code was powered by the Ninjadog Engine
+//
+// Developed by: Atypical Consulting SRL - Philippe Matray
+// Generated on: [SCRUBBED]
+// Version     : [SCRUBBED]
+//
+// This file is part of a custom software solution crafted to meet your
+// specific needs. For optimal performance and compatibility, modifications
+// should be coordinated with Ninjadog support services.
+//------------------------------------------------------------------------------
+
+using TestApp.Api.Contracts.Requests;
+using FastEndpoints;
+using FluentValidation;
+
+namespace TestApp.Api.Validation;
+
+public partial class UpdateContactRequestValidator : Validator<UpdateContactRequest>
+{
+    public UpdateContactRequestValidator()
+    {
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .MaximumLength(100)
+            .MinimumLength(2);
+
+        RuleFor(x => x.Email)
+            .NotEmpty()
+            .Matches("^[^@]+@[^@]+\.[^@]+$");
+
+        RuleFor(x => x.Age)
+            .GreaterThanOrEqualTo(0)
+            .LessThanOrEqualTo(150);
+
+        RuleFor(x => x.Bio)
+            .NotEmpty()
+            .MaximumLength(500);
+
+    }
+}

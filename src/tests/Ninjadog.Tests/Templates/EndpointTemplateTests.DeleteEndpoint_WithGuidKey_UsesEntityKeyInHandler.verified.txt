@@ -17,11 +17,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace TestApp.Api.Endpoints;
 
-public partial class DeleteTodoItemEndpoint
+public partial class DeleteTodoItemEndpoint(ITodoItemService todoItemService)
     : Endpoint<DeleteTodoItemRequest>
 {
-    public ITodoItemService TodoItemService { get; private set; } = null!;
-
     public override void Configure()
     {
         Delete("/todo-items/{id:guid}");
@@ -30,7 +28,7 @@ public partial class DeleteTodoItemEndpoint
 
     public override async Task HandleAsync(DeleteTodoItemRequest req, CancellationToken ct)
     {
-        var deleted = await TodoItemService.DeleteAsync(req.Id);
+        var deleted = await todoItemService.DeleteAsync(req.Id);
         if (!deleted)
         {
             await SendNotFoundAsync(ct);

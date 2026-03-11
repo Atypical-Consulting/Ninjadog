@@ -15,4 +15,5 @@ namespace Ninjadog.Settings.Entities;
 /// <param name="Relationships">The relationships between this entity and other entities.</param>
 public record NinjadogEntity(
     NinjadogEntityProperties Properties,
-    NinjadogEntityRelationships? Relationships = null);
+    NinjadogEntityRelationships? Relationships = null,
+    List<Dictionary<string, object>>? SeedData = null);

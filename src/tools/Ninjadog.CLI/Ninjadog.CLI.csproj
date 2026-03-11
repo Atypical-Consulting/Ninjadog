@@ -3,9 +3,10 @@
   <PropertyGroup>
     <AssemblyName>Ninjadog</AssemblyName>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>ninjadog</ToolCommandName>
+    <IsPackable>true</IsPackable>
+    <EnablePackageValidation>false</EnablePackageValidation>
   </PropertyGroup>
 
   <ItemGroup>

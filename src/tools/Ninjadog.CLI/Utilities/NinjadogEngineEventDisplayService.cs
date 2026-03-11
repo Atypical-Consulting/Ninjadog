@@ -15,7 +15,8 @@ internal sealed class NinjadogEngineEventDisplayService(IDomainEventDispatcher d
 
     protected override void BeforeEngineRun(BeforeEngineRunEvent domainEvent)
     {
-        var (config, entities) = domainEvent.Settings;
+        var config = domainEvent.Settings.Config;
+        var entities = domainEvent.Settings.Entities;
         var manifest = domainEvent.TemplateManifest;
 
         MarkupLine("[bold]Using the following settings:[/]");

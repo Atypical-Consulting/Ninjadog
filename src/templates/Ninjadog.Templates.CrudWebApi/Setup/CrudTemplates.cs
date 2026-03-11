@@ -52,11 +52,13 @@ public class CrudTemplates : NinjadogTemplates
         AddTemplates(
             "Database",
             new DatabaseInitializerTemplate(),
-            new DbConnectionFactoryTemplate());
+            new DbConnectionFactoryTemplate(),
+            new DatabaseSeederTemplate());
 
         AddTemplates(
             "Domain",
-            new DomainEntityTemplate());
+            new DomainEntityTemplate(),
+            new EnumTemplate());
 
         AddTemplates(
             "Endpoints",
@@ -64,7 +66,8 @@ public class CrudTemplates : NinjadogTemplates
             new DeleteEndpointTemplate(),
             new GetAllEndpointTemplate(),
             new GetEndpointTemplate(),
-            new UpdateEndpointTemplate());
+            new UpdateEndpointTemplate(),
+            new GetByParentEndpointTemplate());
 
         AddTemplates(
             "Mapping",

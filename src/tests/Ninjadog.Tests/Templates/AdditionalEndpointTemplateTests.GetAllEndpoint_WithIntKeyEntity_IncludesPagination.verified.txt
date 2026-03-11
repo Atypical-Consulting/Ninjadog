@@ -18,11 +18,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace TestApp.Api.Endpoints;
 
-public partial class GetAllOrdersEndpoint
+public partial class GetAllOrdersEndpoint(IOrderService orderService)
     : EndpointWithoutRequest<GetAllOrdersResponse>
 {
-    public IOrderService OrderService { get; private set; } = null!;
-
     public override void Configure()
     {
         Get("/orders");
@@ -34,7 +32,7 @@ public partial class GetAllOrdersEndpoint
         var page = int.TryParse(HttpContext.Request.Query["page"], out var p) && p > 0 ? p : 1;
         var pageSize = int.TryParse(HttpContext.Request.Query["pageSize"], out var ps) && ps > 0 ? ps : 10;
 
-        var (orders, totalCount) = await OrderService.GetAllAsync(page, pageSize);
+        var (orders, totalCount) = await orderService.GetAllAsync(page, pageSize);
         var ordersResponse = orders.ToOrdersResponse(page, pageSize, totalCount);
         await SendOkAsync(ordersResponse, ct);
     }

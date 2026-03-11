@@ -15,10 +15,18 @@ namespace Ninjadog.Settings.Config;
 /// <param name="RootNamespace">The root namespace for the generated code.</param>
 /// <param name="OutputPath">The path where the generated files will be saved.</param>
 /// <param name="SaveGeneratedFiles">Indicates whether the generated files should be saved to disk. Default is true.</param>
+/// <param name="Cors">The optional CORS configuration for the application.</param>
+/// <param name="SoftDelete">Indicates whether soft delete is enabled. When true, DELETE operations set IsDeleted=1 instead of removing rows. Default is false.</param>
+/// <param name="Auditing">Indicates whether audit fields (CreatedAt, UpdatedAt) should be added to generated tables. Default is false.</param>
+/// <param name="DatabaseProvider">The database provider to use (sqlite, postgresql, sqlserver). Default is sqlite.</param>
 public abstract record NinjadogConfiguration(
     string Name,
     string Version,
     string Description,
     string RootNamespace,
     string OutputPath,
-    bool SaveGeneratedFiles = true);
+    bool SaveGeneratedFiles = true,
+    NinjadogCorsConfiguration? Cors = null,
+    bool SoftDelete = false,
+    bool Auditing = false,
+    string DatabaseProvider = "sqlite");
