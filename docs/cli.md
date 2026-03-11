@@ -47,11 +47,68 @@ ninjadog build             Run the generators
 
 ### `ninjadog init`
 
-Initializes a new Ninjadog project in the current directory with a default configuration file containing a sample `Person` entity.
+Initializes a new Ninjadog project in the current directory by generating a `ninjadog.json` configuration file. The command walks you through a series of interactive prompts to customize the project settings, then writes the configuration with a sample `Person` entity to get you started.
 
 ```bash
 ninjadog init
 ```
+
+#### Interactive prompts
+
+When you run `ninjadog init`, the CLI asks for the following project settings:
+
+| Prompt | Default | Description |
+|---|---|---|
+| **Project name** | `NinjadogApp` | The display name for your API project. |
+| **Version** | `1.0.0` | The initial semantic version. |
+| **Description** | `Welcome to Ninjadog!` | A short description of the project. |
+| **Root namespace** | `NinjadogApp` | The C# root namespace for generated code. |
+| **Output path** | `.` | Directory where generated files are written (relative to the config file). |
+
+Press <kbd>Enter</kbd> at any prompt to accept the default value.
+
+#### Example session
+
+```
+$ ninjadog init
+? Project name: MyApi
+? Version: 1.0.0
+? Description: My REST API
+? Root namespace: MyApi
+? Output path: src/applications/MyApi
+Ninjadog settings file created successfully.
+```
+
+This creates a `ninjadog.json` in the current directory:
+
+```json
+{
+  "config": {
+    "name": "MyApi",
+    "version": "1.0.0",
+    "description": "My REST API",
+    "rootNamespace": "MyApi",
+    "outputPath": "src/applications/MyApi",
+    "saveGeneratedFiles": true
+  },
+  "entities": {
+    "Person": {
+      "properties": {
+        "Id": { "type": "Guid", "isKey": true },
+        "FirstName": { "type": "string" },
+        "LastName": { "type": "string" },
+        "BirthDate": { "type": "DateTime" }
+      }
+    }
+  }
+}
+```
+
+{: .tip }
+> The generated `Person` entity is a starter template. Replace or extend it with your own domain entities before running `ninjadog build`.
+
+{: .note }
+> A `ninjadog.json` file must **not** already exist in the current directory. If one is found, the command exits with an error to avoid overwriting your configuration.
 
 ### `ninjadog add-entity`
 
