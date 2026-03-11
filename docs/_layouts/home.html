@@ -962,14 +962,14 @@
       </div>
 
       <h1 class="hero__title">
-        <span class="hero__title-line">One attribute.</span>
+        <span class="hero__title-line">One config.</span>
         <span class="hero__title-line"><span class="accent">Full REST API.</span></span>
         <span class="hero__title-line">Zero boilerplate.</span>
       </h1>
 
       <p class="hero__subtitle">
-        Ninjadog uses C# Source Generators to produce your entire API stack at compile time.
-        No runtime reflection, no code-gen CLI step, no files to keep in sync.
+        Ninjadog uses a powerful template engine to generate your entire API stack from a single JSON config.
+        No runtime reflection, no manual wiring, no files to keep in sync.
       </p>
 
       <div class="hero__actions">
@@ -990,17 +990,19 @@
             <span class="code-window__dot code-window__dot--red"></span>
             <span class="code-window__dot code-window__dot--yellow"></span>
             <span class="code-window__dot code-window__dot--green"></span>
-            <span class="code-window__filename">Product.cs</span>
+            <span class="code-window__filename">ninjadog.json</span>
           </div>
           <div class="code-window__body">
-            <pre><span class="kw">using</span> <span class="tp">Ninjadog</span><span class="punct">;</span>
-
-<span class="punct">[</span><span class="attr">Ninjadog</span><span class="punct">]</span>
-<span class="kw">public class</span> <span class="tp">Product</span>
-<span class="punct">{</span>
-    <span class="kw">public</span> <span class="tp">Guid</span> <span class="prop">Id</span> <span class="punct">{ get; set; }</span>
-    <span class="kw">public</span> <span class="tp">string</span> <span class="prop">Name</span> <span class="punct">{ get; set; }</span>
-    <span class="kw">public</span> <span class="tp">decimal</span> <span class="prop">Price</span> <span class="punct">{ get; set; }</span>
+            <pre><span class="punct">{</span>
+  <span class="prop">"entities"</span><span class="punct">:</span> <span class="punct">{</span>
+    <span class="tp">"Product"</span><span class="punct">:</span> <span class="punct">{</span>
+      <span class="prop">"properties"</span><span class="punct">:</span> <span class="punct">{</span>
+        <span class="attr">"Id"</span><span class="punct">:</span>    <span class="punct">{</span> <span class="prop">"type"</span><span class="punct">:</span> <span class="kw">"Guid"</span><span class="punct">,</span> <span class="prop">"isKey"</span><span class="punct">:</span> <span class="kw">true</span> <span class="punct">},</span>
+        <span class="attr">"Name"</span><span class="punct">:</span>  <span class="punct">{</span> <span class="prop">"type"</span><span class="punct">:</span> <span class="kw">"string"</span> <span class="punct">},</span>
+        <span class="attr">"Price"</span><span class="punct">:</span> <span class="punct">{</span> <span class="prop">"type"</span><span class="punct">:</span> <span class="kw">"decimal"</span> <span class="punct">}</span>
+      <span class="punct">}</span>
+    <span class="punct">}</span>
+  <span class="punct">}</span>
 <span class="punct">}</span></pre>
           </div>
         </div>
@@ -1278,12 +1280,12 @@
   <section class="cta-bottom">
     <div class="cta-bottom__box reveal" data-reveal>
       <h2 class="cta-bottom__title">Ready to ship faster?</h2>
-      <p class="cta-bottom__desc">Get started in under 2 minutes. One package, one attribute, full API.</p>
+      <p class="cta-bottom__desc">Get started in under 2 minutes. One config, one command, full API.</p>
 
       <div class="install-block">
         <div class="install-cmd">
           <span class="install-cmd__prompt">$</span>
-          <span class="install-cmd__text" id="installText">dotnet add package Ninjadog</span>
+          <span class="install-cmd__text" id="installText">dotnet tool install -g Ninjadog.CLI</span>
           <button class="install-cmd__copy" id="copyBtn" aria-label="Copy install command">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           </button>
