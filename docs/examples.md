@@ -250,6 +250,50 @@ public partial class DatabaseInitializer(IDbConnectionFactory connectionFactory)
 }
 ```
 
+## Database -- Soft Delete
+
+When `config.features.softDelete` is enabled in `ninjadog.json`, the generated schema adds `IsDeleted` and `DeletedAt` columns to every table, and all queries are adjusted automatically.
+
+**Generated schema with soft delete:**
+
+```csharp
+public partial class DatabaseInitializer(IDbConnectionFactory connectionFactory)
+{
+    public async Task InitializeAsync()
+    {
+        using var connection = await connectionFactory.CreateConnectionAsync();
+
+        await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS TodoItems (
+            Id CHAR(36) PRIMARY KEY,
+            Title TEXT NOT NULL,
+            Description TEXT NOT NULL,
+            IsCompleted INTEGER NOT NULL,
+            DueDate TEXT NOT NULL,
+            Priority INTEGER NOT NULL,
+            Cost REAL NOT NULL,
+            IsDeleted INTEGER NOT NULL DEFAULT 0,
+            DeletedAt TEXT)");
+
+
+    }
+}
+```
+
+**Generated soft-delete SQL (UPDATE instead of DELETE):**
+
+```sql
+UPDATE TodoItems SET IsDeleted = 1, DeletedAt = datetime('now') WHERE Id = @Id
+```
+
+**Generated filtered SELECT:**
+
+```sql
+SELECT * FROM TodoItems WHERE IsDeleted = 0 ORDER BY Id LIMIT @PageSize OFFSET @Offset
+```
+
+{: .note }
+> Soft delete is disabled by default. Enable it by adding `"features": { "softDelete": true }` to the `config` section of your `ninjadog.json`. See [Data Layer Generators](/Ninjadog/generators/data-layer#soft-delete) for full details.
+
 ## Database -- Audit Fields
 
 When `config.features.auditing` is set to `true`, the generated schema gains `CreatedAt` and `UpdatedAt` columns, and the repository SQL manages their values automatically.

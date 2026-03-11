@@ -114,6 +114,69 @@ public partial class DatabaseSeeder(IDbConnectionFactory connectionFactory)
 {: .tip }
 > Boolean values are automatically converted to `1`/`0` for SQLite compatibility. String values are properly escaped with single quotes.
 
+## Soft Delete
+
+Ninjadog supports **soft delete** as an opt-in feature. When enabled, records are never physically removed from the database -- instead, they are marked as deleted and automatically filtered out of queries.
+
+{: .note }
+> Soft delete is **disabled by default** and fully backward compatible. Existing projects are unaffected unless you explicitly enable it.
+
+### Configuration
+
+Enable soft delete in your `ninjadog.json`:
+
+```json
+{
+  "config": {
+    "features": {
+      "softDelete": true
+    }
+  }
+}
+```
+
+### Generated Schema Changes
+
+When soft delete is enabled, two columns are added to **every** table:
+
+| Column | SQLite Type | Default | Purpose |
+|---|---|---|---|
+| `IsDeleted` | INTEGER | 0 | Flag indicating the record is deleted |
+| `DeletedAt` | TEXT | NULL | Timestamp of when the record was deleted |
+
+Example generated schema with soft delete:
+
+```csharp
+await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS TodoItems (
+    Id CHAR(36) PRIMARY KEY,
+    Title TEXT NOT NULL,
+    Description TEXT NOT NULL,
+    IsCompleted INTEGER NOT NULL,
+    DueDate TEXT NOT NULL,
+    Priority INTEGER NOT NULL,
+    Cost REAL NOT NULL,
+    IsDeleted INTEGER NOT NULL DEFAULT 0,
+    DeletedAt TEXT)");
+```
+
+### Generated SQL Behavior
+
+**DELETE** operations become a soft-delete `UPDATE`:
+
+```sql
+UPDATE TodoItems SET IsDeleted = 1, DeletedAt = datetime('now') WHERE Id = @Id
+```
+
+**SELECT** and **COUNT** queries automatically filter out deleted records:
+
+```sql
+SELECT * FROM TodoItems WHERE IsDeleted = 0 ORDER BY Id LIMIT @PageSize OFFSET @Offset
+SELECT COUNT(*) FROM TodoItems WHERE IsDeleted = 0
+```
+
+{: .tip }
+> Soft-deleted records remain in the database and can be restored by setting `IsDeleted = 0` and `DeletedAt = NULL` directly via SQL. Ninjadog does not generate a restore endpoint, but the data is preserved.
+
 ## Repositories
 
 ### RepositoryGenerator
