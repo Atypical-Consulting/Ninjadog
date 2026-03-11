@@ -38,7 +38,7 @@ internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
         // Serve embedded static files
         var embeddedProvider = new EmbeddedFileProvider(
             typeof(UiCommand).Assembly,
-            "Ninjadog.WebUI");
+            "Ninjadog.CLI.WebUI");
 
         app.UseStaticFiles(new StaticFileOptions
         {
