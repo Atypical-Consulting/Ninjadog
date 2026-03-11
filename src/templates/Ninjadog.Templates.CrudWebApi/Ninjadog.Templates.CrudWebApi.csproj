@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <RootNamespace>Ninjadog.Templates.CrudWebAPI</RootNamespace>
-    <IsPackable>true</IsPackable>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

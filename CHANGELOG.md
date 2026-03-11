@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Added
 
-- **NuGet CLI tool** — `Ninjadog.CLI` is now published on NuGet and installable via `dotnet tool install -g Ninjadog.CLI`.
+- **NuGet CLI tool** — `Ninjadog` is now published on NuGet and installable via `dotnet tool install -g Ninjadog`.
 - **GitHub Release workflow** — Tag-based releases now auto-create GitHub Releases with changelog and attached NuGet packages.
 - **Pagination** — `GetAll` endpoints support `?page=1&pageSize=10` query parameters, with `Page`, `PageSize`, and `TotalCount` metadata in the response.
 - **CLI build command** — `ninjadog build` now executes the engine instead of throwing `NotImplementedException`.

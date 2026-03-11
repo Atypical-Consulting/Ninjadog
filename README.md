@@ -24,7 +24,7 @@
 ## Quick Start
 
 ```bash
-dotnet tool install -g Ninjadog.CLI
+dotnet tool install -g Ninjadog
 mkdir MyApi && cd MyApi
 ninjadog init
 ```
@@ -274,7 +274,7 @@ public partial class DatabaseInitializer(IDbConnectionFactory connectionFactory)
 **Option 1 — Global CLI tool** *(recommended)*
 
 ```bash
-dotnet tool install -g Ninjadog.CLI
+dotnet tool install -g Ninjadog
 ```
 
 **Option 2 — From Source**
@@ -438,7 +438,7 @@ Full documentation for each generator is available in [`doc/generators/`](./doc/
 Install the CLI as a global dotnet tool:
 
 ```bash
-dotnet tool install -g Ninjadog.CLI
+dotnet tool install -g Ninjadog
 ```
 
 Available commands:

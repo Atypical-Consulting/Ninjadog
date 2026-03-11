@@ -87,18 +87,13 @@ ninjadog/
 └── global.json                              # .NET SDK version config
 ```
 
-## NuGet Packages
+## NuGet Package
 
-| Package | Description |
-|---|---|
-| `Ninjadog.Engine` | Main code generation engine |
-| `Ninjadog.Engine.Core` | Core generator abstractions |
-| `Ninjadog.Engine.Infrastructure` | Infrastructure utilities |
-| `Ninjadog.Helpers` | Shared helper functions |
-| `Ninjadog.Settings` | Generator configuration |
-| `Ninjadog.Settings.Extensions` | Settings extension methods |
-| `Ninjadog.Templates.CrudWebApi` | CRUD Web API template |
-| `Ninjadog.CLI` | Command-line tool (`dotnet tool install -g Ninjadog.CLI`) |
+```bash
+dotnet tool install -g Ninjadog
+```
+
+The `Ninjadog` package is a global .NET tool that bundles the engine, templates, and all dependencies. The internal libraries (Engine, Settings, Helpers, etc.) are not published separately.
 
 ---
 

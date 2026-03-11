@@ -40,7 +40,7 @@ jobs:
         run: |
           echo "Packages produced:"
           ls -la ./artifacts/*.nupkg
-          test $(ls ./artifacts/*.nupkg | wc -l) -eq 8
+          test $(ls ./artifacts/*.nupkg | wc -l) -eq 1
 
       - name: Push to NuGet
         run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate

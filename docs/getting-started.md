@@ -33,7 +33,7 @@ Get a full CRUD REST API running in under 2 minutes.
 Install the Ninjadog CLI as a global .NET tool:
 
 ```bash
-dotnet tool install -g Ninjadog.CLI
+dotnet tool install -g Ninjadog
 ```
 
 ### Option 2 -- From Source

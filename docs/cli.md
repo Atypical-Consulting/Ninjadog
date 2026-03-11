@@ -22,7 +22,7 @@ The `ninjadog` CLI is distributed as a .NET global tool for project scaffolding 
 ## Installation
 
 ```bash
-dotnet tool install -g Ninjadog.CLI
+dotnet tool install -g Ninjadog
 ```
 
 {: .tip }
