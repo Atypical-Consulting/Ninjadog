@@ -59,3 +59,16 @@ public sealed record SoftDeleteConfiguration()
 
 public sealed record SoftDeleteSettings()
     : NinjadogSettings(new SoftDeleteConfiguration(), new TestEntitiesCollection());
+
+public sealed record AuditConfiguration()
+    : NinjadogConfiguration(
+        Name: "TestApp",
+        Version: "1.0.0",
+        Description: "Test application",
+        RootNamespace: "TestApp.Api",
+        OutputPath: "output",
+        SaveGeneratedFiles: false,
+        Auditing: true);
+
+public sealed record AuditSettings()
+    : NinjadogSettings(new AuditConfiguration(), new TestEntitiesCollection());

@@ -68,11 +68,17 @@ public abstract record NinjadogSettings(
         }
 
         var softDelete = false;
+        var auditing = false;
         if (configElement.TryGetProperty("features", out var featuresElement))
         {
             if (featuresElement.TryGetProperty("softDelete", out var sd))
             {
                 softDelete = sd.GetBoolean();
+            }
+
+            if (featuresElement.TryGetProperty("auditing", out var aud))
+            {
+                auditing = aud.GetBoolean();
             }
         }
 
@@ -84,7 +90,8 @@ public abstract record NinjadogSettings(
             OutputPath: configElement.TryGetProperty("outputPath", out var op) ? op.GetString()! : $"src/applications/{name}",
             SaveGeneratedFiles: configElement.TryGetProperty("saveGeneratedFiles", out var sgf) && sgf.GetBoolean(),
             Cors: cors,
-            SoftDelete: softDelete);
+            SoftDelete: softDelete,
+            Auditing: auditing);
 
         var entities = new NinjadogLoadedEntities();
 

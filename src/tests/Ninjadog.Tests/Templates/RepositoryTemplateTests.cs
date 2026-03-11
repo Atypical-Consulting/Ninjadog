@@ -30,4 +30,12 @@ public partial class RepositoryTemplateTests
         var results = _template.GenerateMany(settings).ToList();
         return Verify(results.Select(r => r.Content));
     }
+
+    [Fact]
+    public Task GenerateMany_WithAuditing_AddsAuditLogic()
+    {
+        var settings = new AuditSettings();
+        var results = _template.GenerateMany(settings).ToList();
+        return Verify(results.Select(r => r.Content));
+    }
 }

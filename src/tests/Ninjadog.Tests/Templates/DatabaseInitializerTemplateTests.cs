@@ -22,4 +22,12 @@ public partial class DatabaseInitializerTemplateTests
         var result = _template.GenerateOne(settings);
         return Verify(result.Content);
     }
+
+    [Fact]
+    public Task GenerateOne_WithAuditing_AddsAuditColumns()
+    {
+        var settings = new AuditSettings();
+        var result = _template.GenerateOne(settings);
+        return Verify(result.Content);
+    }
 }

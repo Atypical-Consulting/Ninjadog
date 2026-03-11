@@ -11,6 +11,7 @@ public sealed class RepositoryTemplate
     : NinjadogTemplate
 {
     private bool _softDelete;
+    private bool _auditing;
 
     /// <inheritdoc />
     public override string Name => "Repository";
@@ -19,6 +20,7 @@ public sealed class RepositoryTemplate
     public override IEnumerable<NinjadogContentFile> GenerateMany(NinjadogSettings ninjadogSettings)
     {
         _softDelete = ninjadogSettings.Config.SoftDelete;
+        _auditing = ninjadogSettings.Config.Auditing;
         return base.GenerateMany(ninjadogSettings);
     }
 
@@ -48,7 +50,7 @@ public sealed class RepositoryTemplate
                       using var connection = await connectionFactory.CreateConnectionAsync();
 
                       var result = await connection.ExecuteAsync(
-                          @"{{GenerateSqlInsertQuery(entity)}}",
+                          @"{{GenerateSqlInsertQuery(entity, _auditing)}}",
                           {{st.VarModel}});
 
                       return result > 0;
@@ -82,7 +84,7 @@ public sealed class RepositoryTemplate
                       using var connection = await connectionFactory.CreateConnectionAsync();
 
                       var result = await connection.ExecuteAsync(
-                          @"{{GenerateSqlUpdateQuery(entity)}}",
+                          @"{{GenerateSqlUpdateQuery(entity, _auditing)}}",
                           {{st.VarModel}});
 
                           return result > 0;
@@ -104,18 +106,29 @@ public sealed class RepositoryTemplate
         return CreateNinjadogContentFile(fileName, content);
     }
 
-    private static string GenerateSqlInsertQuery(NinjadogEntityWithKey entity)
+    private static string GenerateSqlInsertQuery(NinjadogEntityWithKey entity, bool auditing)
     {
         var st = entity.StringTokens;
         var properties = entity.Properties;
 
+        var columns = properties.Keys.ToList();
+        var values = properties.Keys.Select(k => $"@{k}").ToList();
+
+        if (auditing)
+        {
+            columns.Add("CreatedAt");
+            columns.Add("UpdatedAt");
+            values.Add("datetime('now')");
+            values.Add("datetime('now')");
+        }
+
         return new IndentedStringBuilder(0)
             .Append($"INSERT INTO {st.Models} (")
-            .Append(string.Join(", ", properties.Keys)) // Using String.Join to handle the comma-separated list
+            .Append(string.Join(", ", columns))
             .Append(") ")
             .IncrementIndent(3)
             .Append("VALUES (")
-            .Append(string.Join(", ", properties.Keys.Select(k => $"@{k}"))) // Again using String.Join for the values
+            .Append(string.Join(", ", values))
             .Append(")")
             .ToString();
     }
@@ -143,7 +156,7 @@ public sealed class RepositoryTemplate
             : $"SELECT COUNT(*) FROM {st.Models}";
     }
 
-    private static string GenerateSqlUpdateQuery(NinjadogEntityWithKey entity)
+    private static string GenerateSqlUpdateQuery(NinjadogEntityWithKey entity, bool auditing)
     {
         var st = entity.StringTokens;
         var properties = entity.Properties;
@@ -153,10 +166,15 @@ public sealed class RepositoryTemplate
 
         stringBuilder.Append($"UPDATE {st.Models} SET ");
 
-        // Using LINQ to filter out key properties and then joining them with String.Join
         var updateClauses = properties
             .Where(p => !p.Value.IsKey)
-            .Select(p => $"{p.Key} = @{p.Key}");
+            .Select(p => $"{p.Key} = @{p.Key}")
+            .ToList();
+
+        if (auditing)
+        {
+            updateClauses.Add("UpdatedAt = datetime('now')");
+        }
 
         return stringBuilder
             .Append(string.Join(", ", updateClauses))

@@ -1,0 +1,80 @@
+﻿[  
+//------------------------------------------------------------------------------
+// This code was powered by the Ninjadog Engine
+//
+// Developed by: Atypical Consulting SRL - Philippe Matray
+// Generated on: [SCRUBBED]
+// Version     : [SCRUBBED]
+//
+// This file is part of a custom software solution crafted to meet your
+// specific needs. For optimal performance and compatibility, modifications
+// should be coordinated with Ninjadog support services.
+//------------------------------------------------------------------------------
+
+using TestApp.Api.Contracts.Data;
+using TestApp.Api.Database;
+using Dapper;
+
+namespace TestApp.Api.Repositories;
+
+public partial class TodoItemRepository(IDbConnectionFactory connectionFactory)
+    : ITodoItemRepository
+{
+    public async Task<bool> CreateAsync(TodoItemDto todoItem)
+    {
+        using var connection = await connectionFactory.CreateConnectionAsync();
+
+        var result = await connection.ExecuteAsync(
+            @"INSERT INTO TodoItems (Id, Title, Description, IsCompleted, DueDate, Priority, Cost, CreatedAt, UpdatedAt) VALUES (@Id, @Title, @Description, @IsCompleted, @DueDate, @Priority, @Cost, datetime('now'), datetime('now'))",
+            todoItem);
+
+        return result > 0;
+    }
+
+    public async Task<TodoItemDto?> GetAsync(Guid id)
+    {
+        using var connection = await connectionFactory.CreateConnectionAsync();
+
+        return await connection.QuerySingleOrDefaultAsync<TodoItemDto>(
+            "SELECT * FROM TodoItems WHERE Id = @Id LIMIT 1",
+            new { Id = id.ToString() });
+    }
+
+    public async Task<IEnumerable<TodoItemDto>> GetAllAsync(int page, int pageSize)
+    {
+        using var connection = await connectionFactory.CreateConnectionAsync();
+        return await connection.QueryAsync<TodoItemDto>(
+            "SELECT * FROM TodoItems LIMIT @PageSize OFFSET @Offset",
+            new { PageSize = pageSize, Offset = (page - 1) * pageSize });
+    }
+
+    public async Task<int> CountAsync()
+    {
+        using var connection = await connectionFactory.CreateConnectionAsync();
+        return await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM TodoItems");
+    }
+
+    public async Task<bool> UpdateAsync(TodoItemDto todoItem)
+    {
+        using var connection = await connectionFactory.CreateConnectionAsync();
+
+        var result = await connection.ExecuteAsync(
+            @"UPDATE TodoItems SET Title = @Title, Description = @Description, IsCompleted = @IsCompleted, DueDate = @DueDate, Priority = @Priority, Cost = @Cost, UpdatedAt = datetime('now') WHERE Id = @Id",
+            todoItem);
+
+            return result > 0;
+    }
+
+    public async Task<bool> DeleteAsync(Guid id)
+    {
+        using var connection = await connectionFactory.CreateConnectionAsync();
+
+        var result = await connection.ExecuteAsync(
+            @"DELETE FROM TodoItems WHERE Id = @Id",
+            new { Id = id.ToString() });
+
+        return result > 0;
+    }
+}
+
+]
