@@ -50,13 +50,30 @@ public abstract record NinjadogSettings(
 
         var configElement = root.GetProperty("config");
         var name = configElement.GetProperty("name").GetString()!;
+
+        NinjadogCorsConfiguration? cors = null;
+        if (configElement.TryGetProperty("cors", out var corsElement))
+        {
+            var origins = corsElement.TryGetProperty("origins", out var originsEl)
+                ? originsEl.EnumerateArray().Select(e => e.GetString()!).ToArray()
+                : [];
+            var methods = corsElement.TryGetProperty("methods", out var methodsEl)
+                ? methodsEl.EnumerateArray().Select(e => e.GetString()!).ToArray()
+                : null;
+            var headers = corsElement.TryGetProperty("headers", out var headersEl)
+                ? headersEl.EnumerateArray().Select(e => e.GetString()!).ToArray()
+                : null;
+            cors = new NinjadogCorsConfiguration(origins, methods, headers);
+        }
+
         var config = new NinjadogLoadedConfiguration(
             Name: name,
             Version: configElement.GetProperty("version").GetString()!,
             Description: configElement.GetProperty("description").GetString()!,
             RootNamespace: configElement.GetProperty("rootNamespace").GetString()!,
             OutputPath: configElement.TryGetProperty("outputPath", out var op) ? op.GetString()! : $"src/applications/{name}",
-            SaveGeneratedFiles: configElement.TryGetProperty("saveGeneratedFiles", out var sgf) && sgf.GetBoolean());
+            SaveGeneratedFiles: configElement.TryGetProperty("saveGeneratedFiles", out var sgf) && sgf.GetBoolean(),
+            Cors: cors);
 
         var entities = new NinjadogLoadedEntities();
 

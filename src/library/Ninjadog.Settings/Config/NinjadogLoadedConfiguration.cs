@@ -13,5 +13,6 @@ public sealed record NinjadogLoadedConfiguration(
     string Description,
     string RootNamespace,
     string OutputPath,
-    bool SaveGeneratedFiles = true)
-    : NinjadogConfiguration(Name, Version, Description, RootNamespace, OutputPath, SaveGeneratedFiles);
+    bool SaveGeneratedFiles = true,
+    NinjadogCorsConfiguration? Cors = null)
+    : NinjadogConfiguration(Name, Version, Description, RootNamespace, OutputPath, SaveGeneratedFiles, Cors);

@@ -15,10 +15,12 @@ namespace Ninjadog.Settings.Config;
 /// <param name="RootNamespace">The root namespace for the generated code.</param>
 /// <param name="OutputPath">The path where the generated files will be saved.</param>
 /// <param name="SaveGeneratedFiles">Indicates whether the generated files should be saved to disk. Default is true.</param>
+/// <param name="Cors">The optional CORS configuration for the application.</param>
 public abstract record NinjadogConfiguration(
     string Name,
     string Version,
     string Description,
     string RootNamespace,
     string OutputPath,
-    bool SaveGeneratedFiles = true);
+    bool SaveGeneratedFiles = true,
+    NinjadogCorsConfiguration? Cors = null);
