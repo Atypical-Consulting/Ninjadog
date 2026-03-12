@@ -20,9 +20,13 @@ public partial interface ITodoItemRepository
 
     Task<TodoItemDto?> GetAsync(Guid id);
 
-    Task<IEnumerable<TodoItemDto>> GetAllAsync(int page, int pageSize);
+    Task<IEnumerable<TodoItemDto>> GetAllAsync(
+        int page, int pageSize,
+        Dictionary<string, string>? filters = null,
+        string? sortBy = null,
+        bool sortDescending = false);
 
-    Task<int> CountAsync();
+    Task<int> CountAsync(Dictionary<string, string>? filters = null);
 
     Task<bool> UpdateAsync(TodoItemDto todoItem);
 

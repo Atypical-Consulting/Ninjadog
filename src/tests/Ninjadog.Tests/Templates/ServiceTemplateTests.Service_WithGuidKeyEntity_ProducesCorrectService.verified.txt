@@ -50,10 +50,15 @@ public partial class TodoItemService(ITodoItemRepository todoItemRepository)
     }
 
     /// <inheritdoc />
-    public async Task<(IEnumerable<TodoItem> Items, int TotalCount)> GetAllAsync(int page, int pageSize)
+    public async Task<(IEnumerable<TodoItem> Items, int TotalCount)> GetAllAsync(
+        int page, int pageSize,
+        Dictionary<string, string>? filters = null,
+        string? sortBy = null,
+        bool sortDescending = false)
     {
-        var todoItemDtos = await todoItemRepository.GetAllAsync(page, pageSize);
-        var totalCount = await todoItemRepository.CountAsync();
+        var todoItemDtos = await todoItemRepository.GetAllAsync(
+            page, pageSize, filters, sortBy, sortDescending);
+        var totalCount = await todoItemRepository.CountAsync(filters);
         var items = todoItemDtos.Select(x => x.ToTodoItem());
         return (items, totalCount);
     }

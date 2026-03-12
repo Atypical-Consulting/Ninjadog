@@ -31,9 +31,13 @@ public sealed class RepositoryInterfaceTemplate
 
                   Task<{{st.ClassModelDto}}?> GetAsync({{entityKey.Type}} id);
 
-                  Task<IEnumerable<{{st.ClassModelDto}}>> GetAllAsync(int page, int pageSize);
+                  Task<IEnumerable<{{st.ClassModelDto}}>> GetAllAsync(
+                      int page, int pageSize,
+                      Dictionary<string, string>? filters = null,
+                      string? sortBy = null,
+                      bool sortDescending = false);
 
-                  Task<int> CountAsync();
+                  Task<int> CountAsync(Dictionary<string, string>? filters = null);
 
                   Task<bool> UpdateAsync({{st.ClassModelDto}} {{st.VarModel}});
 

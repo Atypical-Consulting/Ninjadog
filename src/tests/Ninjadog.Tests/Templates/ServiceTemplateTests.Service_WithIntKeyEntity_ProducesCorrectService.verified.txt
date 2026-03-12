@@ -50,10 +50,15 @@ public partial class OrderService(IOrderRepository orderRepository)
     }
 
     /// <inheritdoc />
-    public async Task<(IEnumerable<Order> Items, int TotalCount)> GetAllAsync(int page, int pageSize)
+    public async Task<(IEnumerable<Order> Items, int TotalCount)> GetAllAsync(
+        int page, int pageSize,
+        Dictionary<string, string>? filters = null,
+        string? sortBy = null,
+        bool sortDescending = false)
     {
-        var orderDtos = await orderRepository.GetAllAsync(page, pageSize);
-        var totalCount = await orderRepository.CountAsync();
+        var orderDtos = await orderRepository.GetAllAsync(
+            page, pageSize, filters, sortBy, sortDescending);
+        var totalCount = await orderRepository.CountAsync(filters);
         var items = orderDtos.Select(x => x.ToOrder());
         return (items, totalCount);
     }

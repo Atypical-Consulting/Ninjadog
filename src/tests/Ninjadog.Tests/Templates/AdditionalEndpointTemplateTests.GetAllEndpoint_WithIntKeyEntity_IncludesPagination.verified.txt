@@ -20,6 +20,11 @@ namespace TestApp.Api.Endpoints;
 public partial class GetAllOrdersEndpoint(IOrderService orderService)
     : EndpointWithoutRequest<GetAllOrdersResponse>
 {
+    private static readonly HashSet<string> FilterableProperties = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "CustomerName", "Total"
+    };
+
     public override void Configure()
     {
         Get("/orders");
@@ -31,7 +36,32 @@ public partial class GetAllOrdersEndpoint(IOrderService orderService)
         var page = int.TryParse(HttpContext.Request.Query["page"], out var p) && p > 0 ? p : 1;
         var pageSize = int.TryParse(HttpContext.Request.Query["pageSize"], out var ps) && ps > 0 ? ps : 10;
 
-        var (orders, totalCount) = await orderService.GetAllAsync(page, pageSize);
+        // Parse filters from query parameters matching entity properties
+        var filters = new Dictionary<string, string>();
+        foreach (var key in HttpContext.Request.Query.Keys)
+        {
+            if (FilterableProperties.Contains(key))
+            {
+                var value = HttpContext.Request.Query[key].ToString();
+                if (!string.IsNullOrEmpty(value))
+                {
+                    filters[key] = value;
+                }
+            }
+        }
+
+        // Parse sort parameters
+        var sortBy = HttpContext.Request.Query["sortBy"].ToString();
+        if (!string.IsNullOrEmpty(sortBy) && !FilterableProperties.Contains(sortBy))
+        {
+            sortBy = null;
+        }
+
+        var sortDescending = string.Equals(
+            HttpContext.Request.Query["sortDir"].ToString(), "desc", StringComparison.OrdinalIgnoreCase);
+
+        var (orders, totalCount) = await orderService.GetAllAsync(
+            page, pageSize, filters, sortBy, sortDescending);
         var ordersResponse = orders.ToOrdersResponse(page, pageSize, totalCount);
         await Send.OkAsync(ordersResponse, ct);
     }

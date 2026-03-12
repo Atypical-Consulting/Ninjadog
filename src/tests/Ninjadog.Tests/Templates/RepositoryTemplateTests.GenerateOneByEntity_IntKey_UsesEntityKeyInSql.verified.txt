@@ -39,18 +39,47 @@ public partial class OrderRepository(IDbConnectionFactory connectionFactory)
             new { OrderId = id.ToString() });
     }
 
-    public async Task<IEnumerable<OrderDto>> GetAllAsync(int page, int pageSize)
+    public async Task<IEnumerable<OrderDto>> GetAllAsync(
+        int page, int pageSize,
+        Dictionary<string, string>? filters = null,
+        string? sortBy = null,
+        bool sortDescending = false)
     {
         using var connection = await connectionFactory.CreateConnectionAsync();
-        return await connection.QueryAsync<OrderDto>(
-            "SELECT * FROM Orders LIMIT @PageSize OFFSET @Offset",
-            new { PageSize = pageSize, Offset = (page - 1) * pageSize });
+
+        var (whereClause, parameters) = BuildWhereClause(filters);
+        parameters.Add("PageSize", pageSize);
+        parameters.Add("Offset", (page - 1) * pageSize);
+
+        var orderBy = BuildOrderByClause(sortBy, sortDescending);
+        var sql = "SELECT * FROM Orders";
+        if (!string.IsNullOrEmpty(whereClause))
+        {
+            sql += " WHERE " + whereClause;
+        }
+        
+        if (!string.IsNullOrEmpty(orderBy))
+        {
+            sql += " ORDER BY " + orderBy;
+        }
+        
+        sql += " LIMIT @PageSize OFFSET @Offset";
+
+        return await connection.QueryAsync<OrderDto>(sql, parameters);
     }
 
-    public async Task<int> CountAsync()
+    public async Task<int> CountAsync(Dictionary<string, string>? filters = null)
     {
         using var connection = await connectionFactory.CreateConnectionAsync();
-        return await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Orders");
+
+        var (whereClause, parameters) = BuildWhereClause(filters);
+        var sql = "SELECT COUNT(*) FROM Orders";
+        if (!string.IsNullOrEmpty(whereClause))
+        {
+            sql += " WHERE " + whereClause;
+        }
+
+        return await connection.ExecuteScalarAsync<int>(sql, parameters);
     }
 
     public async Task<bool> UpdateAsync(OrderDto order)
@@ -73,5 +102,47 @@ public partial class OrderRepository(IDbConnectionFactory connectionFactory)
             new { OrderId = id.ToString() });
 
         return result > 0;
+    }
+
+    private static readonly HashSet<string> AllowedColumns = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "CustomerName", "Total"
+    };
+
+    private static (string WhereClause, Dictionary<string, object> Parameters) BuildWhereClause(
+        Dictionary<string, string>? filters)
+    {
+        var parameters = new Dictionary<string, object>();
+        if (filters is null || filters.Count == 0)
+        {
+            return (string.Empty, parameters);
+        }
+
+        var conditions = new List<string>();
+        foreach (var (key, value) in filters)
+        {
+            if (AllowedColumns.Contains(key))
+            {
+                conditions.Add($"{key} = @Filter_{key}");
+                parameters[$"Filter_{key}"] = value;
+            }
+        }
+
+        var whereClause = conditions.Count > 0
+            ? string.Join(" AND ", conditions)
+            : string.Empty;
+
+        return (whereClause, parameters);
+    }
+
+    private static string BuildOrderByClause(string? sortBy, bool sortDescending)
+    {
+        if (string.IsNullOrEmpty(sortBy) || !AllowedColumns.Contains(sortBy))
+        {
+            return string.Empty;
+        }
+
+        var direction = sortDescending ? "DESC" : "ASC";
+        return $"{sortBy} {direction}";
     }
 }

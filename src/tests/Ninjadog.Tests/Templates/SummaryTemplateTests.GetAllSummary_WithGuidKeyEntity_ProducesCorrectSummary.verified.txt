@@ -21,7 +21,9 @@ public partial class GetAllTodoItemsSummary : Summary<GetAllTodoItemsEndpoint>
     public GetAllTodoItemsSummary()
     {
         Summary = "Returns all the todo items in the system";
-        Description = "Returns all the todo items in the system";
+        Description = "Returns all the todo items in the system. "
+            + "Supports pagination (page, pageSize), filtering by property values, "
+            + "and sorting (sortBy, sortDir=asc|desc).";
         Response<GetAllTodoItemsResponse>(200, "All todo items in the system are returned");
     }
 }

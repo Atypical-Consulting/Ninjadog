@@ -67,18 +67,32 @@ public sealed class RepositoryTemplate
                           new { {{entityKey.Key}} = id.ToString() });
                   }
 
-                  public async Task<IEnumerable<{{st.ClassModelDto}}>> GetAllAsync(int page, int pageSize)
+                  public async Task<IEnumerable<{{st.ClassModelDto}}>> GetAllAsync(
+                      int page, int pageSize,
+                      Dictionary<string, string>? filters = null,
+                      string? sortBy = null,
+                      bool sortDescending = false)
                   {
                       using var connection = await connectionFactory.CreateConnectionAsync();
-                      return await connection.QueryAsync<{{st.ClassModelDto}}>(
-                          "{{GenerateSqlSelectAllQuery(entity, _softDelete, _provider)}}",
-                          new { PageSize = pageSize, Offset = (page - 1) * pageSize });
+
+                      var (whereClause, parameters) = BuildWhereClause(filters);
+                      parameters.Add("PageSize", pageSize);
+                      parameters.Add("Offset", (page - 1) * pageSize);
+
+                      var orderBy = BuildOrderByClause(sortBy, sortDescending);
+                      {{GenerateGetAllSqlBuilder(entity, _softDelete, _provider)}}
+
+                      return await connection.QueryAsync<{{st.ClassModelDto}}>(sql, parameters);
                   }
 
-                  public async Task<int> CountAsync()
+                  public async Task<int> CountAsync(Dictionary<string, string>? filters = null)
                   {
                       using var connection = await connectionFactory.CreateConnectionAsync();
-                      return await connection.ExecuteScalarAsync<int>("{{GenerateSqlCountQuery(entity, _softDelete)}}");
+
+                      var (whereClause, parameters) = BuildWhereClause(filters);
+                      {{GenerateCountSqlBuilder(entity, _softDelete)}}
+
+                      return await connection.ExecuteScalarAsync<int>(sql, parameters);
                   }
 
                   public async Task<bool> UpdateAsync({{st.ClassModelDto}} {{st.VarModel}})
@@ -102,10 +116,60 @@ public sealed class RepositoryTemplate
 
                       return result > 0;
                   }
+
+                  private static readonly HashSet<string> AllowedColumns = new(StringComparer.OrdinalIgnoreCase)
+                  {
+                      {{GenerateAllowedColumns(entity)}}
+                  };
+
+                  private static (string WhereClause, Dictionary<string, object> Parameters) BuildWhereClause(
+                      Dictionary<string, string>? filters)
+                  {
+                      var parameters = new Dictionary<string, object>();
+                      if (filters is null || filters.Count == 0)
+                      {
+                          return (string.Empty, parameters);
+                      }
+
+                      var conditions = new List<string>();
+                      foreach (var (key, value) in filters)
+                      {
+                          if (AllowedColumns.Contains(key))
+                          {
+                              conditions.Add($"{key} = @Filter_{key}");
+                              parameters[$"Filter_{key}"] = value;
+                          }
+                      }
+
+                      var whereClause = conditions.Count > 0
+                          ? string.Join(" AND ", conditions)
+                          : string.Empty;
+
+                      return (whereClause, parameters);
+                  }
+
+                  private static string BuildOrderByClause(string? sortBy, bool sortDescending)
+                  {
+                      if (string.IsNullOrEmpty(sortBy) || !AllowedColumns.Contains(sortBy))
+                      {
+                          return string.Empty;
+                      }
+
+                      var direction = sortDescending ? "DESC" : "ASC";
+                      return $"{sortBy} {direction}";
+                  }
               }
               """;
 
         return CreateNinjadogContentFile(fileName, content);
+    }
+
+    private static string GenerateAllowedColumns(NinjadogEntityWithKey entity)
+    {
+        var columns = entity.Properties
+            .Where(p => !p.Value.IsKey)
+            .Select(p => $"\"{p.Key}\"");
+        return string.Join(", ", columns);
     }
 
     private static string GenerateSqlInsertQuery(NinjadogEntityWithKey entity, bool auditing, string provider)
@@ -146,24 +210,63 @@ public sealed class RepositoryTemplate
         return $"SELECT {top}* FROM {st.Models} WHERE {entityKey.Key} = @{entityKey.Key}{softDeleteFilter}{limit}";
     }
 
-    private static string GenerateSqlSelectAllQuery(NinjadogEntityWithKey entity, bool softDelete, string provider)
+    private static List<string> GenerateFilterableQueryLines(string baseQuery, bool softDelete)
     {
-        var st = entity.StringTokens;
-        var whereClause = softDelete ? " WHERE IsDeleted = 0" : string.Empty;
-
-        return provider switch
-        {
-            "sqlserver" => $"SELECT * FROM {st.Models}{whereClause} ORDER BY (SELECT NULL) OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY",
-            _ => $"SELECT * FROM {st.Models}{whereClause} LIMIT @PageSize OFFSET @Offset"
-        };
+        var filterJoin = softDelete ? " AND " : " WHERE ";
+        return
+        [
+            $"var sql = \"{baseQuery}\";",
+            "if (!string.IsNullOrEmpty(whereClause))",
+            "{",
+            $"    sql += \"{filterJoin}\" + whereClause;",
+            "}",
+        ];
     }
 
-    private static string GenerateSqlCountQuery(NinjadogEntityWithKey entity, bool softDelete)
+    private static string GenerateGetAllSqlBuilder(NinjadogEntityWithKey entity, bool softDelete, string provider)
     {
         var st = entity.StringTokens;
-        return softDelete
+        var baseQuery = softDelete
+            ? $"SELECT * FROM {st.Models} WHERE IsDeleted = 0"
+            : $"SELECT * FROM {st.Models}";
+        var paginationClause = provider == "sqlserver"
+            ? " OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY"
+            : " LIMIT @PageSize OFFSET @Offset";
+
+        var lines = GenerateFilterableQueryLines(baseQuery, softDelete);
+        lines.Add(string.Empty);
+
+        lines.AddRange(provider == "sqlserver"
+            ?
+            [
+                "sql += !string.IsNullOrEmpty(orderBy)",
+                "    ? \" ORDER BY \" + orderBy",
+                "    : \" ORDER BY (SELECT NULL)\";",
+                string.Empty,
+            ]
+            :
+            [
+                "if (!string.IsNullOrEmpty(orderBy))",
+                "{",
+                "    sql += \" ORDER BY \" + orderBy;",
+                "}",
+                string.Empty,
+            ]);
+
+        lines.Add($"sql += \"{paginationClause}\";");
+
+        return string.Join("\n        ", lines);
+    }
+
+    private static string GenerateCountSqlBuilder(NinjadogEntityWithKey entity, bool softDelete)
+    {
+        var st = entity.StringTokens;
+        var baseQuery = softDelete
             ? $"SELECT COUNT(*) FROM {st.Models} WHERE IsDeleted = 0"
             : $"SELECT COUNT(*) FROM {st.Models}";
+
+        var lines = GenerateFilterableQueryLines(baseQuery, softDelete);
+        return string.Join("\n        ", lines);
     }
 
     private static string GenerateSqlUpdateQuery(NinjadogEntityWithKey entity, bool auditing, string provider)

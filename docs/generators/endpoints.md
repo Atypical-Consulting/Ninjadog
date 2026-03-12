@@ -16,14 +16,45 @@ Generates a `POST /{entities}` endpoint that accepts a create request, maps it t
 
 ## GetAllEndpointGenerator
 
-Generates a `GET /{entities}` endpoint with built-in pagination support via query parameters:
+Generates a `GET /{entities}` endpoint with built-in **pagination**, **filtering**, and **sorting** via query parameters:
+
+### Pagination
 
 | Parameter | Default | Description |
 |---|---|---|
 | `page` | 1 | Page number (1-based) |
 | `pageSize` | 10 | Items per page |
 
-The response includes `TotalCount` metadata for client-side pagination controls.
+### Filtering
+
+Filter results by passing entity property names as query parameters. Only non-key properties are filterable. Filters use exact equality matching and are combined with `AND`.
+
+```
+GET /todo-items?IsCompleted=true&Priority=5
+```
+
+Invalid property names are silently ignored, preventing SQL injection. The generated code maintains a compile-time whitelist of allowed column names.
+
+### Sorting
+
+| Parameter | Default | Description |
+|---|---|---|
+| `sortBy` | (none) | Property name to sort by |
+| `sortDir` | `asc` | Sort direction: `asc` or `desc` |
+
+```
+GET /todo-items?sortBy=DueDate&sortDir=desc
+```
+
+The `sortBy` value is validated against the same property whitelist. Invalid sort fields are ignored (no sorting applied).
+
+### Combined example
+
+```
+GET /products?Category=Electronics&sortBy=Price&sortDir=asc&page=2&pageSize=20
+```
+
+The response includes `TotalCount` metadata reflecting the filtered result set, enabling accurate client-side pagination controls.
 
 ## GetEndpointGenerator
 
