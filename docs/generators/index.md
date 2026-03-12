@@ -1,6 +1,6 @@
 ---
 title: Generators
-description: "Overview of Ninjadog's 38 code generators: endpoints, contracts, data layer, Docker, mapping, validation, OpenAPI summaries, and project setup."
+description: "Overview of Ninjadog's code generators: endpoints, contracts, data layer, Docker, mapping, validation, OpenAPI summaries, integration tests, and project setup."
 layout: default
 nav_order: 6
 has_children: true
@@ -33,6 +33,7 @@ Ninjadog includes **59 generators** organized into 16 categories. Each generator
 | **[Validation](/Ninjadog/generators/validation)** | CreateRequestValidator, UpdateRequestValidator | Per entity |
 | **[Middleware](/Ninjadog/generators/project-setup)** | RequestCorrelationMiddleware | Single file |
 | **[Docker](/Ninjadog/generators/docker)** | Dockerfile, DockerCompose, DockerIgnore | Single file |
+| **[Integration Tests](/Ninjadog/generators/integration-tests)** | TestCsproj, WebApplicationFactory, TestBase, EntityEndpointTests | Single file / Per entity |
 
 ## Generation Modes
 

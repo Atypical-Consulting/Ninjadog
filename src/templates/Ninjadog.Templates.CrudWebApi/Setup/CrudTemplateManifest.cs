@@ -35,7 +35,12 @@ public class CrudTemplateManifest : NinjadogTemplateManifest
         "Microsoft.Data.SqlClient:6.1.4",
         "BCrypt.Net-Next:4.1.0",
         "Serilog.AspNetCore:9.0.0",
-        "Serilog.Sinks.File:6.0.0"
+        "Serilog.Sinks.File:6.0.0",
+        "Microsoft.AspNetCore.Mvc.Testing:10.0.5",
+        "Microsoft.NET.Test.Sdk:17.14.1",
+        "xunit:2.9.3",
+        "xunit.runner.visualstudio:3.1.1",
+        "FluentAssertions:8.3.0"
     ];
 
     /// <inheritdoc />

@@ -7,6 +7,7 @@ using Ninjadog.Templates.CrudWebAPI.Template.Database;
 using Ninjadog.Templates.CrudWebAPI.Template.Docker;
 using Ninjadog.Templates.CrudWebAPI.Template.Domain;
 using Ninjadog.Templates.CrudWebAPI.Template.Endpoints;
+using Ninjadog.Templates.CrudWebAPI.Template.IntegrationTests;
 using Ninjadog.Templates.CrudWebAPI.Template.Mapping;
 using Ninjadog.Templates.CrudWebAPI.Template.Middleware;
 using Ninjadog.Templates.CrudWebAPI.Template.Repositories;
@@ -135,5 +136,12 @@ public class CrudTemplates : NinjadogTemplates
         Add(new DockerfileTemplate());
         Add(new DockerComposeTemplate());
         Add(new DockerIgnoreTemplate());
+
+        AddTemplates(
+            "IntegrationTests",
+            new IntegrationTestCsprojTemplate(),
+            new CustomWebApplicationFactoryTemplate(),
+            new IntegrationTestBaseTemplate(),
+            new EntityIntegrationTestTemplate());
     }
 }
