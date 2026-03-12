@@ -1,0 +1,35 @@
+﻿//------------------------------------------------------------------------------
+// This code was powered by the Ninjadog Engine
+//
+// Developed by: Atypical Consulting SRL - Philippe Matray
+// Generated on: [SCRUBBED]
+// Version     : [SCRUBBED]
+//
+// This file is part of a custom software solution crafted to meet your
+// specific needs. For optimal performance and compatibility, modifications
+// should be coordinated with Ninjadog support services.
+//------------------------------------------------------------------------------
+
+using Dapper;
+
+namespace TestApp.Api.Database;
+
+public partial class DatabaseInitializer(IDbConnectionFactory connectionFactory)
+{
+    public async Task InitializeAsync()
+    {
+        using var connection = await connectionFactory.CreateConnectionAsync();
+        
+        await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS Authors (
+            Id CHAR(36) PRIMARY KEY,
+            Name TEXT NOT NULL)");
+
+        await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS Posts (
+            Id CHAR(36) PRIMARY KEY,
+            Title TEXT NOT NULL,
+            Content TEXT NOT NULL,
+            AuthorId CHAR(36) NOT NULL,
+            FOREIGN KEY (AuthorId) REFERENCES Authors(Id))");
+
+    }
+}

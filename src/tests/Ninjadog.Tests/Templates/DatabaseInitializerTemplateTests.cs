@@ -30,4 +30,12 @@ public partial class DatabaseInitializerTemplateTests
         var result = _template.GenerateOne(settings);
         return Verify(result.Content);
     }
+
+    [Fact]
+    public Task GenerateOne_WithRelationships_AddsForeignKeyConstraints()
+    {
+        var settings = new RelationshipSettings();
+        var result = _template.GenerateOne(settings);
+        return Verify(result.Content);
+    }
 }
