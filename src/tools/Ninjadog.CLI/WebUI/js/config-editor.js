@@ -107,11 +107,17 @@ const ConfigEditor = (() => {
             </div>
         `;
 
-        // Bind change events
+        // Bind change events with focus-based undo (push once on focus, not every keystroke)
         container.querySelectorAll('[data-field]').forEach(el => {
             const event = el.type === 'checkbox' ? 'change' : 'input';
+            let undoPushed = false;
+            el.addEventListener('focus', () => { undoPushed = false; });
             el.addEventListener(event, () => {
                 interactedFields.add(el.dataset.field);
+                if (!undoPushed) {
+                    App.pushUndo();
+                    undoPushed = true;
+                }
                 collectConfig(container, state);
             });
         });
@@ -142,8 +148,8 @@ const ConfigEditor = (() => {
     }
 
     function renderEmptyState(state) {
-        const entities = state.entities || [];
-        if (entities.length > 0) return '';
+        const entities = state.entities || {};
+        if (Object.keys(entities).length > 0) return '';
 
         return `
             <div class="empty-state">
@@ -300,8 +306,6 @@ const ConfigEditor = (() => {
 
         // Run validation (visual feedback only, does not block state updates)
         validateFields(container);
-
-        App.pushUndo();
 
         state.config = state.config || {};
         state.config.name = val('name');

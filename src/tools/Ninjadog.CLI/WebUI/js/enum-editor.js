@@ -60,9 +60,7 @@ const EnumEditor = (() => {
     }
 
     function enumCard(name, values) {
-        const colorDot = typeof App !== 'undefined' && App.getEntityColor
-            ? `<span class="entity-color-dot" style="background: ${App.getEntityColor(name)}"></span>`
-            : '';
+        const colorDot = `<span class="entity-color-dot" style="background: ${App.getEntityColor(name)}"></span>`;
 
         return `
         <div class="entity-card" data-enum="${esc(name)}">

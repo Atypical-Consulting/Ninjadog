@@ -318,12 +318,11 @@ const App = (() => {
         if (autoSaveTimer) clearTimeout(autoSaveTimer);
         autoSaveTimer = setTimeout(async () => {
             autoSaveTimer = null;
-            const isDirty = JSON.stringify(state) !== savedSnapshot;
-            if (!isDirty) return;
+            if (!dirtyFlag) return;
             try {
                 const jsonText = JSON.stringify(JsonPreview.getJson(state), null, 2);
                 await NinjadogApi.saveConfig(jsonText);
-                savedSnapshot = JSON.stringify(state);
+                markClean();
                 updateDirtyIndicator();
                 showToast('Auto-saved', 'success', 2000);
             } catch {
@@ -337,7 +336,7 @@ const App = (() => {
         try {
             const jsonText = JSON.stringify(JsonPreview.getJson(state), null, 2);
             await NinjadogApi.saveConfig(jsonText);
-            savedSnapshot = JSON.stringify(state);
+            markClean();
             updateDirtyIndicator();
             showToast('Configuration saved', 'success');
         } catch (err) {
@@ -350,7 +349,7 @@ const App = (() => {
             // Save first
             const jsonText = JSON.stringify(JsonPreview.getJson(state), null, 2);
             await NinjadogApi.saveConfig(jsonText);
-            savedSnapshot = JSON.stringify(state);
+            markClean();
             updateDirtyIndicator();
 
             const result = await NinjadogApi.build();
@@ -424,7 +423,10 @@ const App = (() => {
     }
 
     // ── State change handler ─────────────────────────────────────────────
+    let dirtyFlag = false;
+
     function onStateChanged() {
+        dirtyFlag = true;
         JsonPreview.update(state);
         scheduleValidation();
         updateDirtyIndicator();
@@ -432,9 +434,14 @@ const App = (() => {
         scheduleAutoSave();
     }
 
+    function markClean() {
+        savedSnapshot = JSON.stringify(state);
+        dirtyFlag = false;
+    }
+
     // ── Dirty indicator ──────────────────────────────────────────────────
     function updateDirtyIndicator() {
-        const isDirty = JSON.stringify(state) !== savedSnapshot;
+        const isDirty = dirtyFlag;
         const dot = document.getElementById('dirty-indicator');
         const saveBtn = document.getElementById('btn-save');
 
@@ -497,10 +504,7 @@ const App = (() => {
     function afterUndoRedo() {
         updateUndoRedoButtons();
         renderActiveTab();
-        JsonPreview.update(state);
-        scheduleValidation();
-        updateDirtyIndicator();
-        updateTabBadges();
+        onStateChanged();
     }
 
     function updateUndoRedoButtons() {
@@ -667,6 +671,9 @@ const App = (() => {
             overlay.classList.remove('hidden');
             // Close on backdrop click
             overlay.addEventListener('click', onOverlayBackdropClick);
+            // Close button
+            const closeBtn = overlay.querySelector('#shortcut-overlay-close');
+            if (closeBtn) closeBtn.onclick = () => toggleShortcutOverlay();
         } else {
             overlay.classList.add('hidden');
             overlay.removeEventListener('click', onOverlayBackdropClick);
@@ -831,10 +838,12 @@ const App = (() => {
             };
         });
 
-        // Close on backdrop click
+        // Close on backdrop click or cancel button
         picker.addEventListener('click', (e) => {
             if (e.target === picker) picker.classList.add('hidden');
         }, { once: true });
+        const closeBtn = picker.querySelector('#template-picker-close');
+        if (closeBtn) closeBtn.onclick = () => picker.classList.add('hidden');
     }
 
     // ── Import modal ─────────────────────────────────────────────────────
@@ -846,14 +855,14 @@ const App = (() => {
 
         importModalCallback = callback;
 
-        const title = modal.querySelector('#import-modal-title');
+        const title = modal.querySelector('.import-modal-title');
         if (title) title.textContent = 'Import data for ' + entityName;
 
-        const textarea = modal.querySelector('#import-modal-textarea');
+        const textarea = modal.querySelector('#import-textarea');
         if (textarea) textarea.value = '';
 
-        const confirmBtn = modal.querySelector('#import-modal-confirm');
-        const cancelBtn = modal.querySelector('#import-modal-cancel');
+        const confirmBtn = modal.querySelector('#import-confirm');
+        const cancelBtn = modal.querySelector('#import-cancel');
 
         modal.classList.remove('hidden');
 

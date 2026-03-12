@@ -101,9 +101,7 @@ const SeedEditor = (() => {
         const seedData = entity.seedData || [];
         const keyProp = findKeyProp(entity);
         const canAutoKey = keyProp && ['guid', 'int', 'long'].includes((keyProp.type || '').toLowerCase());
-        const colorDot = typeof App !== 'undefined' && App.getEntityColor
-            ? `<span class="entity-color-dot" style="background: ${App.getEntityColor(name)}"></span>`
-            : '';
+        const colorDot = `<span class="entity-color-dot" style="background: ${App.getEntityColor(name)}"></span>`;
 
         return `
         <div class="entity-card" data-seed-entity="${esc(name)}">
@@ -176,19 +174,17 @@ const SeedEditor = (() => {
         container.querySelectorAll('.seed-import').forEach(btn => {
             btn.addEventListener('click', () => {
                 const entityName = btn.dataset.entity;
-                if (typeof App !== 'undefined' && App.showImportModal) {
-                    App.showImportModal(entityName, (importedRows) => {
-                        if (!Array.isArray(importedRows) || importedRows.length === 0) return;
-                        const ent = state.entities[entityName];
-                        ent.seedData = ent.seedData || [];
-                        App.pushUndo();
-                        importedRows.forEach(row => {
-                            ent.seedData.push(row);
-                        });
-                        render(container, state);
-                        App.onStateChanged();
+                App.showImportModal(entityName, (importedRows) => {
+                    if (!Array.isArray(importedRows) || importedRows.length === 0) return;
+                    const ent = state.entities[entityName];
+                    ent.seedData = ent.seedData || [];
+                    App.pushUndo();
+                    importedRows.forEach(row => {
+                        ent.seedData.push(row);
                     });
-                }
+                    render(container, state);
+                    App.onStateChanged();
+                });
             });
         });
 

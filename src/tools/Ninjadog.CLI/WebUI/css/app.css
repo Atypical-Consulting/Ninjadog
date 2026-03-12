@@ -995,8 +995,8 @@ textarea:focus-visible {
     transform: translateX(-50%) translateY(0);
 }
 
-/* === Keyboard Shortcut Overlay === */
-.shortcut-overlay {
+/* === Modal Overlay (shared base) === */
+.modal-overlay {
     position: fixed;
     inset: 0;
     z-index: 2000;
@@ -1008,18 +1008,24 @@ textarea:focus-visible {
     animation: fade-in 200ms ease;
 }
 
-.shortcut-overlay.hidden {
+.modal-overlay.hidden {
     display: none;
 }
 
-.shortcut-panel {
+.modal-panel {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 24px 32px;
-    max-width: 480px;
+    padding: 24px;
     width: 100%;
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+/* === Keyboard Shortcut Overlay === */
+
+.shortcut-panel {
+    max-width: 480px;
+    padding: 24px 32px;
 }
 
 .shortcut-title {
@@ -1206,30 +1212,8 @@ tr.drag-over {
 }
 
 /* === Template Picker === */
-.template-picker {
-    position: fixed;
-    inset: 0;
-    z-index: 2000;
-    background: rgba(8, 9, 14, 0.85);
-    backdrop-filter: blur(8px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: fade-in 200ms ease;
-}
-
-.template-picker.hidden {
-    display: none;
-}
-
 .template-picker-panel {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 24px;
     max-width: 640px;
-    width: 100%;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
 }
 
 .template-picker-title {
@@ -1292,30 +1276,10 @@ tr.drag-over {
 }
 
 /* === Import Modal === */
-.import-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 2000;
-    background: rgba(8, 9, 14, 0.85);
-    backdrop-filter: blur(8px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: fade-in 200ms ease;
-}
-
-.import-modal.hidden {
-    display: none;
-}
+/* import-modal uses .modal-overlay base */
 
 .import-modal-panel {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 24px;
     max-width: 520px;
-    width: 100%;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
 }
 
 .import-modal-title {

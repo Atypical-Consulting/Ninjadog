@@ -445,10 +445,18 @@ const EntityEditor = (() => {
             });
         });
 
-        // Property field changes
+        // Property field changes (focus-based undo — push once per focus, not every keystroke)
         container.querySelectorAll('.prop-field').forEach(el => {
             const event = el.type === 'checkbox' ? 'change' : 'input';
-            el.addEventListener(event, () => collectProperties(container, state));
+            let undoPushed = false;
+            el.addEventListener('focus', () => { undoPushed = false; });
+            el.addEventListener(event, () => {
+                if (!undoPushed) {
+                    App.pushUndo();
+                    undoPushed = true;
+                }
+                collectProperties(container, state);
+            });
         });
 
         // Inline add relationship

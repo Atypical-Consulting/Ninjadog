@@ -16,8 +16,8 @@
         <div id="toast-container" class="toast-container"></div>
 
         <!-- Keyboard shortcut overlay (hidden by default) -->
-        <div id="shortcut-overlay" class="shortcut-overlay hidden">
-            <div class="shortcut-panel">
+        <div id="shortcut-overlay" class="modal-overlay hidden">
+            <div class="modal-panel shortcut-panel">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="shortcut-title" style="margin-bottom: 0;">Keyboard Shortcuts</h2>
                     <button id="shortcut-overlay-close" class="header-btn-icon" style="width:28px;height:28px;" title="Close">&times;</button>
@@ -56,8 +56,8 @@
         </div>
 
         <!-- Import modal (hidden by default) -->
-        <div id="import-modal" class="import-modal hidden">
-            <div class="import-modal-panel">
+        <div id="import-modal" class="modal-overlay hidden">
+            <div class="modal-panel import-modal-panel">
                 <h2 class="import-modal-title">Import Seed Data</h2>
                 <p class="text-xs text-gray-400 mb-3">Paste CSV or JSON data below. CSV should have a header row matching property names.</p>
                 <textarea id="import-textarea" class="import-textarea" placeholder="name,email,age&#10;John,john@example.com,30&#10;Jane,jane@example.com,25"></textarea>
@@ -69,8 +69,8 @@
         </div>
 
         <!-- Template picker modal (hidden by default) -->
-        <div id="template-picker" class="template-picker hidden">
-            <div class="template-picker-panel">
+        <div id="template-picker" class="modal-overlay hidden">
+            <div class="modal-panel template-picker-panel">
                 <h2 class="template-picker-title">Start from a Template</h2>
                 <p class="template-picker-subtitle">Choose a starter configuration or start from scratch.</p>
                 <div class="template-grid" id="template-grid">
