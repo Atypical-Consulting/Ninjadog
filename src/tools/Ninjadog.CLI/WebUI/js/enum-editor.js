@@ -74,9 +74,9 @@ const EnumEditor = (() => {
             <div class="entity-body">
                 <div class="flex flex-wrap gap-2 mb-2">
                     ${values.map((v, i) => `
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-700 rounded text-xs">
+                        <span class="enum-value-tag">
                             ${esc(v)}
-                            <button class="text-gray-400 hover:text-red-400 enum-val-remove" data-enum="${esc(name)}" data-index="${i}">&times;</button>
+                            <button class="enum-val-remove" data-enum="${esc(name)}" data-index="${i}">&times;</button>
                         </span>
                     `).join('')}
                 </div>

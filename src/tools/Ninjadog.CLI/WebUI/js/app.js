@@ -151,17 +151,17 @@ const App = (() => {
 
     // ── Toast icons ──────────────────────────────────────────────────────
     const TOAST_ICONS = {
-        success: '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>',
-        error: '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>',
-        warning: '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 3l9.66 16.5H2.34L12 3z"/></svg>',
-        info: '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01"/></svg>'
+        success: '<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>',
+        error: '<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>',
+        warning: '<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 3l9.66 16.5H2.34L12 3z"/></svg>',
+        info: '<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01"/></svg>'
     };
 
     const TOAST_COLORS = {
-        success: 'bg-emerald-900/90 text-emerald-200 border-emerald-700',
-        error: 'bg-red-900/90 text-red-200 border-red-700',
-        warning: 'bg-amber-900/90 text-amber-200 border-amber-700',
-        info: 'bg-blue-900/90 text-blue-200 border-blue-700'
+        success: 'toast-success',
+        error: 'toast-error',
+        warning: 'toast-warning',
+        info: 'toast-info'
     };
 
     // ── Tab label map ────────────────────────────────────────────────────
@@ -392,8 +392,8 @@ const App = (() => {
         }
 
         body.innerHTML = lines.map(line => {
-            const cls = line.startsWith('[ERROR]') ? 'text-red-400' : 'text-gray-300';
-            return `<div class="${cls} text-xs font-mono">${escHtml(line)}</div>`;
+            const color = line.startsWith('[ERROR]') ? '#f87171' : '#d1d5db';
+            return `<div style="color:${color};font-size:12px;font-family:var(--font-mono);">${escHtml(line)}</div>`;
         }).join('');
 
         if (closeBtn) {
@@ -523,12 +523,10 @@ const App = (() => {
         if (!container) return;
 
         const toast = document.createElement('div');
-        toast.className = `flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm shadow-lg
-            transition-all duration-300 ease-out transform translate-x-0 opacity-100
-            ${TOAST_COLORS[type] || TOAST_COLORS.info}`;
+        toast.className = `toast ${TOAST_COLORS[type] || TOAST_COLORS.info}`;
 
         const icon = TOAST_ICONS[type] || TOAST_ICONS.info;
-        toast.innerHTML = `<span class="shrink-0">${icon}</span><span>${escHtml(message)}</span>`;
+        toast.innerHTML = `<span style="flex-shrink:0;">${icon}</span><span>${escHtml(message)}</span>`;
 
         container.appendChild(toast);
 
@@ -541,10 +539,10 @@ const App = (() => {
     }
 
     function dismissToast(toast) {
-        toast.classList.add('opacity-0', 'translate-x-4');
+        toast.classList.add('toast-exit');
         setTimeout(() => {
             if (toast.parentNode) toast.parentNode.removeChild(toast);
-        }, 300);
+        }, 250);
     }
 
     // ── Tab badges ───────────────────────────────────────────────────────
@@ -591,7 +589,7 @@ const App = (() => {
         bar.innerHTML = segments.map((seg, i) => {
             const isLast = i === segments.length - 1;
             const separator = i > 0
-                ? '<svg class="w-3 h-3 text-gray-600 mx-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>'
+                ? '<svg width="12" height="12" style="color:#4b5563;margin:0 6px;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>'
                 : '';
             const clickable = seg.tab && !isLast
                 ? `class="text-gray-400 hover:text-gray-200 cursor-pointer transition-colors" data-breadcrumb-tab="${seg.tab}"`

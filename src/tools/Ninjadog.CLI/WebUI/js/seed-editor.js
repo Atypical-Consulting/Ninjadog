@@ -115,12 +115,12 @@ const SeedEditor = (() => {
                 </div>
             </div>
             ${seedData.length > 0 || props.length > 0 ? `
-            <div class="entity-body overflow-x-auto">
+            <div class="entity-body" style="overflow-x:auto;">
                 <table class="data-table">
                     <thead><tr>
                         ${props.map(p => {
                             const isKey = entity.properties[p] && entity.properties[p].isKey;
-                            return `<th>${esc(p)}${isKey ? ' <span class="text-yellow-500" title="Key field">&#x1f511;</span>' : ''}</th>`;
+                            return `<th>${esc(p)}${isKey ? ' <span style="color:#eab308;" title="Key field">&#x1f511;</span>' : ''}</th>`;
                         }).join('')}
                         <th></th>
                     </tr></thead>
@@ -134,9 +134,9 @@ const SeedEditor = (() => {
                                 const error = validateCell(cellValue, propDef.type);
                                 const errorClass = error ? ' cell-error' : '';
                                 const errorTitle = error ? ` title="${esc(error)}"` : '';
-                                return `<td class="relative${errorClass}"${errorTitle}>`
-                                    + `<input class="field-input py-1 text-xs seed-field${isKey ? ' font-mono' : ''}" data-prop="${esc(p)}" value="${esc(cellValue)}" />`
-                                    + (canGen ? `<button class="seed-gen-key absolute right-1 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-blue-500 cursor-pointer" data-entity="${esc(name)}" data-row="${i}" title="Generate ${esc(propDef.type)} key">&#x21bb;</button>` : '')
+                                return `<td class="seed-cell${errorClass}"${errorTitle}>`
+                                    + `<input class="field-input seed-field${isKey ? ' font-mono' : ''}" data-prop="${esc(p)}" value="${esc(cellValue)}" style="padding-top:4px;padding-bottom:4px;font-size:12px;" />`
+                                    + (canGen ? `<button class="seed-gen-key" data-entity="${esc(name)}" data-row="${i}" title="Generate ${esc(propDef.type)} key">&#x21bb;</button>` : '')
                                     + `</td>`;
                             }).join('')}
                             <td><button class="btn-sm btn-danger seed-remove-row" data-entity="${esc(name)}" data-row="${i}">X</button></td>
