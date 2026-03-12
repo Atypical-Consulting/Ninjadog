@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using Json.Schema;
 using Ninjadog.Settings.Schema;
 
@@ -21,10 +20,9 @@ public static class SchemaValidator
     /// <returns>A <see cref="SchemaValidationResult"/> containing any schema violations.</returns>
     public static SchemaValidationResult Validate(string json)
     {
-        JsonNode? node;
         try
         {
-            node = JsonNode.Parse(json);
+            JsonDocument.Parse(json);
         }
         catch (JsonException ex)
         {
@@ -44,7 +42,8 @@ public static class SchemaValidator
             OutputFormat = OutputFormat.List
         };
 
-        var result = SchemaProvider.Schema.Evaluate(node, evaluationOptions);
+        var jsonElement = JsonDocument.Parse(json).RootElement;
+        var result = SchemaProvider.Schema.Evaluate(jsonElement, evaluationOptions);
 
         if (result.IsValid)
         {
@@ -57,12 +56,12 @@ public static class SchemaValidator
         {
             foreach (var detail in result.Details)
             {
-                if (detail.IsValid || !detail.HasErrors)
+                if (detail.IsValid || detail.Errors is null || detail.Errors.Count == 0)
                 {
                     continue;
                 }
 
-                var path = detail.InstanceLocation?.ToString() ?? "$";
+                var path = detail.InstanceLocation.ToString();
 
                 foreach (var error in detail.Errors!)
                 {
