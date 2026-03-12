@@ -1,7 +1,44 @@
 /**
  * Seed Data tab — per-entity seed data table editor.
+ * Supports auto-generation of key values (Guid or int/long).
  */
 const SeedEditor = (() => {
+    /** Find the key property name and type for an entity, or null if none. */
+    function findKeyProp(entity) {
+        const props = entity.properties || {};
+        for (const [name, def] of Object.entries(props)) {
+            if (def.isKey) return { name, type: def.type };
+        }
+        return null;
+    }
+
+    /** Generate a RFC-4122 v4 GUID. */
+    function generateGuid() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+            const r = Math.random() * 16 | 0;
+            return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        });
+    }
+
+    /** Next integer key: max existing + 1 (starts at 1). */
+    function nextIntKey(entity, keyName) {
+        const rows = entity.seedData || [];
+        let max = 0;
+        rows.forEach(row => {
+            const v = Number(row[keyName]);
+            if (!isNaN(v) && v > max) max = v;
+        });
+        return max + 1;
+    }
+
+    /** Generate a key value based on property type. */
+    function generateKeyValue(entity, keyProp) {
+        const t = (keyProp.type || '').toLowerCase();
+        if (t === 'guid') return generateGuid();
+        if (t === 'int' || t === 'long') return nextIntKey(entity, keyProp.name);
+        return '';
+    }
+
     function render(container, state) {
         state.entities = state.entities || {};
         const entityNames = Object.keys(state.entities);
@@ -22,6 +59,8 @@ const SeedEditor = (() => {
     function seedEntityCard(name, entity) {
         const props = Object.keys(entity.properties || {});
         const seedData = entity.seedData || [];
+        const keyProp = findKeyProp(entity);
+        const canAutoKey = keyProp && ['guid', 'int', 'long'].includes((keyProp.type || '').toLowerCase());
 
         return `
         <div class="entity-card" data-seed-entity="${esc(name)}">
@@ -29,6 +68,7 @@ const SeedEditor = (() => {
                 <span class="font-medium text-sm">${esc(name)}</span>
                 <div class="flex items-center gap-2">
                     <span class="text-xs text-gray-500">${seedData.length} rows</span>
+                    ${canAutoKey && seedData.length > 0 ? `<button class="btn-sm btn-ghost seed-fill-keys" data-entity="${esc(name)}" title="Auto-fill empty ${esc(keyProp.name)} values">Fill Keys</button>` : ''}
                     <button class="btn-sm btn-ghost seed-add-row" data-entity="${esc(name)}">+ Row</button>
                 </div>
             </div>
@@ -36,12 +76,22 @@ const SeedEditor = (() => {
             <div class="entity-body overflow-x-auto">
                 <table class="data-table">
                     <thead><tr>
-                        ${props.map(p => `<th>${esc(p)}</th>`).join('')}
+                        ${props.map(p => {
+                            const isKey = entity.properties[p] && entity.properties[p].isKey;
+                            return `<th>${esc(p)}${isKey ? ' <span class="text-yellow-500" title="Key field">&#x1f511;</span>' : ''}</th>`;
+                        }).join('')}
                         <th></th>
                     </tr></thead>
                     <tbody>
                         ${seedData.map((row, i) => `<tr data-entity="${esc(name)}" data-row="${i}">
-                            ${props.map(p => `<td><input class="field-input py-1 text-xs seed-field" data-prop="${esc(p)}" value="${esc(row[p] ?? '')}" /></td>`).join('')}
+                            ${props.map(p => {
+                                const isKey = entity.properties[p] && entity.properties[p].isKey;
+                                const canGen = isKey && ['guid', 'int', 'long'].includes((entity.properties[p].type || '').toLowerCase());
+                                return `<td class="relative">`
+                                    + `<input class="field-input py-1 text-xs seed-field${isKey ? ' font-mono' : ''}" data-prop="${esc(p)}" value="${esc(row[p] ?? '')}" />`
+                                    + (canGen ? `<button class="seed-gen-key absolute right-1 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-blue-500 cursor-pointer" data-entity="${esc(name)}" data-row="${i}" title="Generate ${esc(entity.properties[p].type)} key">&#x21bb;</button>` : '')
+                                    + `</td>`;
+                            }).join('')}
                             <td><button class="btn-sm btn-danger seed-remove-row" data-entity="${esc(name)}" data-row="${i}">X</button></td>
                         </tr>`).join('')}
                     </tbody>
@@ -51,14 +101,54 @@ const SeedEditor = (() => {
     }
 
     function bindEvents(container, state) {
-        // Add row
+        // Add row — auto-generate key value
         container.querySelectorAll('.seed-add-row').forEach(btn => {
             btn.addEventListener('click', () => {
                 const entity = btn.dataset.entity;
-                state.entities[entity].seedData = state.entities[entity].seedData || [];
+                const ent = state.entities[entity];
+                ent.seedData = ent.seedData || [];
                 const row = {};
-                Object.keys(state.entities[entity].properties || {}).forEach(p => { row[p] = ''; });
-                state.entities[entity].seedData.push(row);
+                Object.keys(ent.properties || {}).forEach(p => { row[p] = ''; });
+
+                // Auto-fill key
+                const keyProp = findKeyProp(ent);
+                if (keyProp && ['guid', 'int', 'long'].includes((keyProp.type || '').toLowerCase())) {
+                    row[keyProp.name] = generateKeyValue(ent, keyProp);
+                }
+
+                ent.seedData.push(row);
+                render(container, state);
+                App.onStateChanged();
+            });
+        });
+
+        // Generate single key
+        container.querySelectorAll('.seed-gen-key').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const entity = btn.dataset.entity;
+                const idx = parseInt(btn.dataset.row, 10);
+                const ent = state.entities[entity];
+                const keyProp = findKeyProp(ent);
+                if (!keyProp) return;
+                ent.seedData[idx][keyProp.name] = generateKeyValue(ent, keyProp);
+                render(container, state);
+                App.onStateChanged();
+            });
+        });
+
+        // Fill all empty keys
+        container.querySelectorAll('.seed-fill-keys').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const entity = btn.dataset.entity;
+                const ent = state.entities[entity];
+                const keyProp = findKeyProp(ent);
+                if (!keyProp || !ent.seedData) return;
+                ent.seedData.forEach(row => {
+                    const val = row[keyProp.name];
+                    if (val === '' || val === undefined || val === null) {
+                        row[keyProp.name] = generateKeyValue(ent, keyProp);
+                    }
+                });
                 render(container, state);
                 App.onStateChanged();
             });
