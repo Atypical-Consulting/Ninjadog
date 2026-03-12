@@ -30,14 +30,11 @@ internal sealed class ValidateCommand
 
     private static string ResolveFilePath(string? file)
     {
-        if (!string.IsNullOrWhiteSpace(file))
-        {
-            return Path.IsPathRooted(file)
+        return !string.IsNullOrWhiteSpace(file)
+            ? Path.IsPathRooted(file)
                 ? file
-                : Path.Combine(Directory.GetCurrentDirectory(), file);
-        }
-
-        return Path.Combine(Directory.GetCurrentDirectory(), "ninjadog.json");
+                : Path.Combine(Directory.GetCurrentDirectory(), file)
+            : Path.Combine(Directory.GetCurrentDirectory(), "ninjadog.json");
     }
 
     private static int RenderResult(SchemaValidationResult result, bool strict)

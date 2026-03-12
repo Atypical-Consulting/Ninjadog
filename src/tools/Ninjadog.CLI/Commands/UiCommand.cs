@@ -47,7 +47,7 @@ internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
         });
 
         // Serve index.html at root
-        app.MapGet("/", async (HttpContext ctx) =>
+        app.MapGet("/", async ctx =>
         {
             var file = embeddedProvider.GetFileInfo("index.html");
             if (!file.Exists)
@@ -120,6 +120,49 @@ internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
         {
             var schemaJson = SchemaProvider.GetSchemaText();
             return Results.Content(schemaJson, "application/json");
+        });
+
+        // API: List directories for folder picker
+        app.MapGet("/api/directories", (string? path) =>
+        {
+            var basePath = Directory.GetCurrentDirectory();
+            var targetPath = string.IsNullOrWhiteSpace(path) || path == "."
+                ? basePath
+                : Path.IsPathRooted(path) ? path : Path.Combine(basePath, path);
+
+            try
+            {
+                var resolved = Path.GetFullPath(targetPath);
+                if (!Directory.Exists(resolved))
+                {
+                    return Results.Json(new { error = "Directory not found" }, statusCode: 404);
+                }
+
+                var dirs = Directory.GetDirectories(resolved)
+                    .Where(d => !Path.GetFileName(d).StartsWith('.'))
+                    .Select(d => Path.GetFileName(d))
+                    .OrderBy(d => d)
+                    .ToArray();
+
+                var parent = Path.GetDirectoryName(resolved);
+                var relativeToCwd = Path.GetRelativePath(basePath, resolved);
+                if (relativeToCwd == ".")
+                {
+                    relativeToCwd = ".";
+                }
+
+                return Results.Json(new
+                {
+                    current = relativeToCwd,
+                    absolute = resolved,
+                    parent = parent != null ? Path.GetRelativePath(basePath, parent) : null,
+                    directories = dirs
+                });
+            }
+            catch
+            {
+                return Results.Json(new { error = "Cannot access directory" }, statusCode: 400);
+            }
         });
 
         // Open browser

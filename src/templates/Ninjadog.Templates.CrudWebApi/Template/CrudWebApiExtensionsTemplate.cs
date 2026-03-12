@@ -119,12 +119,9 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
 
     private static string GenerateSeederRegistration(bool hasSeedData)
     {
-        if (!hasSeedData)
-        {
-            return string.Empty;
-        }
-
-        return "        services.AddSingleton<DatabaseSeeder>();\n";
+        return hasSeedData
+            ? "        services.AddSingleton<DatabaseSeeder>();\n"
+            : string.Empty;
     }
 
     private static string GenerateModelDependenciesInjection(List<NinjadogEntityWithKey> entities)

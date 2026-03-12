@@ -89,12 +89,9 @@ public class ProgramTemplate : NinjadogTemplate
 
     private static string GenerateSeederCall(bool hasSeedData)
     {
-        if (!hasSeedData)
-        {
-            return string.Empty;
-        }
-
-        return """
+        return !hasSeedData
+            ? string.Empty
+            : """
 
               await app.Services
                   .GetRequiredService<DatabaseSeeder>()

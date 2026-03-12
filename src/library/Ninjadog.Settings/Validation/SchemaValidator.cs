@@ -59,7 +59,7 @@ public static class SchemaValidator
 
                 var path = detail.InstanceLocation.ToString();
 
-                foreach (var error in detail.Errors!)
+                foreach (var error in detail.Errors)
                 {
                     diagnostics.Add(new ValidationDiagnostic(
                         "SCHEMA",

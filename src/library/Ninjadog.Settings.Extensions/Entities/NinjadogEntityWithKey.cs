@@ -8,6 +8,7 @@ namespace Ninjadog.Settings.Extensions.Entities;
 /// <param name="Key">The key of the entity.</param>
 /// <param name="Properties">The properties of the entity.</param>
 /// <param name="Relationships">The relationships between this entity and other entities.</param>
+/// <param name="SeedData">The seed data rows to insert when initializing the database.</param>
 public sealed record NinjadogEntityWithKey(
     string Key,
     NinjadogEntityProperties Properties,

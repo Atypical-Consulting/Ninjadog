@@ -110,17 +110,14 @@ public sealed class DatabaseInitializerTemplate
 
     private static string MapToDbType(string typeName, string provider, HashSet<string>? enumNames = null)
     {
-        if (enumNames?.Contains(typeName) == true)
-        {
-            return "INTEGER";
-        }
-
-        return provider switch
-        {
-            "postgresql" => MapToPostgresType(typeName),
-            "sqlserver" => MapToSqlServerType(typeName),
-            _ => MapToSqliteType(typeName)
-        };
+        return enumNames?.Contains(typeName) == true
+            ? "INTEGER"
+            : provider switch
+            {
+                "postgresql" => MapToPostgresType(typeName),
+                "sqlserver" => MapToSqlServerType(typeName),
+                _ => MapToSqliteType(typeName)
+            };
     }
 
     private static string MapToSqliteType(string typeName)

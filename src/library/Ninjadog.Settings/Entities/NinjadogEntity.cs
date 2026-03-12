@@ -9,6 +9,7 @@ namespace Ninjadog.Settings.Entities;
 /// </summary>
 /// <param name="Properties">The properties of the entity, including their types and key designation.</param>
 /// <param name="Relationships">The relationships between this entity and other entities.</param>
+/// <param name="SeedData">The seed data rows to insert when initializing the database.</param>
 public record NinjadogEntity(
     NinjadogEntityProperties Properties,
     NinjadogEntityRelationships? Relationships = null,
