@@ -10,15 +10,17 @@ internal sealed class NinjadogEngineEventDisplayService(IDomainEventDispatcher d
     private const string DisableMarkup = "[yellow]disabled[/]";
 
     private int _filesGeneratedForCurrentTemplate;
+    private int _scaffoldRowIndex;
 
-    private ProgressContext? _progressContext;
-    private ProgressTask? _scaffoldTask;
-    private ProgressTask? _nugetTask;
-    private ProgressTask? _generateTask;
+    private LiveDisplayContext? _liveContext;
+    private Table? _liveTable;
 
-    internal void SetProgressContext(ProgressContext ctx)
+    private bool HasLiveDisplay => _liveTable is not null;
+
+    internal void SetLiveContext(LiveDisplayContext ctx, Table table)
     {
-        _progressContext = ctx;
+        _liveContext = ctx;
+        _liveTable = table;
     }
 
     protected override void BeforeEngineRun(BeforeEngineRunEvent domainEvent)
@@ -58,28 +60,27 @@ internal sealed class NinjadogEngineEventDisplayService(IDomainEventDispatcher d
             WriteLine();
             MarkupLine("[bold]Scaffolding project...[/]");
         }
-        else if (_progressContext is not null)
+        else if (HasLiveDisplay)
         {
-            _scaffoldTask = _progressContext.AddTask($"Scaffolding [green]{config.Name.EscapeMarkup()}[/]", maxValue: 1);
-            _nugetTask = _progressContext.AddTask($"Adding NuGet packages ({manifest.NuGetPackages.Count})", autoStart: false, maxValue: 1);
-            _generateTask = _progressContext.AddTask("Generating files", autoStart: false, maxValue: manifest.Templates.Count);
+            _scaffoldRowIndex = _liveTable!.Rows.Count;
+            _liveTable.AddRow("[yellow]...[/]", $"Scaffolding [green]{config.Name.EscapeMarkup()}[/]", string.Empty);
+            _liveContext!.Refresh();
         }
     }
 
     protected override void ScaffoldingCompleted(ScaffoldingCompletedEvent domainEvent)
     {
+        var manifest = domainEvent.TemplateManifest;
+
         if (verbose)
         {
             MarkupLine("[bold]Scaffolding complete. Generating files...[/]");
         }
-        else if (_progressContext is not null)
+        else if (HasLiveDisplay)
         {
-            _scaffoldTask?.Increment(1);
-
-            _nugetTask?.StartTask();
-            _nugetTask?.Increment(1);
-
-            _generateTask?.StartTask();
+            _liveTable!.Rows.Update(_scaffoldRowIndex, 0, new Markup("[green]OK[/]"));
+            _liveTable.AddRow("[green]OK[/]", $"NuGet packages ({manifest.NuGetPackages.Count})", string.Empty);
+            _liveContext!.Refresh();
         }
     }
 
@@ -98,7 +99,7 @@ internal sealed class NinjadogEngineEventDisplayService(IDomainEventDispatcher d
             WriteLine();
         }
 
-        // Summary is printed after progress completes (in BuildCommand)
+        // Summary is printed after live display completes (in BuildCommand)
     }
 
     protected override void BeforeTemplateGenerated(BeforeTemplateParsedEvent domainEvent)
@@ -111,12 +112,6 @@ internal sealed class NinjadogEngineEventDisplayService(IDomainEventDispatcher d
             WriteLine();
             MarkupLine($"- Processing template [yellow]{templateName}[/]...");
         }
-        else if (_generateTask is not null)
-        {
-            var templateName = domainEvent.Template.Name;
-            _generateTask.Description = $"Generating [yellow]{templateName.EscapeMarkup()}[/]";
-            _progressContext?.Refresh();
-        }
     }
 
     protected override void AfterTemplateGenerated(AfterTemplateParsedEvent domainEvent)
@@ -127,10 +122,6 @@ internal sealed class NinjadogEngineEventDisplayService(IDomainEventDispatcher d
             {
                 MarkupLine("  [yellow](skipped)[/]");
             }
-        }
-        else
-        {
-            _generateTask?.Increment(1);
         }
     }
 
@@ -150,16 +141,31 @@ internal sealed class NinjadogEngineEventDisplayService(IDomainEventDispatcher d
             Markup($" with a length of [green]{length:N0}[/] characters.");
             WriteLine();
         }
-
-        // In non-verbose mode with progress, individual files are tracked via the progress bar
+        else if (HasLiveDisplay)
+        {
+            var length = contentFile.Length;
+            _liveTable!.AddRow(
+                "[green]OK[/]",
+                fileKey.EscapeMarkup(),
+                $"[dim]{length:N0}[/]");
+            _liveContext!.Refresh();
+        }
     }
 
     protected override void OnErrorOccurred(ErrorOccurredEvent domainEvent)
     {
         var exception = domainEvent.Exception;
 
-        WriteLine();
-        MarkupLine("[bold red]Error occurred:[/]");
-        WriteException(exception);
+        if (HasLiveDisplay)
+        {
+            _liveTable!.AddRow("[bold red]ERR[/]", $"[red]{exception.Message.EscapeMarkup()}[/]", string.Empty);
+            _liveContext!.Refresh();
+        }
+        else
+        {
+            WriteLine();
+            MarkupLine("[bold red]Error occurred:[/]");
+            WriteException(exception);
+        }
     }
 }

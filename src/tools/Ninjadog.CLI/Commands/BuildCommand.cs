@@ -25,7 +25,7 @@ internal sealed class BuildCommand(
             }
             else
             {
-                RunWithProgress(engine, displayService);
+                RunWithLiveDisplay(engine, displayService);
             }
 
             return 0;
@@ -38,27 +38,31 @@ internal sealed class BuildCommand(
         }
     }
 
-    private static void RunWithProgress(INinjadogEngine engine, NinjadogEngineEventDisplayService displayService)
+    private static void RunWithLiveDisplay(INinjadogEngine engine, NinjadogEngineEventDisplayService displayService)
     {
-        AnsiConsole.Progress()
+        var table = new Table()
+            .Border(TableBorder.Rounded)
+            .AddColumn(new TableColumn("[bold]Status[/]").Width(12))
+            .AddColumn(new TableColumn("[bold]File[/]"))
+            .AddColumn(new TableColumn("[bold]Size[/]").RightAligned().Width(10));
+
+        AnsiConsole.Live(table)
             .AutoClear(true)
-            .Columns(
-                new TaskDescriptionColumn(),
-                new ProgressBarColumn(),
-                new PercentageColumn(),
-                new SpinnerColumn())
+            .Overflow(VerticalOverflow.Ellipsis)
+            .Cropping(VerticalOverflowCropping.Top)
             .Start(ctx =>
             {
-                displayService.SetProgressContext(ctx);
+                displayService.SetLiveContext(ctx, table);
                 engine.Run();
             });
 
         var snapshot = engine.Context.GetSnapshot();
         var elapsed = snapshot.TotalTimeElapsed;
         var totalFiles = snapshot.TotalFilesGenerated;
+        var totalChars = snapshot.TotalCharactersGenerated;
 
         WriteLine();
-        MarkupLine($"[bold]Build completed in {elapsed.TotalSeconds:F1}s[/] — [green]{totalFiles} files[/] generated");
+        MarkupLine($"[bold green]Build completed[/] in [bold]{elapsed.TotalSeconds:F1}s[/] — [green]{totalFiles} files[/] generated ({totalChars:N0} chars)");
         WriteLine();
     }
 }
