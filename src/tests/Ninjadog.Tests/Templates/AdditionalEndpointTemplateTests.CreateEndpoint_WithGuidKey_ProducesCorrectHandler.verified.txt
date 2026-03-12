@@ -15,7 +15,6 @@ using TestApp.Api.Contracts.Responses;
 using TestApp.Api.Mapping;
 using TestApp.Api.Services;
 using FastEndpoints;
-using Microsoft.AspNetCore.Authorization;
 
 namespace TestApp.Api.Endpoints;
 
@@ -35,7 +34,7 @@ public partial class CreateTodoItemEndpoint(ITodoItemService todoItemService)
         await todoItemService.CreateAsync(todoItem);
 
         var todoItemResponse = todoItem.ToTodoItemResponse();
-        await SendCreatedAtAsync<GetTodoItemEndpoint>(
+        await Send.CreatedAtAsync<GetTodoItemEndpoint>(
             new { Id = todoItem.Id }, todoItemResponse, generateAbsoluteUrl: true, cancellation: ct);
     }
 }

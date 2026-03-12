@@ -1,7 +1,3 @@
-// Copyright (c) 2020-2024 Atypical Consulting SRL. All rights reserved.
-// Atypical Consulting SRL licenses this file to you under the Proprietary license.
-// See the LICENSE file in the project root for full license information.
-
 namespace Ninjadog.Templates.CrudWebAPI.Template.Database;
 
 /// <summary>
@@ -16,6 +12,7 @@ public sealed class DatabaseSeederTemplate : NinjadogTemplate
     public override NinjadogContentFile GenerateOne(NinjadogSettings ninjadogSettings)
     {
         var rootNamespace = ninjadogSettings.Config.RootNamespace;
+        var provider = ninjadogSettings.Config.DatabaseProvider;
         var entities = ninjadogSettings.Entities.FromKeys();
         var ns = $"{rootNamespace}.Database";
         const string fileName = "DatabaseSeeder.cs";
@@ -38,7 +35,7 @@ public sealed class DatabaseSeederTemplate : NinjadogTemplate
                   public async Task SeedAsync()
                   {
                       using var connection = await connectionFactory.CreateConnectionAsync();
-              {{GenerateSeedInserts(entitiesWithSeed)}}
+              {{GenerateSeedInserts(entitiesWithSeed, provider)}}
                   }
               }
               """;
@@ -46,7 +43,7 @@ public sealed class DatabaseSeederTemplate : NinjadogTemplate
         return CreateNinjadogContentFile(fileName, content);
     }
 
-    private static string GenerateSeedInserts(List<NinjadogEntityWithKey> entities)
+    private static string GenerateSeedInserts(List<NinjadogEntityWithKey> entities, string provider)
     {
         IndentedStringBuilder sb = new(2);
 
@@ -58,17 +55,43 @@ public sealed class DatabaseSeederTemplate : NinjadogTemplate
                 continue;
             }
 
+            var keyPropertyName = entity.Properties
+                .FirstOrDefault(x => x.Value.IsKey).Key;
+
             foreach (var row in entity.SeedData)
             {
                 var columns = string.Join(", ", row.Keys);
                 var values = string.Join(", ", row.Values.Select(FormatSqlValue));
+                var sql = GenerateIdempotentInsert(provider, st.Models, columns, values, keyPropertyName, row);
 
                 sb.AppendLine()
-                    .AppendLine($"await connection.ExecuteAsync(\"INSERT INTO {st.Models} ({columns}) VALUES ({values})\");");
+                    .AppendLine($"await connection.ExecuteAsync(\"{sql}\");");
             }
         }
 
         return sb.ToString();
+    }
+
+    private static string GenerateIdempotentInsert(
+        string provider,
+        string tableName,
+        string columns,
+        string values,
+        string keyPropertyName,
+        Dictionary<string, object> row)
+    {
+        switch (provider)
+        {
+            case "postgresql":
+                return $"INSERT INTO {tableName} ({columns}) VALUES ({values}) ON CONFLICT DO NOTHING";
+
+            case "sqlserver":
+                var keyValue = row.TryGetValue(keyPropertyName, out var kv) ? FormatSqlValue(kv) : "NULL";
+                return $"IF NOT EXISTS (SELECT 1 FROM {tableName} WHERE {keyPropertyName} = {keyValue}) INSERT INTO {tableName} ({columns}) VALUES ({values})";
+
+            default:
+                return $"INSERT OR IGNORE INTO {tableName} ({columns}) VALUES ({values})";
+        }
     }
 
     private static string FormatSqlValue(object value)

@@ -1,7 +1,3 @@
-// Copyright (c) 2020-2024 Atypical Consulting SRL. All rights reserved.
-// Atypical Consulting SRL licenses this file to you under the Proprietary license.
-// See the LICENSE file in the project root for full license information.
-
 using Ninjadog.Settings.Entities.Properties;
 
 namespace Ninjadog.Settings.Entities;
@@ -13,6 +9,7 @@ namespace Ninjadog.Settings.Entities;
 /// </summary>
 /// <param name="Properties">The properties of the entity, including their types and key designation.</param>
 /// <param name="Relationships">The relationships between this entity and other entities.</param>
+/// <param name="SeedData">The seed data rows to insert when initializing the database.</param>
 public record NinjadogEntity(
     NinjadogEntityProperties Properties,
     NinjadogEntityRelationships? Relationships = null,

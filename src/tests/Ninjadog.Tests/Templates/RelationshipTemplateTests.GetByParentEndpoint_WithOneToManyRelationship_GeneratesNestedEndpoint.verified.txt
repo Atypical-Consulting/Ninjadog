@@ -15,7 +15,6 @@ using TestApp.Api.Contracts.Responses;
 using TestApp.Api.Mapping;
 using TestApp.Api.Services;
 using FastEndpoints;
-using Microsoft.AspNetCore.Authorization;
 
 namespace TestApp.Api.Endpoints;
 
@@ -36,7 +35,7 @@ public partial class GetPostsByAuthorEndpoint(IPostService postService)
 
         var (posts, totalCount) = await postService.GetAllAsync(page, pageSize);
         var postsResponse = posts.ToPostsResponse(page, pageSize, totalCount);
-        await SendOkAsync(postsResponse, ct);
+        await Send.OkAsync(postsResponse, ct);
     }
 }
 

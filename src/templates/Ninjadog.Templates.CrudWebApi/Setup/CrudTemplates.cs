@@ -1,12 +1,9 @@
-// Copyright (c) 2020-2024 Atypical Consulting SRL. All rights reserved.
-// Atypical Consulting SRL licenses this file to you under the Proprietary license.
-// See the LICENSE file in the project root for full license information.
-
 using Ninjadog.Templates.CrudWebAPI.Template;
 using Ninjadog.Templates.CrudWebAPI.Template.Contracts.Data;
 using Ninjadog.Templates.CrudWebAPI.Template.Contracts.Requests;
 using Ninjadog.Templates.CrudWebAPI.Template.Contracts.Responses;
 using Ninjadog.Templates.CrudWebAPI.Template.Database;
+using Ninjadog.Templates.CrudWebAPI.Template.Docker;
 using Ninjadog.Templates.CrudWebAPI.Template.Domain;
 using Ninjadog.Templates.CrudWebAPI.Template.Endpoints;
 using Ninjadog.Templates.CrudWebAPI.Template.Mapping;
@@ -30,8 +27,13 @@ public class CrudTemplates : NinjadogTemplates
     public CrudTemplates()
     {
         Add(new AppSettingsTemplate());
+        Add(new HttpFileTemplate());
         Add(new ProgramTemplate());
         Add(new CrudWebApiExtensionsTemplate());
+
+        AddTemplates(
+            "Properties",
+            new LaunchSettingsTemplate());
 
         AddTemplates(
             "Contracts/Data",
@@ -98,5 +100,9 @@ public class CrudTemplates : NinjadogTemplates
             "Validation",
             new CreateRequestValidatorTemplate(),
             new UpdateRequestValidatorTemplate());
+
+        Add(new DockerfileTemplate());
+        Add(new DockerComposeTemplate());
+        Add(new DockerIgnoreTemplate());
     }
 }

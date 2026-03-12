@@ -1,7 +1,3 @@
-// Copyright (c) 2020-2024 Atypical Consulting SRL. All rights reserved.
-// Atypical Consulting SRL licenses this file to you under the Proprietary license.
-// See the LICENSE file in the project root for full license information.
-
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -9,6 +5,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Ninjadog.Settings.Schema;
 using Ninjadog.Settings.Validation;
 
@@ -33,6 +31,9 @@ internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
         var builder = WebApplication.CreateSlimBuilder();
         builder.WebHost.UseUrls(url);
 
+        // Suppress all ASP.NET infrastructure logs — we use Spectre.Console for output
+        builder.Logging.ClearProviders();
+
         var app = builder.Build();
 
         // Serve embedded static files
@@ -47,19 +48,19 @@ internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
         });
 
         // Serve index.html at root
-        app.MapGet("/", async (HttpContext ctx) =>
+        app.MapGet("/", async ctx =>
         {
             var file = embeddedProvider.GetFileInfo("index.html");
             if (!file.Exists)
             {
                 ctx.Response.StatusCode = 404;
-                await ctx.Response.WriteAsync("index.html not found", cancellationToken);
+                await ctx.Response.WriteAsync("index.html not found");
                 return;
             }
 
             ctx.Response.ContentType = "text/html";
             await using var stream = file.CreateReadStream();
-            await stream.CopyToAsync(ctx.Response.Body, cancellationToken);
+            await stream.CopyToAsync(ctx.Response.Body, ctx.RequestAborted);
         });
 
         // API: Read config
@@ -78,7 +79,7 @@ internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
         app.MapPost("/api/config", async (HttpContext ctx) =>
         {
             using var reader = new StreamReader(ctx.Request.Body);
-            var json = await reader.ReadToEndAsync();
+            var json = await reader.ReadToEndAsync(ctx.RequestAborted);
 
             // Validate JSON is parseable
             try
@@ -90,7 +91,7 @@ internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
                 return Results.Json(new { error = ex.Message }, statusCode: 400);
             }
 
-            await File.WriteAllTextAsync(configPath, json, cancellationToken);
+            await File.WriteAllTextAsync(configPath, json, ctx.RequestAborted);
             return Results.Json(new { saved = true });
         });
 
@@ -98,7 +99,7 @@ internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
         app.MapPost("/api/validate", async (HttpContext ctx) =>
         {
             using var reader = new StreamReader(ctx.Request.Body);
-            var json = await reader.ReadToEndAsync();
+            var json = await reader.ReadToEndAsync(ctx.RequestAborted);
 
             var result = NinjadogConfigValidator.Validate(json);
             return Results.Json(result);
@@ -122,19 +123,57 @@ internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
             return Results.Content(schemaJson, "application/json");
         });
 
-        // Open browser
+        // API: List directories for folder picker
+        app.MapGet("/api/directories", (string? path) =>
+        {
+            var basePath = Directory.GetCurrentDirectory();
+            var targetPath = string.IsNullOrWhiteSpace(path) || path == "."
+                ? basePath
+                : Path.IsPathRooted(path) ? path : Path.Combine(basePath, path);
+
+            try
+            {
+                var resolved = Path.GetFullPath(targetPath);
+                if (!Directory.Exists(resolved))
+                {
+                    return Results.Json(new { error = "Directory not found" }, statusCode: 404);
+                }
+
+                var dirs = Directory.GetDirectories(resolved)
+                    .Where(d => !Path.GetFileName(d).StartsWith('.'))
+                    .Select(d => Path.GetFileName(d))
+                    .OrderBy(d => d)
+                    .ToArray();
+
+                var parent = Path.GetDirectoryName(resolved);
+                var relativeToCwd = Path.GetRelativePath(basePath, resolved);
+                if (relativeToCwd == ".")
+                {
+                    relativeToCwd = ".";
+                }
+
+                return Results.Json(new
+                {
+                    current = relativeToCwd,
+                    absolute = resolved,
+                    parent = parent != null ? Path.GetRelativePath(basePath, parent) : null,
+                    directories = dirs
+                });
+            }
+            catch
+            {
+                return Results.Json(new { error = "Cannot access directory" }, statusCode: 400);
+            }
+        });
+
+        // Open browser only after server is ready
         if (!settings.NoBrowser)
         {
-            _ = Task.Run(
-                async () =>
-                {
-                    await Task.Delay(500, cancellationToken);
-                    OpenBrowser(url);
-                },
-                cancellationToken);
+            app.Lifetime.ApplicationStarted.Register(() => OpenBrowser(url));
         }
 
-        await app.RunAsync();
+        await app.StartAsync(cancellationToken);
+        await app.WaitForShutdownAsync(cancellationToken);
         return 0;
     }
 

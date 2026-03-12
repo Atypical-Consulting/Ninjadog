@@ -15,7 +15,6 @@ using TestApp.Api.Contracts.Responses;
 using TestApp.Api.Mapping;
 using TestApp.Api.Services;
 using FastEndpoints;
-using Microsoft.AspNetCore.Authorization;
 
 namespace TestApp.Api.Endpoints;
 
@@ -35,7 +34,7 @@ public partial class CreateOrderEndpoint(IOrderService orderService)
         await orderService.CreateAsync(order);
 
         var orderResponse = order.ToOrderResponse();
-        await SendCreatedAtAsync<GetOrderEndpoint>(
+        await Send.CreatedAtAsync<GetOrderEndpoint>(
             new { Id = order.OrderId }, orderResponse, generateAbsoluteUrl: true, cancellation: ct);
     }
 }

@@ -14,7 +14,6 @@ using TestApp.Api.Contracts.Responses;
 using TestApp.Api.Mapping;
 using TestApp.Api.Services;
 using FastEndpoints;
-using Microsoft.AspNetCore.Authorization;
 
 namespace TestApp.Api.Endpoints;
 
@@ -34,6 +33,6 @@ public partial class GetAllOrdersEndpoint(IOrderService orderService)
 
         var (orders, totalCount) = await orderService.GetAllAsync(page, pageSize);
         var ordersResponse = orders.ToOrdersResponse(page, pageSize, totalCount);
-        await SendOkAsync(ordersResponse, ct);
+        await Send.OkAsync(ordersResponse, ct);
     }
 }

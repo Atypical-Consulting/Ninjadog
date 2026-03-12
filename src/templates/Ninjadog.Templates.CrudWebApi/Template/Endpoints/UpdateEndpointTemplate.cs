@@ -1,7 +1,3 @@
-// Copyright (c) 2020-2024 Atypical Consulting SRL. All rights reserved.
-// Atypical Consulting SRL licenses this file to you under the Proprietary license.
-// See the LICENSE file in the project root for full license information.
-
 namespace Ninjadog.Templates.CrudWebAPI.Template.Endpoints;
 
 /// <summary>
@@ -30,7 +26,6 @@ public sealed class UpdateEndpointTemplate
               using {{rootNamespace}}.Mapping;
               using {{rootNamespace}}.Services;
               using FastEndpoints;
-              using Microsoft.AspNetCore.Authorization;
 
               {{WriteFileScopedNamespace(ns)}}
 
@@ -49,7 +44,7 @@ public sealed class UpdateEndpointTemplate
 
                       if ({{st.VarExistingModel}} is null)
                       {
-                          await SendNotFoundAsync(ct);
+                          await Send.NotFoundAsync(ct);
                           return;
                       }
 
@@ -57,7 +52,7 @@ public sealed class UpdateEndpointTemplate
                       await {{st.VarModelService}}.UpdateAsync({{st.VarModel}});
 
                       var {{st.VarModelResponse}} = {{st.VarModel}}.{{st.MethodToModelResponse}}();
-                      await SendOkAsync({{st.VarModelResponse}}, ct);
+                      await Send.OkAsync({{st.VarModelResponse}}, ct);
                   }
               }
               """;

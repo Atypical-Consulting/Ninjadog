@@ -1,7 +1,3 @@
-// Copyright (c) 2020-2024 Atypical Consulting SRL. All rights reserved.
-// Atypical Consulting SRL licenses this file to you under the Proprietary license.
-// See the LICENSE file in the project root for full license information.
-
 namespace Ninjadog.Templates.CrudWebAPI.Template.Database;
 
 /// <summary>
@@ -114,17 +110,14 @@ public sealed class DatabaseInitializerTemplate
 
     private static string MapToDbType(string typeName, string provider, HashSet<string>? enumNames = null)
     {
-        if (enumNames?.Contains(typeName) == true)
-        {
-            return "INTEGER";
-        }
-
-        return provider switch
-        {
-            "postgresql" => MapToPostgresType(typeName),
-            "sqlserver" => MapToSqlServerType(typeName),
-            _ => MapToSqliteType(typeName)
-        };
+        return enumNames?.Contains(typeName) == true
+            ? "INTEGER"
+            : provider switch
+            {
+                "postgresql" => MapToPostgresType(typeName),
+                "sqlserver" => MapToSqlServerType(typeName),
+                _ => MapToSqliteType(typeName)
+            };
     }
 
     private static string MapToSqliteType(string typeName)

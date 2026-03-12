@@ -1,7 +1,3 @@
-// Copyright (c) 2020-2024 Atypical Consulting SRL. All rights reserved.
-// Atypical Consulting SRL licenses this file to you under the Proprietary license.
-// See the LICENSE file in the project root for full license information.
-
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Ninjadog.Settings.Config;
@@ -17,6 +13,7 @@ namespace Ninjadog.Settings;
 /// </summary>
 /// <param name="Config">The general configuration settings for the Ninjadog Engine.</param>
 /// <param name="Entities">The collection of entities that the Ninjadog Engine will use for template generation.</param>
+/// <param name="Enums">The optional enum definitions mapping enum names to their values.</param>
 public abstract record NinjadogSettings(
     NinjadogConfiguration Config,
     NinjadogEntities Entities,
@@ -142,7 +139,7 @@ public abstract record NinjadogSettings(
                                 JsonValueKind.Number => field.Value.TryGetInt32(out var intVal) ? intVal : field.Value.GetDecimal(),
                                 JsonValueKind.True => true,
                                 JsonValueKind.False => false,
-                                _ => field.Value.GetRawText()
+                                JsonValueKind.Undefined or JsonValueKind.Object or JsonValueKind.Array or JsonValueKind.Null or _ => field.Value.GetRawText(),
                             };
                         }
 
@@ -157,7 +154,7 @@ public abstract record NinjadogSettings(
         Dictionary<string, List<string>>? enums = null;
         if (TryGetOptionalObject(root, EnumsPropertyName, out var enumsElement))
         {
-            enums = new Dictionary<string, List<string>>();
+            enums = [];
             foreach (var enumProp in enumsElement.EnumerateObject())
             {
                 var values = enumProp.Value.EnumerateArray()
@@ -172,123 +169,75 @@ public abstract record NinjadogSettings(
 
     private static string GetRequiredString(JsonElement element, string propertyName)
     {
-        if (!TryGetOptionalProperty(element, propertyName, out var property) || property.ValueKind != JsonValueKind.String)
-        {
-            throw new JsonException($"Expected '{propertyName}' to be a JSON string.");
-        }
-
-        return property.GetString()!;
+        return !TryGetOptionalProperty(element, propertyName, out var property) || property.ValueKind != JsonValueKind.String
+            ? throw new JsonException($"Expected '{propertyName}' to be a JSON string.")
+            : property.GetString()!;
     }
 
     private static string? GetOptionalString(JsonElement element, string propertyName)
     {
-        if (!TryGetOptionalProperty(element, propertyName, out var property))
-        {
-            return null;
-        }
-
-        if (property.ValueKind != JsonValueKind.String)
-        {
-            throw new JsonException($"Expected '{propertyName}' to be a JSON string.");
-        }
-
-        return property.GetString();
+        return !TryGetOptionalProperty(element, propertyName, out var property)
+            ? null
+            : property.ValueKind != JsonValueKind.String
+                ? throw new JsonException($"Expected '{propertyName}' to be a JSON string.")
+                : property.GetString();
     }
 
     private static bool GetOptionalBoolean(JsonElement element, string propertyName)
     {
-        if (!TryGetOptionalProperty(element, propertyName, out var property))
-        {
-            return false;
-        }
-
-        if (property.ValueKind is not JsonValueKind.True and not JsonValueKind.False)
-        {
-            throw new JsonException($"Expected '{propertyName}' to be a JSON boolean.");
-        }
-
-        return property.GetBoolean();
+        return TryGetOptionalProperty(element, propertyName, out var property)
+            && (property.ValueKind is not JsonValueKind.True and not JsonValueKind.False
+                ? throw new JsonException($"Expected '{propertyName}' to be a JSON boolean.")
+                : property.GetBoolean());
     }
 
     private static int? GetOptionalInt32(JsonElement element, string propertyName)
     {
-        if (!TryGetOptionalProperty(element, propertyName, out var property))
-        {
-            return null;
-        }
-
-        if (property.ValueKind != JsonValueKind.Number)
-        {
-            throw new JsonException($"Expected '{propertyName}' to be a JSON number.");
-        }
-
-        return property.GetInt32();
+        return !TryGetOptionalProperty(element, propertyName, out var property)
+            ? null
+            : property.ValueKind != JsonValueKind.Number
+                ? throw new JsonException($"Expected '{propertyName}' to be a JSON number.")
+                : property.GetInt32();
     }
 
     private static string[]? GetOptionalStringArray(JsonElement element, string propertyName)
     {
-        if (!TryGetOptionalProperty(element, propertyName, out var property))
-        {
-            return null;
-        }
-
-        if (property.ValueKind != JsonValueKind.Array)
-        {
-            throw new JsonException($"Expected '{propertyName}' to be a JSON array.");
-        }
-
-        return property.EnumerateArray().Select(item => item.GetString()!).ToArray();
+        return !TryGetOptionalProperty(element, propertyName, out var property)
+            ? null
+            : property.ValueKind != JsonValueKind.Array
+                ? throw new JsonException($"Expected '{propertyName}' to be a JSON array.")
+                : [.. property.EnumerateArray().Select(item => item.GetString()!)];
     }
 
     private static JsonElement GetRequiredObject(JsonElement element, string propertyName)
     {
-        if (!TryGetOptionalObject(element, propertyName, out var property))
-        {
-            throw new JsonException($"Expected '{propertyName}' to be a JSON object.");
-        }
-
-        return property;
+        return !TryGetOptionalObject(element, propertyName, out var property)
+            ? throw new JsonException($"Expected '{propertyName}' to be a JSON object.")
+            : property;
     }
 
     private static bool TryGetOptionalObject(JsonElement element, string propertyName, out JsonElement property)
     {
-        if (!TryGetOptionalProperty(element, propertyName, out property))
-        {
-            return false;
-        }
-
-        if (property.ValueKind != JsonValueKind.Object)
-        {
-            throw new JsonException($"Expected '{propertyName}' to be a JSON object.");
-        }
-
-        return true;
+        return TryGetOptionalProperty(element, propertyName, out property)
+            && (property.ValueKind != JsonValueKind.Object
+                ? throw new JsonException($"Expected '{propertyName}' to be a JSON object.")
+                : true);
     }
 
     private static bool TryGetOptionalArray(JsonElement element, string propertyName, out JsonElement property)
     {
-        if (!TryGetOptionalProperty(element, propertyName, out property))
-        {
-            return false;
-        }
-
-        if (property.ValueKind != JsonValueKind.Array)
-        {
-            throw new JsonException($"Expected '{propertyName}' to be a JSON array.");
-        }
-
-        return true;
+        return TryGetOptionalProperty(element, propertyName, out property)
+            && (property.ValueKind != JsonValueKind.Array
+                ? throw new JsonException($"Expected '{propertyName}' to be a JSON array.")
+                : true);
     }
 
     private static bool TryGetOptionalProperty(JsonElement element, string propertyName, out JsonElement property)
     {
         property = default;
 
-        if (element.ValueKind != JsonValueKind.Object || !element.TryGetProperty(propertyName, out property))
-        {
-            return false;
-        }
-
-        return property.ValueKind is not JsonValueKind.Null and not JsonValueKind.Undefined;
+        return element.ValueKind == JsonValueKind.Object
+            && element.TryGetProperty(propertyName, out property)
+            && property.ValueKind is not JsonValueKind.Null and not JsonValueKind.Undefined;
     }
 }

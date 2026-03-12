@@ -249,11 +249,19 @@ ninjadog ui [OPTIONS]
 
 **Visual builder features:**
 
-- **Entity editor** -- Add, rename, and remove entities. Define properties with types, key markers, and validation rules.
-- **Enum editor** -- Define enums with named members and optional integer values.
-- **Seed data editor** -- Populate initial data rows for each entity directly from the UI.
-- **Live JSON preview** -- See the generated `ninjadog.json` update in real time as you make changes.
-- **Validation** -- The UI validates your configuration before saving, highlighting errors inline.
+- **Entity editor** -- Add, rename, clone, and remove entities. Define properties with types, key markers, and validation rules. Drag-and-drop property reordering, quick-add presets (ID, Name, Timestamps, Email, Description), and bulk property actions.
+- **Enum editor** -- Define enums with named values. Inline add/remove with two-click delete confirmation.
+- **Seed data editor** -- Populate initial data rows for each entity. Auto-generated key values (Guid, int, long), CSV/JSON import, and cell-level type validation.
+- **Live JSON preview** -- See the generated `ninjadog.json` update in real time with Monaco Editor syntax highlighting and schema validation.
+- **Validation** -- Live schema validation with error paths displayed inline.
+- **Undo / Redo** -- Full undo/redo history (up to 50 states) with <kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Y</kbd> keyboard shortcuts.
+- **Keyboard shortcuts** -- <kbd>Ctrl+S</kbd> save, <kbd>Ctrl+B</kbd> build, <kbd>Ctrl+E</kbd> add entity, <kbd>1</kbd>--<kbd>4</kbd> switch tabs, <kbd>?</kbd> show shortcut overlay.
+- **Auto-save** -- Optional auto-save to localStorage with 3-second debounce.
+- **View modes** -- Toggle between Split View (form + JSON), Form Only, or JSON Only layouts.
+- **Template picker** -- Start from pre-built templates (Blank, Todo App, Blog API, E-Commerce) instead of an empty configuration.
+- **Import** -- Import seed data from CSV or JSON arrays via a modal dialog.
+- **Export** -- Download the current configuration as a JSON file.
+- **Entity color coding** -- Each entity gets a unique color dot for quick visual identification across all tabs.
 
 {: .tip }
 > By default, `ninjadog ui` opens your browser automatically. Use `--no-open` if you are running on a headless server or want to open the URL manually.

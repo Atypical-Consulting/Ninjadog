@@ -1,7 +1,3 @@
-// Copyright (c) 2020-2024 Atypical Consulting SRL. All rights reserved.
-// Atypical Consulting SRL licenses this file to you under the Proprietary license.
-// See the LICENSE file in the project root for full license information.
-
 namespace Ninjadog.Templates.CrudWebAPI.Template.Mapping;
 
 /// <summary>
@@ -84,13 +80,15 @@ public sealed class DomainToDtoMapperTemplate
             }
         }
 
+        var properties = sb.ToString().TrimStart();
+
         return $$"""
 
                      public static {{st.ClassModelDto}} {{st.MethodToModelDto}}(this {{st.Model}} {{st.VarModel}})
                      {
                          return new {{st.ClassModelDto}}
                          {
-                             {{sb}}
+                             {{properties}}
                          };
                      }
                  """;

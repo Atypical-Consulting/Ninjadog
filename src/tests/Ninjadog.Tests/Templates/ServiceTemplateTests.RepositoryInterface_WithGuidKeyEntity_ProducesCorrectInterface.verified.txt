@@ -11,8 +11,6 @@
 //------------------------------------------------------------------------------
 
 using TestApp.Api.Contracts.Data;
-using TestApp.Api.Database;
-using Dapper;
 
 namespace TestApp.Api.Repositories;
 

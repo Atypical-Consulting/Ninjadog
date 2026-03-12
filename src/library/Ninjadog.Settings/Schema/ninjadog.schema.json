@@ -1,7 +1,8 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ninjadog.dev/schemas/ninjadog.schema.json",
   "title": "Ninjadog Configuration",
-  "description": "Schema for ninjadog.json configuration files used by the Ninjadog code generator.",
+  "description": "Schema for ninjadog.json configuration files used by the Ninjadog code generator. Defines the project settings, entities, enums, and relationships needed to generate a complete CRUD Web API.",
   "type": "object",
   "required": ["config", "entities"],
   "properties": {
@@ -10,176 +11,288 @@
       "description": "Reference to the JSON schema for editor support."
     },
     "config": {
+      "$ref": "#/$defs/config"
+    },
+    "entities": {
+      "title": "Entities",
+      "description": "Entity definitions for code generation. Each key is a PascalCase entity name.",
       "type": "object",
+      "propertyNames": {
+        "pattern": "^[A-Z][a-zA-Z0-9]*$",
+        "description": "Entity names must be PascalCase identifiers."
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/entity"
+      }
+    },
+    "enums": {
+      "title": "Enums",
+      "description": "Enum definitions for code generation. Each key is a PascalCase enum name mapping to an array of string values.",
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[A-Z][a-zA-Z0-9]*$",
+        "description": "Enum names must be PascalCase identifiers."
+      },
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minItems": 1,
+        "uniqueItems": true
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "config": {
+      "title": "Project Configuration",
       "description": "General configuration settings for the Ninjadog Engine.",
+      "type": "object",
       "required": ["name", "version", "description", "rootNamespace"],
       "properties": {
         "name": {
           "type": "string",
-          "description": "The name of the application or project."
+          "description": "The name of the application or project.",
+          "minLength": 1,
+          "examples": ["TodoApp", "BlogEngine", "InventoryManager"]
         },
         "version": {
           "type": "string",
-          "description": "The version of the application or project."
+          "description": "The semantic version of the application or project.",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9.]+)?$",
+          "examples": ["1.0.0", "2.1.0-beta"]
         },
         "description": {
           "type": "string",
-          "description": "A brief description of the application or project."
+          "description": "A brief description of the application or project.",
+          "minLength": 1,
+          "examples": ["A simple todo application", "REST API for blog management"]
         },
         "rootNamespace": {
           "type": "string",
-          "description": "The root namespace for the generated code."
+          "description": "The root namespace for the generated code. Uses dotted notation.",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)*$",
+          "examples": ["MyCompany.TodoApp", "Acme.Blog.Api"]
         },
         "outputPath": {
           "type": "string",
-          "description": "The path where generated files will be saved."
+          "description": "The path where generated files will be saved.",
+          "default": "."
         },
         "saveGeneratedFiles": {
           "type": "boolean",
-          "description": "Whether to save generated files to disk."
+          "description": "Whether to save generated files to disk.",
+          "default": true
         },
         "cors": {
-          "type": "object",
-          "description": "CORS configuration for the application.",
-          "required": ["origins"],
-          "properties": {
-            "origins": {
-              "type": "array",
-              "items": { "type": "string" },
-              "description": "Allowed CORS origins."
-            },
-            "methods": {
-              "type": "array",
-              "items": { "type": "string" },
-              "description": "Allowed HTTP methods."
-            },
-            "headers": {
-              "type": "array",
-              "items": { "type": "string" },
-              "description": "Allowed HTTP headers."
-            }
-          },
-          "additionalProperties": false
+          "$ref": "#/$defs/corsConfig"
         },
         "features": {
-          "type": "object",
-          "description": "Feature toggles for the code generator.",
-          "properties": {
-            "softDelete": {
-              "type": "boolean",
-              "description": "Enable soft delete support."
-            },
-            "auditing": {
-              "type": "boolean",
-              "description": "Enable audit fields (CreatedAt, UpdatedAt)."
-            }
-          },
-          "additionalProperties": false
+          "$ref": "#/$defs/featuresConfig"
         },
         "database": {
-          "type": "object",
-          "description": "Database configuration.",
-          "properties": {
-            "provider": {
-              "type": "string",
-              "enum": ["sqlite", "postgresql", "sqlserver"],
-              "description": "The database provider to use."
-            }
-          },
-          "additionalProperties": false
+          "$ref": "#/$defs/databaseConfig"
+        },
+        "softDelete": {
+          "type": "boolean",
+          "description": "Enable soft delete support. Flat alternative to features.softDelete.",
+          "default": false
+        },
+        "auditing": {
+          "type": "boolean",
+          "description": "Enable audit fields. Flat alternative to features.auditing.",
+          "default": false
+        },
+        "databaseProvider": {
+          "type": "string",
+          "description": "The database provider to use. Flat alternative to database.provider.",
+          "enum": ["sqlite", "postgresql", "sqlserver"],
+          "default": "sqlite"
         }
       },
       "additionalProperties": false
     },
-    "entities": {
+    "corsConfig": {
+      "title": "CORS Configuration",
+      "description": "Cross-Origin Resource Sharing settings for the generated API.",
       "type": "object",
-      "description": "Entity definitions for code generation.",
-      "additionalProperties": {
-        "type": "object",
-        "required": ["properties"],
+      "required": ["origins"],
+      "properties": {
+        "origins": {
+          "type": "array",
+          "description": "Allowed CORS origins.",
+          "items": {
+            "type": "string",
+            "format": "uri",
+            "examples": ["http://localhost:3000", "https://myapp.example.com"]
+          },
+          "minItems": 1
+        },
+        "methods": {
+          "type": "array",
+          "description": "Allowed HTTP methods. Omit to allow all methods.",
+          "items": {
+            "type": "string",
+            "enum": ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"]
+          },
+          "uniqueItems": true
+        },
+        "headers": {
+          "type": "array",
+          "description": "Allowed HTTP headers. Omit to allow all headers.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "featuresConfig": {
+      "title": "Feature Toggles",
+      "description": "Optional feature toggles for the code generator.",
+      "type": "object",
+      "properties": {
+        "softDelete": {
+          "type": "boolean",
+          "description": "Enable soft delete support. Adds IsDeleted and DeletedAt columns and filters deleted records from queries.",
+          "default": false
+        },
+        "auditing": {
+          "type": "boolean",
+          "description": "Enable audit fields. Adds CreatedAt and UpdatedAt timestamps automatically managed on insert and update.",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "databaseConfig": {
+      "title": "Database Configuration",
+      "description": "Database provider and connection settings.",
+      "type": "object",
+      "properties": {
+        "provider": {
+          "type": "string",
+          "description": "The database provider to use. Determines SQL dialect, type mappings, and connection factory.",
+          "enum": ["sqlite", "postgresql", "sqlserver"],
+          "default": "sqlite"
+        }
+      },
+      "additionalProperties": false
+    },
+    "entity": {
+      "title": "Entity Definition",
+      "description": "Defines a single entity with its properties, relationships, and optional seed data.",
+      "type": "object",
+      "required": ["properties"],
+      "properties": {
         "properties": {
-          "properties": {
-            "type": "object",
-            "description": "Property definitions for the entity.",
-            "additionalProperties": {
-              "type": "object",
-              "required": ["type"],
-              "properties": {
-                "type": {
-                  "type": "string",
-                  "description": "The data type of the property."
-                },
-                "isKey": {
-                  "type": "boolean",
-                  "description": "Whether this property is the primary key."
-                },
-                "required": {
-                  "type": "boolean",
-                  "description": "Whether this property is required."
-                },
-                "maxLength": {
-                  "type": "integer",
-                  "description": "Maximum length constraint for string properties."
-                },
-                "minLength": {
-                  "type": "integer",
-                  "description": "Minimum length constraint for string properties."
-                },
-                "min": {
-                  "type": "integer",
-                  "description": "Minimum value constraint for numeric properties."
-                },
-                "max": {
-                  "type": "integer",
-                  "description": "Maximum value constraint for numeric properties."
-                },
-                "pattern": {
-                  "type": "string",
-                  "description": "Regex pattern constraint for string properties."
-                }
-              },
-              "additionalProperties": false
-            }
+          "title": "Entity Properties",
+          "description": "Property definitions for the entity. Each key is a PascalCase property name.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-zA-Z][a-zA-Z0-9]*$",
+            "description": "Property names must be valid identifiers (PascalCase or camelCase)."
           },
-          "relationships": {
-            "type": "object",
-            "description": "Relationship definitions for the entity.",
-            "additionalProperties": {
-              "type": "object",
-              "required": ["relatedEntity", "type"],
-              "properties": {
-                "relatedEntity": {
-                  "type": "string",
-                  "description": "The name of the related entity."
-                },
-                "type": {
-                  "type": "string",
-                  "enum": ["OneToOne", "OneToMany", "ManyToMany", "OneWay", "ManyWay"],
-                  "description": "The type of relationship."
-                }
-              },
-              "additionalProperties": false
-            }
+          "additionalProperties": {
+            "$ref": "#/$defs/entityProperty"
           },
-          "seedData": {
-            "type": "array",
-            "description": "Seed data for the entity.",
-            "items": {
-              "type": "object"
-            }
+          "minProperties": 1
+        },
+        "relationships": {
+          "title": "Entity Relationships",
+          "description": "Relationship definitions linking this entity to others.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/entityRelationship"
           }
         },
-        "additionalProperties": false
-      }
+        "seedData": {
+          "title": "Seed Data",
+          "description": "Initial data rows to insert when the database is initialized. Each object must match the entity's property names.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "minProperties": 1
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
     },
-    "enums": {
+    "entityProperty": {
+      "title": "Entity Property",
+      "description": "Defines a single property on an entity, including its type and optional validation constraints.",
       "type": "object",
-      "description": "Enum definitions for code generation.",
-      "additionalProperties": {
-        "type": "array",
-        "items": { "type": "string" }
-      }
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The .NET data type of the property.",
+          "examples": ["string", "int", "bool", "Guid", "DateTime", "decimal", "List<TodoItem>"]
+        },
+        "isKey": {
+          "type": "boolean",
+          "description": "Whether this property is the primary key. Exactly one property per entity should be marked as the key.",
+          "default": false
+        },
+        "required": {
+          "type": "boolean",
+          "description": "Whether this property is required. Generates a NotEmpty/NotNull validation rule.",
+          "default": false
+        },
+        "maxLength": {
+          "type": "integer",
+          "description": "Maximum length constraint for string properties. Generates a MaximumLength validation rule.",
+          "minimum": 1
+        },
+        "minLength": {
+          "type": "integer",
+          "description": "Minimum length constraint for string properties. Generates a MinimumLength validation rule.",
+          "minimum": 0
+        },
+        "min": {
+          "type": "integer",
+          "description": "Minimum value constraint for numeric properties. Generates a GreaterThanOrEqualTo validation rule."
+        },
+        "max": {
+          "type": "integer",
+          "description": "Maximum value constraint for numeric properties. Generates a LessThanOrEqualTo validation rule."
+        },
+        "pattern": {
+          "type": "string",
+          "description": "Regex pattern constraint for string properties. Generates a Matches validation rule.",
+          "minLength": 1
+        }
+      },
+      "dependentRequired": {
+        "minLength": [],
+        "maxLength": []
+      },
+      "additionalProperties": false
+    },
+    "entityRelationship": {
+      "title": "Entity Relationship",
+      "description": "Defines a relationship between two entities.",
+      "type": "object",
+      "required": ["relatedEntity", "type"],
+      "properties": {
+        "relatedEntity": {
+          "type": "string",
+          "description": "The PascalCase name of the related entity. Must match a key in the top-level entities object.",
+          "pattern": "^[A-Z][a-zA-Z0-9]*$",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "description": "The cardinality of the relationship.",
+          "enum": ["OneToOne", "OneToMany", "ManyToMany", "OneWay", "ManyWay"]
+        }
+      },
+      "additionalProperties": false
     }
-  },
-  "additionalProperties": false
+  }
 }

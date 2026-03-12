@@ -1,7 +1,3 @@
-// Copyright (c) 2020-2024 Atypical Consulting SRL. All rights reserved.
-// Atypical Consulting SRL licenses this file to you under the Proprietary license.
-// See the LICENSE file in the project root for full license information.
-
 using System.Text.Json.Serialization;
 
 namespace Ninjadog.Settings;
@@ -12,7 +8,12 @@ namespace Ninjadog.Settings;
 [JsonSourceGenerationOptions(
     WriteIndented = true,
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
-    DictionaryKeyPolicy = JsonKnownNamingPolicy.Unspecified)]
+    DictionaryKeyPolicy = JsonKnownNamingPolicy.Unspecified,
+    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
 [JsonSerializable(typeof(NinjadogSettings))]
+[JsonSerializable(typeof(decimal))]
+[JsonSerializable(typeof(bool))]
+[JsonSerializable(typeof(long))]
+[JsonSerializable(typeof(double))]
 public sealed partial class JsonSerializationContext
     : JsonSerializerContext;

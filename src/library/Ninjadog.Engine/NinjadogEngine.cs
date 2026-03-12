@@ -1,7 +1,3 @@
-// Copyright (c) 2020-2024 Atypical Consulting SRL. All rights reserved.
-// Atypical Consulting SRL licenses this file to you under the Proprietary license.
-// See the LICENSE file in the project root for full license information.
-
 using Ninjadog.Engine.Core.ValueObjects;
 
 namespace Ninjadog.Engine;
@@ -106,14 +102,19 @@ public sealed class NinjadogEngine(
         Context.Reset();
         Context.StartCollectMetrics();
 
+        // notify subscribers that the engine is about to start scaffolding
+        var beforeSnapshot = Context.GetSnapshot();
+        BeforeEngineRunEvent beforeEvent = new(ninjadogSettings, templateManifest, beforeSnapshot);
+        domainEventDispatcher.Dispatch(beforeEvent);
+
         // create the app folder and the initial files (sln, .gitignore, ninjadog.json etc.)
         ninjadogAppService.DotnetVersionAsync().Wait();
         ninjadogAppService.CreateAppAsync().Wait();
 
-        // dispatch the event
-        var snapshot = Context.GetSnapshot();
-        BeforeEngineRunEvent domainEvent = new(ninjadogSettings, templateManifest, snapshot);
-        domainEventDispatcher.Dispatch(domainEvent);
+        // notify subscribers that scaffolding is complete
+        var afterSnapshot = Context.GetSnapshot();
+        ScaffoldingCompletedEvent scaffoldingEvent = new(ninjadogSettings, templateManifest, afterSnapshot);
+        domainEventDispatcher.Dispatch(scaffoldingEvent);
     }
 
     private void DispatchAfterEngineRun()

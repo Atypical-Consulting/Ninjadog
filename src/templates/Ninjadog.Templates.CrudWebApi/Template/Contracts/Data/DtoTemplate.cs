@@ -1,7 +1,3 @@
-// Copyright (c) 2020-2024 Atypical Consulting SRL. All rights reserved.
-// Atypical Consulting SRL licenses this file to you under the Proprietary license.
-// See the LICENSE file in the project root for full license information.
-
 namespace Ninjadog.Templates.CrudWebAPI.Template.Contracts.Data;
 
 /// <summary>
@@ -27,10 +23,43 @@ public sealed class DtoTemplate : NinjadogTemplate
 
               public partial class {{st.ClassModelDto}}
               {
-              {{entity.GenerateMemberProperties()}}
+              {{GenerateDtoProperties(entity)}}
               }
               """;
 
         return CreateNinjadogContentFile(fileName, content);
+    }
+
+    /// <summary>
+    /// Generates DTO properties with database-friendly types.
+    /// Guid is mapped to string (stored as TEXT in SQLite) and DateOnly is mapped to DateTime.
+    /// </summary>
+    private static string GenerateDtoProperties(NinjadogEntityWithKey entity)
+    {
+        return entity.Properties
+            .FromKeys()
+            .Select(GenerateDtoProperty)
+            .Aggregate((x, y) => $"{x}\n{y}");
+    }
+
+    private static string GenerateDtoProperty(NinjadogEntityPropertyWithKey p)
+    {
+        var dtoType = p.Type switch
+        {
+            "Guid" => "string",
+            "DateOnly" => "DateTime",
+            _ => p.Type
+        };
+
+        IndentedStringBuilder sb = new(1);
+        sb.Append($"public {dtoType} {p.Key} {{ get; init; }}");
+
+        if (dtoType == "string")
+        {
+            sb.Append(" = default!;");
+        }
+
+        sb.AppendLine();
+        return sb.ToString();
     }
 }

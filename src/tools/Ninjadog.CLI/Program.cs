@@ -1,7 +1,3 @@
-// Copyright (c) 2020-2024 Atypical Consulting SRL. All rights reserved.
-// Atypical Consulting SRL licenses this file to you under the Proprietary license.
-// See the LICENSE file in the project root for full license information.
-
 using Microsoft.Extensions.DependencyInjection;
 using Ninjadog.CLI.Commands;
 using Ninjadog.CLI.Utilities;
@@ -17,6 +13,7 @@ registrations.AddDomainEventDispatcher();
 registrations.AddInfrastructure();
 registrations.AddSingleton<INinjadogEngineFactory, NinjadogEngineFactory>();
 registrations.AddSingleton<NinjadogTemplateManifest, CrudTemplateManifest>();
+registrations.AddSingleton(new NinjadogVerbosityOptions());
 
 const string settingsFileName = "ninjadog.json";
 var settingsFilePath = Path.Combine(Directory.GetCurrentDirectory(), settingsFileName);

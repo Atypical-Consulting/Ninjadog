@@ -1,9 +1,11 @@
-// Copyright (c) 2020-2024 Atypical Consulting SRL. All rights reserved.
-// Atypical Consulting SRL licenses this file to you under the Proprietary license.
-// See the LICENSE file in the project root for full license information.
+using System.ComponentModel;
 
 namespace Ninjadog.CLI.Commands;
 
 internal sealed class BuildCommandSettings : CommandSettings
 {
+    [CommandOption("-v|--verbose")]
+    [Description("Show detailed output including per-file generation info and dotnet CLI output.")]
+    [DefaultValue(false)]
+    public bool Verbose { get; init; }
 }

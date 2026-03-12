@@ -1,7 +1,3 @@
-// Copyright (c) 2020-2024 Atypical Consulting SRL. All rights reserved.
-// Atypical Consulting SRL licenses this file to you under the Proprietary license.
-// See the LICENSE file in the project root for full license information.
-
 using Ninjadog.Settings.Validation;
 
 namespace Ninjadog.CLI.Commands;
@@ -23,25 +19,27 @@ internal sealed class ValidateCommand
             return ExitCodeFileNotFound;
         }
 
-        MarkupLine($"Validating [cyan]{filePath.EscapeMarkup()}[/]...");
-        WriteLine();
+        var result = AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .SpinnerStyle(new Style(Color.Cyan))
+            .Start($"Validating [cyan]{filePath.EscapeMarkup()}[/]...", _ =>
+            {
+                var jsonContent = File.ReadAllText(filePath);
+                return NinjadogConfigValidator.Validate(jsonContent);
+            });
 
-        var jsonContent = File.ReadAllText(filePath);
-        var result = NinjadogConfigValidator.Validate(jsonContent);
+        WriteLine();
 
         return RenderResult(result, settings.Strict);
     }
 
     private static string ResolveFilePath(string? file)
     {
-        if (!string.IsNullOrWhiteSpace(file))
-        {
-            return Path.IsPathRooted(file)
+        return !string.IsNullOrWhiteSpace(file)
+            ? Path.IsPathRooted(file)
                 ? file
-                : Path.Combine(Directory.GetCurrentDirectory(), file);
-        }
-
-        return Path.Combine(Directory.GetCurrentDirectory(), "ninjadog.json");
+                : Path.Combine(Directory.GetCurrentDirectory(), file)
+            : Path.Combine(Directory.GetCurrentDirectory(), "ninjadog.json");
     }
 
     private static int RenderResult(SchemaValidationResult result, bool strict)

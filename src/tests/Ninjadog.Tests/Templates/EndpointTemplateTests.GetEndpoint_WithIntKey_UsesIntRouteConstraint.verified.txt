@@ -15,7 +15,6 @@ using TestApp.Api.Contracts.Responses;
 using TestApp.Api.Mapping;
 using TestApp.Api.Services;
 using FastEndpoints;
-using Microsoft.AspNetCore.Authorization;
 
 namespace TestApp.Api.Endpoints;
 
@@ -34,11 +33,11 @@ public partial class GetOrderEndpoint(IOrderService orderService)
 
         if (order is null)
         {
-            await SendNotFoundAsync(ct);
+            await Send.NotFoundAsync(ct);
             return;
         }
 
         var orderResponse = order.ToOrderResponse();
-        await SendOkAsync(orderResponse, ct);
+        await Send.OkAsync(orderResponse, ct);
     }
 }

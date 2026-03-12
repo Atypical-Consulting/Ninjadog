@@ -1,4 +1,5 @@
 {
+  "$schema": "https://ninjadog.dev/schemas/ninjadog.schema.json",
   "config": {
     "name": "TodoApp",
     "version": "1.0.0",

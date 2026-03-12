@@ -13,7 +13,6 @@
 using TestApp.Api.Contracts.Requests;
 using TestApp.Api.Services;
 using FastEndpoints;
-using Microsoft.AspNetCore.Authorization;
 
 namespace TestApp.Api.Endpoints;
 
@@ -31,10 +30,10 @@ public partial class DeleteOrderEndpoint(IOrderService orderService)
         var deleted = await orderService.DeleteAsync(req.OrderId);
         if (!deleted)
         {
-            await SendNotFoundAsync(ct);
+            await Send.NotFoundAsync(ct);
             return;
         }
 
-        await SendNoContentAsync(ct);
+        await Send.NoContentAsync(ct);
     }
 }

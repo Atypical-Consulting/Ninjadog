@@ -1,7 +1,3 @@
-// Copyright (c) 2020-2024 Atypical Consulting SRL. All rights reserved.
-// Atypical Consulting SRL licenses this file to you under the Proprietary license.
-// See the LICENSE file in the project root for full license information.
-
 namespace Ninjadog.Templates.CrudWebAPI.Template.Endpoints;
 
 /// <summary>
@@ -28,7 +24,6 @@ public sealed class GetAllEndpointTemplate
               using {{rootNamespace}}.Mapping;
               using {{rootNamespace}}.Services;
               using FastEndpoints;
-              using Microsoft.AspNetCore.Authorization;
 
               {{WriteFileScopedNamespace(ns)}}
 
@@ -48,7 +43,7 @@ public sealed class GetAllEndpointTemplate
 
                       var ({{st.VarModels}}, totalCount) = await {{st.VarModelService}}.GetAllAsync(page, pageSize);
                       var {{st.VarModelsResponse}} = {{st.VarModels}}.{{st.MethodToModelsResponse}}(page, pageSize, totalCount);
-                      await SendOkAsync({{st.VarModelsResponse}}, ct);
+                      await Send.OkAsync({{st.VarModelsResponse}}, ct);
                   }
               }
               """;

@@ -1,7 +1,3 @@
-// Copyright (c) 2020-2024 Atypical Consulting SRL. All rights reserved.
-// Atypical Consulting SRL licenses this file to you under the Proprietary license.
-// See the LICENSE file in the project root for full license information.
-
 namespace Ninjadog.Templates.CrudWebAPI.Template;
 
 /// <summary>
@@ -26,12 +22,9 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
             $$"""
 
               using Microsoft.AspNetCore.Diagnostics;
-              using {{rootNamespace}}.Contracts.Responses;
               using {{rootNamespace}}.Database;
-              using {{rootNamespace}}.Mapping;
               using {{rootNamespace}}.Repositories;
               using {{rootNamespace}}.Services;
-              using {{rootNamespace}}.Validation;
               using FastEndpoints;
               using FastEndpoints.ClientGen;
               using FastEndpoints.Swagger;
@@ -123,12 +116,9 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
 
     private static string GenerateSeederRegistration(bool hasSeedData)
     {
-        if (!hasSeedData)
-        {
-            return string.Empty;
-        }
-
-        return "        services.AddSingleton<DatabaseSeeder>();\n";
+        return hasSeedData
+            ? "        services.AddSingleton<DatabaseSeeder>();\n"
+            : string.Empty;
     }
 
     private static string GenerateModelDependenciesInjection(List<NinjadogEntityWithKey> entities)

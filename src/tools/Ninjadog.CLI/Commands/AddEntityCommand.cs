@@ -1,7 +1,3 @@
-// Copyright (c) 2020-2024 Atypical Consulting SRL. All rights reserved.
-// Atypical Consulting SRL licenses this file to you under the Proprietary license.
-// See the LICENSE file in the project root for full license information.
-
 using System.Text.Json;
 
 namespace Ninjadog.CLI.Commands;
@@ -96,7 +92,7 @@ internal sealed class AddEntityCommand
             var updatedJson = System.Text.Encoding.UTF8.GetString(stream.ToArray());
             File.WriteAllText(settingsFilePath, updatedJson);
 
-            MarkupLine($"[green]Entity '{settings.EntityName}' added successfully.[/]");
+            MarkupLine($"[green]Entity '{settings.EntityName.EscapeMarkup()}' added successfully.[/]");
             return 0;
         }
         catch (Exception e)

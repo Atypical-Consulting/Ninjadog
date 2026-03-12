@@ -1,6 +1,6 @@
 ---
 title: Generators
-description: "Overview of Ninjadog's 33 code generators: endpoints, contracts, data layer, mapping, validation, OpenAPI summaries, and project setup."
+description: "Overview of Ninjadog's 36 code generators: endpoints, contracts, data layer, Docker, mapping, validation, OpenAPI summaries, and project setup."
 layout: default
 nav_order: 6
 has_children: true
@@ -9,7 +9,7 @@ has_children: true
 # Generators
 {: .no_toc }
 
-Ninjadog includes **34 generators** organized into 13 categories. Each generator produces either a single shared file or a per-entity file.
+Ninjadog includes **37 generators** organized into 14 categories. Each generator produces either a single shared file or a per-entity file.
 {: .fs-6 .fw-300 }
 
 ---
@@ -31,6 +31,7 @@ Ninjadog includes **34 generators** organized into 13 categories. Each generator
 | **[Services](/Ninjadog/generators/data-layer)** | Service, ServiceInterface | Per entity |
 | **[Summaries](/Ninjadog/generators/openapi)** | Create, Delete, GetAll, Get, Update | Per entity |
 | **[Validation](/Ninjadog/generators/validation)** | CreateRequestValidator, UpdateRequestValidator | Per entity |
+| **[Docker](/Ninjadog/generators/docker)** | Dockerfile, DockerCompose, DockerIgnore | Single file |
 
 ## Generation Modes
 
