@@ -140,6 +140,35 @@ public sealed class AotSeededEntitiesCollection : NinjadogEntities
 public sealed record AotSeededSettings()
     : NinjadogSettings(new AotConfiguration(), new AotSeededEntitiesCollection());
 
+public sealed record RateLimitConfiguration()
+    : NinjadogConfiguration(
+        Name: "TestApp",
+        Version: "1.0.0",
+        Description: "Test application",
+        RootNamespace: "TestApp.Api",
+        OutputPath: "output",
+        SaveGeneratedFiles: false,
+        RateLimit: new NinjadogRateLimitConfiguration());
+
+public sealed record RateLimitSettings()
+    : NinjadogSettings(new RateLimitConfiguration(), new TestEntitiesCollection());
+
+public sealed record CustomRateLimitConfiguration()
+    : NinjadogConfiguration(
+        Name: "TestApp",
+        Version: "1.0.0",
+        Description: "Test application",
+        RootNamespace: "TestApp.Api",
+        OutputPath: "output",
+        SaveGeneratedFiles: false,
+        RateLimit: new NinjadogRateLimitConfiguration(
+            PermitLimit: 50,
+            WindowSeconds: 30,
+            SegmentsPerWindow: 3));
+
+public sealed record CustomRateLimitSettings()
+    : NinjadogSettings(new CustomRateLimitConfiguration(), new TestEntitiesCollection());
+
 public sealed record AuthConfiguration()
     : NinjadogConfiguration(
         Name: "TestApp",

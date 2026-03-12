@@ -15,6 +15,7 @@ public class ProgramTemplate : NinjadogTemplate
         var cors = ninjadogSettings.Config.Cors;
         var aot = ninjadogSettings.Config.Aot;
         var auth = ninjadogSettings.Config.Auth;
+        var rateLimit = ninjadogSettings.Config.RateLimit;
         var hasSeedData = ninjadogSettings.Entities.FromKeys().Any(e => e.SeedData is { Count: > 0 });
         const string fileName = "Program.cs";
 
@@ -28,7 +29,7 @@ public class ProgramTemplate : NinjadogTemplate
               using {{rootNamespace}};
               using {{rootNamespace}}.Database;
               using {{rootNamespace}}.Middleware;
-              {{GenerateAuthUsing(auth, rootNamespace)}}using Serilog;
+              {{GenerateRateLimitUsing(rateLimit)}}{{GenerateAuthUsing(auth, rootNamespace)}}using Serilog;
 
               Log.Logger = new LoggerConfiguration()
                   .WriteTo.Console()
@@ -53,7 +54,7 @@ public class ProgramTemplate : NinjadogTemplate
                               {{GenerateCorsPolicy(cors)}}
                           });
                   });
-              {{GenerateAuthServiceRegistration(auth)}}
+              {{GenerateAuthServiceRegistration(auth)}}{{GenerateRateLimitServiceRegistration(rateLimit)}}
                   services.AddNinjadog(config);
 
                   var app = builder.Build();
@@ -61,7 +62,7 @@ public class ProgramTemplate : NinjadogTemplate
                   app.UseMiddleware<RequestCorrelationMiddleware>();
                   app.UseSerilogRequestLogging();
                   app.UseCors(myAllowSpecificOrigins);
-              {{GenerateAuthMiddleware(auth)}}    app.UseNinjadog();
+              {{GenerateRateLimitMiddleware(rateLimit)}}{{GenerateAuthMiddleware(auth)}}    app.UseNinjadog();
 
                   await app.Services
                       .GetRequiredService<DatabaseInitializer>()
@@ -173,6 +174,51 @@ public class ProgramTemplate : NinjadogTemplate
                       .GetRequiredService<UserInitializer>()
                       .InitializeAsync()
                       .ConfigureAwait(false);
+              """;
+    }
+
+    private static string GenerateRateLimitUsing(NinjadogRateLimitConfiguration? rateLimit)
+    {
+        return rateLimit is null
+            ? string.Empty
+            : """
+              using System.Threading.RateLimiting;
+              using Microsoft.AspNetCore.RateLimiting;
+
+              """;
+    }
+
+    private static string GenerateRateLimitServiceRegistration(NinjadogRateLimitConfiguration? rateLimit)
+    {
+        if (rateLimit is null)
+        {
+            return string.Empty;
+        }
+
+        return $$"""
+
+                  services.AddRateLimiter(options =>
+                  {
+                      options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+                      options.AddSlidingWindowLimiter("sliding", limiter =>
+                      {
+                          limiter.PermitLimit = {{rateLimit.PermitLimit}};
+                          limiter.Window = TimeSpan.FromSeconds({{rateLimit.WindowSeconds}});
+                          limiter.SegmentsPerWindow = {{rateLimit.SegmentsPerWindow}};
+                          limiter.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+                          limiter.QueueLimit = 0;
+                      });
+                  });
+              """;
+    }
+
+    private static string GenerateRateLimitMiddleware(NinjadogRateLimitConfiguration? rateLimit)
+    {
+        return rateLimit is null
+            ? string.Empty
+            : """
+                  app.UseRateLimiter();
+
               """;
     }
 

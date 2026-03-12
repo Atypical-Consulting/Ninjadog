@@ -55,6 +55,11 @@ The following skeleton shows **every** configuration option at a glance. Require
       "roles": ["Admin", "User"],             // optional
       "generateLoginEndpoint": true,          // default: true
       "generateRegisterEndpoint": true        // default: true
+    },
+    "rateLimit": {
+      "permitLimit": 100,                     // default: 100
+      "windowSeconds": 60,                    // default: 60
+      "segmentsPerWindow": 6                  // default: 6
     }
   },
   "enums": {
@@ -118,7 +123,8 @@ The `config` object contains project-level settings.
     "cors": { ... },
     "features": { ... },
     "database": { ... },
-    "auth": { ... }
+    "auth": { ... },
+    "rateLimit": { ... }
   }
 }
 ```
@@ -211,6 +217,36 @@ When auth is enabled:
 
 {: .note }
 > When the `auth` block is absent, all endpoints use `AllowAnonymous()` and no auth infrastructure is generated. This is fully backward-compatible.
+
+### Rate Limiting
+
+The optional `rateLimit` object enables ASP.NET Core's built-in sliding window rate limiter for the generated API.
+
+```json
+{
+  "config": {
+    "rateLimit": {
+      "permitLimit": 100,
+      "windowSeconds": 60,
+      "segmentsPerWindow": 6
+    }
+  }
+}
+```
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `permitLimit` | `integer` | `100` | Maximum number of requests allowed within the time window. |
+| `windowSeconds` | `integer` | `60` | Duration of the time window in seconds. |
+| `segmentsPerWindow` | `integer` | `6` | Number of segments the window is divided into for smoother rate limiting. |
+
+When rate limiting is enabled:
+- Requests exceeding the limit receive a `429 Too Many Requests` response
+- The rate limiter middleware is added after CORS and before authentication in the pipeline
+- A named policy `"sliding"` is registered and applied globally
+
+{: .note }
+> When the `rateLimit` block is absent, no rate limiting infrastructure is generated. This is fully backward-compatible.
 
 ## Entities
 
@@ -401,6 +437,11 @@ A full `ninjadog.json` demonstrating all features:
       "audience": "bookstore-api",
       "tokenExpirationMinutes": 120,
       "roles": ["Admin", "Editor"]
+    },
+    "rateLimit": {
+      "permitLimit": 200,
+      "windowSeconds": 60,
+      "segmentsPerWindow": 6
     }
   },
   "enums": {

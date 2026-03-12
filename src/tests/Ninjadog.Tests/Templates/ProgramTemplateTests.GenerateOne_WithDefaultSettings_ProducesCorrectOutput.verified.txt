@@ -1,0 +1,65 @@
+﻿//------------------------------------------------------------------------------
+// This code was powered by the Ninjadog Engine
+//
+// Developed by: Atypical Consulting SRL - Philippe Matray
+// Generated on: [SCRUBBED]
+// Version     : [SCRUBBED]
+//
+// This file is part of a custom software solution crafted to meet your
+// specific needs. For optimal performance and compatibility, modifications
+// should be coordinated with Ninjadog support services.
+//------------------------------------------------------------------------------
+
+using TestApp.Api;
+using TestApp.Api.Database;
+using TestApp.Api.Middleware;
+using Serilog;
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
+
+try
+{
+    const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+    var builder = WebApplication.CreateBuilder(args);
+    var services = builder.Services;
+    var config = builder.Configuration;
+
+    builder.Host.UseSerilog((context, loggerConfig) =>
+        loggerConfig.ReadFrom.Configuration(context.Configuration));
+
+    services.AddCors(options =>
+    {
+        options.AddPolicy(name: myAllowSpecificOrigins,
+            policy =>
+            {
+                policy.WithOrigins("https://localhost:7270");
+            });
+    });
+
+    services.AddNinjadog(config);
+
+    var app = builder.Build();
+
+    app.UseMiddleware<RequestCorrelationMiddleware>();
+    app.UseSerilogRequestLogging();
+    app.UseCors(myAllowSpecificOrigins);
+    app.UseNinjadog();
+
+    await app.Services
+        .GetRequiredService<DatabaseInitializer>()
+        .InitializeAsync()
+        .ConfigureAwait(false);
+
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    await Log.CloseAndFlushAsync();
+}
