@@ -16,6 +16,9 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
         var hasSeedData = entities.Any(e => e.SeedData is { Count: > 0 });
         var provider = ninjadogSettings.Config.DatabaseProvider;
         var factoryClassName = GetFactoryClassName(provider);
+        var projectName = ninjadogSettings.Config.Name;
+        var projectVersion = ninjadogSettings.Config.Version;
+        var projectDescription = ninjadogSettings.Config.Description;
         const string fileName = "CrudWebApiExtensions.cs";
 
         var content =
@@ -43,8 +46,9 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
                       {
                           o.DocumentSettings = s =>
                           {
-                              s.Title = "Ninjadog API";
-                              s.Version = "v1";
+                              s.Title = "{{projectName}}";
+                              s.Version = "v{{projectVersion}}";
+                              s.Description = "{{projectDescription}}";
                           };
                       });
 
@@ -62,6 +66,8 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
                   public static WebApplication UseNinjadog(this WebApplication app)
                   {
                       app.UseValidationExceptionHandler();
+                      app.UseDefaultFiles();
+                      app.UseStaticFiles();
                       app.UseFastEndpoints();
                       app.UseSwaggerGen();
 

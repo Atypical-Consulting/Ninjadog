@@ -101,6 +101,10 @@ public class CrudTemplates : NinjadogTemplates
             new CreateRequestValidatorTemplate(),
             new UpdateRequestValidatorTemplate());
 
+        AddTemplates(
+            "wwwroot",
+            new IndexPageTemplate());
+
         Add(new DockerfileTemplate());
         Add(new DockerComposeTemplate());
         Add(new DockerIgnoreTemplate());
