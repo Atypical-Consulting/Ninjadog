@@ -158,32 +158,33 @@
             </div>
         </header>
 
+        <!-- Toolbar bar (always visible: tabs + view toggle) -->
+        <nav class="tab-bar flex items-center border-b border-bdr bg-surface-base shrink-0" style="height: 42px;">
+            <button class="tab-btn active px-5 text-sm font-medium" data-tab="config">Config</button>
+            <button class="tab-btn px-5 text-sm font-medium" data-tab="entities">Entities <span class="tab-badge hidden" id="badge-entities"></span></button>
+            <button class="tab-btn px-5 text-sm font-medium" data-tab="enums">Enums <span class="tab-badge hidden" id="badge-enums"></span></button>
+            <button class="tab-btn px-5 text-sm font-medium" data-tab="seed">Seed Data <span class="tab-badge hidden" id="badge-seed"></span></button>
+
+            <!-- View toggle (right side of tab bar) -->
+            <div class="ml-auto flex items-center gap-1 px-3">
+                <div class="view-toggle">
+                    <button class="view-toggle-btn active" data-view="split" title="Split View">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+                    </button>
+                    <button class="view-toggle-btn" data-view="form" title="Form Only">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+                    </button>
+                    <button class="view-toggle-btn" data-view="json" title="JSON Only">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
         <!-- Main content -->
         <div class="flex flex-1 overflow-hidden">
             <!-- Left panel -->
             <div id="left-panel" class="flex flex-col flex-1 min-w-0">
-                <!-- Tab bar with badges -->
-                <nav class="tab-bar flex items-center border-b border-bdr bg-surface-base shrink-0" style="height: 42px;">
-                    <button class="tab-btn active px-5 text-sm font-medium" data-tab="config">Config</button>
-                    <button class="tab-btn px-5 text-sm font-medium" data-tab="entities">Entities <span class="tab-badge hidden" id="badge-entities"></span></button>
-                    <button class="tab-btn px-5 text-sm font-medium" data-tab="enums">Enums <span class="tab-badge hidden" id="badge-enums"></span></button>
-                    <button class="tab-btn px-5 text-sm font-medium" data-tab="seed">Seed Data <span class="tab-badge hidden" id="badge-seed"></span></button>
-
-                    <!-- View toggle (right side of tab bar) -->
-                    <div class="ml-auto flex items-center gap-1 px-3">
-                        <div class="view-toggle">
-                            <button class="view-toggle-btn active" data-view="split" title="Split View">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
-                            </button>
-                            <button class="view-toggle-btn" data-view="form" title="Form Only">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
-                            </button>
-                            <button class="view-toggle-btn" data-view="json" title="JSON Only">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                </nav>
 
                 <!-- Breadcrumb bar -->
                 <div id="breadcrumb-bar" class="breadcrumb-bar shrink-0 hidden">

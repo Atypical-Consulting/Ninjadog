@@ -726,17 +726,32 @@ const App = (() => {
                 leftPanel.classList.remove('hidden');
                 jsonPanel.classList.add('hidden');
                 if (resizeHandle) resizeHandle.classList.add('hidden');
+                // Reset JSON panel sizing
+                jsonPanel.style.width = '';
+                jsonPanel.style.flexBasis = '';
+                jsonPanel.style.flexGrow = '';
+                jsonPanel.style.flexShrink = '';
                 break;
             case 'json':
                 leftPanel.classList.add('hidden');
                 jsonPanel.classList.remove('hidden');
                 if (resizeHandle) resizeHandle.classList.add('hidden');
+                // Expand JSON panel to fill all available width
+                jsonPanel.style.width = '100%';
+                jsonPanel.style.flexBasis = '100%';
+                jsonPanel.style.flexGrow = '1';
+                jsonPanel.style.flexShrink = '1';
                 break;
             case 'split':
             default:
                 leftPanel.classList.remove('hidden');
                 jsonPanel.classList.remove('hidden');
                 if (resizeHandle) resizeHandle.classList.remove('hidden');
+                // Reset JSON panel to default fixed width
+                jsonPanel.style.width = '420px';
+                jsonPanel.style.flexBasis = '';
+                jsonPanel.style.flexGrow = '0';
+                jsonPanel.style.flexShrink = '0';
                 break;
         }
     }
