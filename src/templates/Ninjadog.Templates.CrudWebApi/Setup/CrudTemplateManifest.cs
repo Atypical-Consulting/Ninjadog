@@ -33,7 +33,9 @@ public class CrudTemplateManifest : NinjadogTemplateManifest
         "Microsoft.Data.Sqlite:10.0.5",
         "Npgsql:10.0.2",
         "Microsoft.Data.SqlClient:6.1.4",
-        "BCrypt.Net-Next:4.1.0"
+        "BCrypt.Net-Next:4.1.0",
+        "Serilog.AspNetCore:9.0.0",
+        "Serilog.Sinks.File:6.0.0"
     ];
 
     /// <inheritdoc />

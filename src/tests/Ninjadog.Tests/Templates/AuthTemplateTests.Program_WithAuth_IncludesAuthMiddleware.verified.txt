@@ -12,42 +12,64 @@
 
 using TestApp.Api;
 using TestApp.Api.Database;
+using TestApp.Api.Middleware;
 using TestApp.Api.Auth;
+using Serilog;
 
-const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-var builder = WebApplication.CreateBuilder(args);
-var services = builder.Services;
-var config = builder.Configuration;
-
-services.AddCors(options =>
+try
 {
-    options.AddPolicy(name: myAllowSpecificOrigins,
-        policy =>
-        {
-            policy.WithOrigins("https://localhost:7270");
-        });
-});
+    const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
-services.AddJwtAuthentication(config);
-services.AddAuthorizationPolicies();
+    var builder = WebApplication.CreateBuilder(args);
+    var services = builder.Services;
+    var config = builder.Configuration;
 
-services.AddNinjadog(config);
+    builder.Host.UseSerilog((context, loggerConfig) =>
+        loggerConfig.ReadFrom.Configuration(context.Configuration));
 
-var app = builder.Build();
+    services.AddCors(options =>
+    {
+        options.AddPolicy(name: myAllowSpecificOrigins,
+            policy =>
+            {
+                policy.WithOrigins("https://localhost:7270");
+            });
+    });
 
-app.UseCors(myAllowSpecificOrigins);
-app.UseAuthentication();
-app.UseAuthorization();
-app.UseNinjadog();
+    services.AddJwtAuthentication(config);
+    services.AddAuthorizationPolicies();
 
-await app.Services
-    .GetRequiredService<DatabaseInitializer>()
-    .InitializeAsync()
-    .ConfigureAwait(false);
+    services.AddNinjadog(config);
 
-await app.Services
-    .GetRequiredService<UserInitializer>()
-    .InitializeAsync()
-    .ConfigureAwait(false);
-app.Run();
+    var app = builder.Build();
+
+    app.UseMiddleware<RequestCorrelationMiddleware>();
+    app.UseSerilogRequestLogging();
+    app.UseCors(myAllowSpecificOrigins);
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.UseNinjadog();
+
+    await app.Services
+        .GetRequiredService<DatabaseInitializer>()
+        .InitializeAsync()
+        .ConfigureAwait(false);
+
+    await app.Services
+        .GetRequiredService<UserInitializer>()
+        .InitializeAsync()
+        .ConfigureAwait(false);
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    await Log.CloseAndFlushAsync();
+}

@@ -1,0 +1,49 @@
+﻿//------------------------------------------------------------------------------
+// This code was powered by the Ninjadog Engine
+//
+// Developed by: Atypical Consulting SRL - Philippe Matray
+// Generated on: [SCRUBBED]
+// Version     : [SCRUBBED]
+//
+// This file is part of a custom software solution crafted to meet your
+// specific needs. For optimal performance and compatibility, modifications
+// should be coordinated with Ninjadog support services.
+//------------------------------------------------------------------------------
+
+using Serilog.Context;
+
+namespace TestApp.Api.Middleware;
+
+/// <summary>
+/// Middleware that assigns a unique correlation ID to each HTTP request.
+/// The correlation ID is pushed into the Serilog log context so every log entry
+/// written during the request includes it automatically.
+/// It is also returned in the X-Correlation-Id response header for client-side tracing.
+/// </summary>
+public class RequestCorrelationMiddleware
+{
+    private const string CorrelationIdHeader = "X-Correlation-Id";
+    private readonly RequestDelegate _next;
+
+    public RequestCorrelationMiddleware(RequestDelegate next)
+    {
+        _next = next;
+    }
+
+    public async Task InvokeAsync(HttpContext context)
+    {
+        var correlationId = context.Request.Headers[CorrelationIdHeader].FirstOrDefault()
+            ?? Guid.NewGuid().ToString("D");
+
+        context.Response.OnStarting(() =>
+        {
+            context.Response.Headers[CorrelationIdHeader] = correlationId;
+            return Task.CompletedTask;
+        });
+
+        using (LogContext.PushProperty("CorrelationId", correlationId))
+        {
+            await _next(context);
+        }
+    }
+}

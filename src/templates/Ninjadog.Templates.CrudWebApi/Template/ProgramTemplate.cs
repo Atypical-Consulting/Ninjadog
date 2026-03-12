@@ -27,35 +27,57 @@ public class ProgramTemplate : NinjadogTemplate
 
               using {{rootNamespace}};
               using {{rootNamespace}}.Database;
-              {{GenerateAuthUsing(auth, rootNamespace)}}
-              const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
+              using {{rootNamespace}}.Middleware;
+              {{GenerateAuthUsing(auth, rootNamespace)}}using Serilog;
 
-              var builder = {{builderCall}};
-              var services = builder.Services;
-              var config = builder.Configuration;
-              {{GenerateAotJsonOptions(aot, rootNamespace)}}
-              services.AddCors(options =>
+              Log.Logger = new LoggerConfiguration()
+                  .WriteTo.Console()
+                  .CreateBootstrapLogger();
+
+              try
               {
-                  options.AddPolicy(name: myAllowSpecificOrigins,
-                      policy =>
-                      {
-                          {{GenerateCorsPolicy(cors)}}
-                      });
-              });
+                  const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+                  var builder = {{builderCall}};
+                  var services = builder.Services;
+                  var config = builder.Configuration;
+
+                  builder.Host.UseSerilog((context, loggerConfig) =>
+                      loggerConfig.ReadFrom.Configuration(context.Configuration));
+              {{GenerateAotJsonOptions(aot, rootNamespace)}}
+                  services.AddCors(options =>
+                  {
+                      options.AddPolicy(name: myAllowSpecificOrigins,
+                          policy =>
+                          {
+                              {{GenerateCorsPolicy(cors)}}
+                          });
+                  });
               {{GenerateAuthServiceRegistration(auth)}}
-              services.AddNinjadog(config);
+                  services.AddNinjadog(config);
 
-              var app = builder.Build();
+                  var app = builder.Build();
 
-              app.UseCors(myAllowSpecificOrigins);
-              {{GenerateAuthMiddleware(auth)}}app.UseNinjadog();
+                  app.UseMiddleware<RequestCorrelationMiddleware>();
+                  app.UseSerilogRequestLogging();
+                  app.UseCors(myAllowSpecificOrigins);
+              {{GenerateAuthMiddleware(auth)}}    app.UseNinjadog();
 
-              await app.Services
-                  .GetRequiredService<DatabaseInitializer>()
-                  .InitializeAsync()
-                  .ConfigureAwait(false);
+                  await app.Services
+                      .GetRequiredService<DatabaseInitializer>()
+                      .InitializeAsync()
+                      .ConfigureAwait(false);
               {{GenerateUserInitializerCall(auth)}}{{GenerateSeederCall(hasSeedData)}}
-              app.Run();
+                  app.Run();
+              }
+              catch (Exception ex)
+              {
+                  Log.Fatal(ex, "Application terminated unexpectedly");
+              }
+              finally
+              {
+                  await Log.CloseAndFlushAsync();
+              }
               """;
 
         return CreateNinjadogContentFile(fileName, content);
@@ -99,10 +121,10 @@ public class ProgramTemplate : NinjadogTemplate
             ? string.Empty
             : $$"""
 
-              services.ConfigureHttpJsonOptions(options =>
-              {
-                  options.SerializerOptions.TypeInfoResolverChain.Insert(0, {{rootNamespace}}.AppJsonSerializerContext.Default);
-              });
+                  services.ConfigureHttpJsonOptions(options =>
+                  {
+                      options.SerializerOptions.TypeInfoResolverChain.Insert(0, {{rootNamespace}}.AppJsonSerializerContext.Default);
+                  });
               """;
     }
 
@@ -120,11 +142,11 @@ public class ProgramTemplate : NinjadogTemplate
             return string.Empty;
         }
 
-        var result = "\nservices.AddJwtAuthentication(config);";
+        var result = "\n    services.AddJwtAuthentication(config);";
 
         if (auth.Roles is { Length: > 0 })
         {
-            result += "\nservices.AddAuthorizationPolicies();";
+            result += "\n    services.AddAuthorizationPolicies();";
         }
 
         return result + "\n";
@@ -135,8 +157,8 @@ public class ProgramTemplate : NinjadogTemplate
         return auth is null
             ? string.Empty
             : """
-              app.UseAuthentication();
-              app.UseAuthorization();
+                  app.UseAuthentication();
+                  app.UseAuthorization();
 
               """;
     }
@@ -147,10 +169,10 @@ public class ProgramTemplate : NinjadogTemplate
             ? string.Empty
             : """
 
-              await app.Services
-                  .GetRequiredService<UserInitializer>()
-                  .InitializeAsync()
-                  .ConfigureAwait(false);
+                  await app.Services
+                      .GetRequiredService<UserInitializer>()
+                      .InitializeAsync()
+                      .ConfigureAwait(false);
               """;
     }
 
@@ -160,10 +182,10 @@ public class ProgramTemplate : NinjadogTemplate
             ? string.Empty
             : """
 
-              await app.Services
-                  .GetRequiredService<DatabaseSeeder>()
-                  .SeedAsync()
-                  .ConfigureAwait(false);
+                  await app.Services
+                      .GetRequiredService<DatabaseSeeder>()
+                      .SeedAsync()
+                      .ConfigureAwait(false);
               """;
     }
 }

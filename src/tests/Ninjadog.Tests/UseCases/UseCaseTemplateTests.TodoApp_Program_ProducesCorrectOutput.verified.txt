@@ -12,32 +12,54 @@
 
 using TodoApp.CrudWebApi;
 using TodoApp.CrudWebApi.Database;
+using TodoApp.CrudWebApi.Middleware;
+using Serilog;
 
-const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-var builder = WebApplication.CreateBuilder(args);
-var services = builder.Services;
-var config = builder.Configuration;
-
-services.AddCors(options =>
+try
 {
-    options.AddPolicy(name: myAllowSpecificOrigins,
-        policy =>
-        {
-            policy.WithOrigins("https://localhost:7270");
-        });
-});
+    const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
-services.AddNinjadog(config);
+    var builder = WebApplication.CreateBuilder(args);
+    var services = builder.Services;
+    var config = builder.Configuration;
 
-var app = builder.Build();
+    builder.Host.UseSerilog((context, loggerConfig) =>
+        loggerConfig.ReadFrom.Configuration(context.Configuration));
 
-app.UseCors(myAllowSpecificOrigins);
-app.UseNinjadog();
+    services.AddCors(options =>
+    {
+        options.AddPolicy(name: myAllowSpecificOrigins,
+            policy =>
+            {
+                policy.WithOrigins("https://localhost:7270");
+            });
+    });
 
-await app.Services
-    .GetRequiredService<DatabaseInitializer>()
-    .InitializeAsync()
-    .ConfigureAwait(false);
+    services.AddNinjadog(config);
 
-app.Run();
+    var app = builder.Build();
+
+    app.UseMiddleware<RequestCorrelationMiddleware>();
+    app.UseSerilogRequestLogging();
+    app.UseCors(myAllowSpecificOrigins);
+    app.UseNinjadog();
+
+    await app.Services
+        .GetRequiredService<DatabaseInitializer>()
+        .InitializeAsync()
+        .ConfigureAwait(false);
+
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    await Log.CloseAndFlushAsync();
+}

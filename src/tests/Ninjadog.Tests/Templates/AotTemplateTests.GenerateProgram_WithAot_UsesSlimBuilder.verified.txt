@@ -12,36 +12,58 @@
 
 using TestApp.Api;
 using TestApp.Api.Database;
+using TestApp.Api.Middleware;
+using Serilog;
 
-const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-var builder = WebApplication.CreateSlimBuilder(args);
-var services = builder.Services;
-var config = builder.Configuration;
-
-services.ConfigureHttpJsonOptions(options =>
+try
 {
-    options.SerializerOptions.TypeInfoResolverChain.Insert(0, TestApp.Api.AppJsonSerializerContext.Default);
-});
-services.AddCors(options =>
+    const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+    var builder = WebApplication.CreateSlimBuilder(args);
+    var services = builder.Services;
+    var config = builder.Configuration;
+
+    builder.Host.UseSerilog((context, loggerConfig) =>
+        loggerConfig.ReadFrom.Configuration(context.Configuration));
+
+    services.ConfigureHttpJsonOptions(options =>
+    {
+        options.SerializerOptions.TypeInfoResolverChain.Insert(0, TestApp.Api.AppJsonSerializerContext.Default);
+    });
+    services.AddCors(options =>
+    {
+        options.AddPolicy(name: myAllowSpecificOrigins,
+            policy =>
+            {
+                policy.WithOrigins("https://localhost:7270");
+            });
+    });
+
+    services.AddNinjadog(config);
+
+    var app = builder.Build();
+
+    app.UseMiddleware<RequestCorrelationMiddleware>();
+    app.UseSerilogRequestLogging();
+    app.UseCors(myAllowSpecificOrigins);
+    app.UseNinjadog();
+
+    await app.Services
+        .GetRequiredService<DatabaseInitializer>()
+        .InitializeAsync()
+        .ConfigureAwait(false);
+
+    app.Run();
+}
+catch (Exception ex)
 {
-    options.AddPolicy(name: myAllowSpecificOrigins,
-        policy =>
-        {
-            policy.WithOrigins("https://localhost:7270");
-        });
-});
-
-services.AddNinjadog(config);
-
-var app = builder.Build();
-
-app.UseCors(myAllowSpecificOrigins);
-app.UseNinjadog();
-
-await app.Services
-    .GetRequiredService<DatabaseInitializer>()
-    .InitializeAsync()
-    .ConfigureAwait(false);
-
-app.Run();
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    await Log.CloseAndFlushAsync();
+}

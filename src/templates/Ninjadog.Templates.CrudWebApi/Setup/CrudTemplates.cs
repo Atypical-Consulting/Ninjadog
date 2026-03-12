@@ -8,6 +8,7 @@ using Ninjadog.Templates.CrudWebAPI.Template.Docker;
 using Ninjadog.Templates.CrudWebAPI.Template.Domain;
 using Ninjadog.Templates.CrudWebAPI.Template.Endpoints;
 using Ninjadog.Templates.CrudWebAPI.Template.Mapping;
+using Ninjadog.Templates.CrudWebAPI.Template.Middleware;
 using Ninjadog.Templates.CrudWebAPI.Template.Repositories;
 using Ninjadog.Templates.CrudWebAPI.Template.Services;
 using Ninjadog.Templates.CrudWebAPI.Template.Summaries;
@@ -104,6 +105,10 @@ public class CrudTemplates : NinjadogTemplates
             "Validation",
             new CreateRequestValidatorTemplate(),
             new UpdateRequestValidatorTemplate());
+
+        AddTemplates(
+            "Middleware",
+            new RequestCorrelationMiddlewareTemplate());
 
         AddTemplates(
             "Auth",

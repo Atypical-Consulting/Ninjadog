@@ -20,11 +20,34 @@ public class AppSettingsTemplate : NinjadogTemplate
                 "Database": {
                   "ConnectionString": "Data Source=./{{ninjadogSettings.Config.Name}}.db"
                 },
-              {{GenerateJwtSection(auth)}}  "Logging": {
-                  "LogLevel": {
+              {{GenerateJwtSection(auth)}}  "Serilog": {
+                  "Using": ["Serilog.Sinks.Console", "Serilog.Sinks.File"],
+                  "MinimumLevel": {
                     "Default": "Information",
-                    "Microsoft.AspNetCore": "Warning"
-                  }
+                    "Override": {
+                      "Microsoft.AspNetCore": "Warning",
+                      "Microsoft.AspNetCore.Hosting": "Information",
+                      "System": "Warning"
+                    }
+                  },
+                  "WriteTo": [
+                    {
+                      "Name": "Console",
+                      "Args": {
+                        "outputTemplate": "[{Timestamp:HH:mm:ss} {Level:u3}] {CorrelationId:l} {Message:lj}{NewLine}{Exception}"
+                      }
+                    },
+                    {
+                      "Name": "File",
+                      "Args": {
+                        "path": "logs/log-.txt",
+                        "rollingInterval": "Day",
+                        "retainedFileCountLimit": 7,
+                        "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] ({CorrelationId}) {Message:lj}{NewLine}{Exception}"
+                      }
+                    }
+                  ],
+                  "Enrich": ["FromLogContext", "WithMachineName", "WithThreadId"]
                 },
                 "AllowedHosts": "*"
               }
