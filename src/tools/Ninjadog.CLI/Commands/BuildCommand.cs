@@ -4,14 +4,17 @@ namespace Ninjadog.CLI.Commands;
 
 internal sealed class BuildCommand(
     INinjadogEngineFactory engineFactory,
-    IDomainEventDispatcher domainEventDispatcher)
+    IDomainEventDispatcher domainEventDispatcher,
+    NinjadogVerbosityOptions verbosityOptions)
     : Command<BuildCommandSettings>
 {
     public override int Execute(CommandContext context, BuildCommandSettings settings, CancellationToken cancellationToken)
     {
         try
         {
-            var displayService = new NinjadogEngineEventDisplayService(domainEventDispatcher);
+            verbosityOptions.Verbose = settings.Verbose;
+
+            var displayService = new NinjadogEngineEventDisplayService(domainEventDispatcher, settings.Verbose);
             displayService.RegisterAllHandlers();
             engineFactory.CreateNinjadogEngine().Run();
             return 0;

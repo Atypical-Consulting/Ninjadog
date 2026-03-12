@@ -13,6 +13,7 @@ registrations.AddDomainEventDispatcher();
 registrations.AddInfrastructure();
 registrations.AddSingleton<INinjadogEngineFactory, NinjadogEngineFactory>();
 registrations.AddSingleton<NinjadogTemplateManifest, CrudTemplateManifest>();
+registrations.AddSingleton(new NinjadogVerbosityOptions());
 
 const string settingsFileName = "ninjadog.json";
 var settingsFilePath = Path.Combine(Directory.GetCurrentDirectory(), settingsFileName);

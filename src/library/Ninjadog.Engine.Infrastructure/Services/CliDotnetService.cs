@@ -9,7 +9,7 @@ namespace Ninjadog.Engine.Infrastructure.Services;
 /// This class provides functionality to programmatically run commands using the .NET CLI,
 /// ensuring the CLI is available upon initialization.
 /// </summary>
-public sealed class CliDotnetService : ICliDotnetService
+public sealed class CliDotnetService(NinjadogVerbosityOptions verbosityOptions) : ICliDotnetService
 {
     private const string DotnetCommand = "dotnet";
 
@@ -97,16 +97,18 @@ public sealed class CliDotnetService : ICliDotnetService
         await ListenCommandAsync(cmd);
     }
 
-    private static async Task ListenCommandAsync(Command cmd)
+    private async Task ListenCommandAsync(Command cmd)
     {
+        var verbose = verbosityOptions.Verbose;
+
         await foreach (var cmdEvent in cmd.ListenAsync())
         {
             switch (cmdEvent)
             {
-                case StartedCommandEvent started:
+                case StartedCommandEvent started when verbose:
                     AnsiConsole.MarkupLine($"[yellow]Process started; ID: {started.ProcessId}[/]");
                     break;
-                case StandardOutputCommandEvent stdOut:
+                case StandardOutputCommandEvent stdOut when verbose:
                     AnsiConsole.MarkupLine($"[blue]Out>[/] {stdOut.Text}");
                     break;
                 case StandardErrorCommandEvent stdErr:
@@ -116,7 +118,7 @@ public sealed class CliDotnetService : ICliDotnetService
                     AnsiConsole.MarkupLine($"[red]Process exited with code {exited.ExitCode}[/]");
                     AnsiConsole.WriteLine();
                     break;
-                case ExitedCommandEvent:
+                case ExitedCommandEvent when verbose:
                     AnsiConsole.MarkupLine("[green]Process completed successfully[/]");
                     AnsiConsole.WriteLine();
                     break;
