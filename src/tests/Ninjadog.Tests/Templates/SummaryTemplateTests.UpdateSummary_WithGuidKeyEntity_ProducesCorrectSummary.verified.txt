@@ -10,6 +10,7 @@
 // should be coordinated with Ninjadog support services.
 //------------------------------------------------------------------------------
 
+using Microsoft.AspNetCore.Mvc;
 using TestApp.Api.Contracts.Responses;
 using TestApp.Api.Endpoints;
 using FastEndpoints;
@@ -23,6 +24,6 @@ public partial class UpdateTodoItemSummary : Summary<UpdateTodoItemEndpoint>
         Summary = "Updates an existing todo item in the system";
         Description = "Updates an existing todo item in the system";
         Response<TodoItemResponse>(201, "todo item was successfully updated");
-        Response<ErrorResponse>(400, "The request did not pass validation checks");
+        Response<ProblemDetails>(400, "The request did not pass validation checks");
     }
 }

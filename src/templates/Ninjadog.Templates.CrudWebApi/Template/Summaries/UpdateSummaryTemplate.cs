@@ -20,6 +20,7 @@ public sealed class UpdateSummaryTemplate
         var content =
             $$"""
 
+              using Microsoft.AspNetCore.Mvc;
               using {{rootNamespace}}.Contracts.Responses;
               using {{rootNamespace}}.Endpoints;
               using FastEndpoints;
@@ -33,7 +34,7 @@ public sealed class UpdateSummaryTemplate
                       Summary = "Updates an existing {{st.ModelHumanized}} in the system";
                       Description = "Updates an existing {{st.ModelHumanized}} in the system";
                       Response<{{st.ClassModelResponse}}>(201, "{{st.ModelHumanized}} was successfully updated");
-                      Response<ErrorResponse>(400, "The request did not pass validation checks");
+                      Response<ProblemDetails>(400, "The request did not pass validation checks");
                   }
               }
               """;

@@ -30,3 +30,35 @@ The root generator that orchestrates the entire code generation pipeline. It rea
 ### Generated Registration
 
 The core generator also produces service registration extension methods so all generated repositories, services, and validators are automatically registered in your DI container.
+
+### Global Error Handling (RFC 9457)
+
+The core generator produces a global exception handler that returns standardized [RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457) responses for all errors. Every error response uses the `application/problem+json` content type.
+
+**Validation errors (400)** -- When a `FluentValidation.ValidationException` is thrown (e.g., invalid create/update request), the handler returns:
+
+```json
+{
+  "status": 400,
+  "title": "One or more validation errors occurred.",
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+  "detail": "See the errors property for details.",
+  "errors": {
+    "Name": ["'Name' must not be empty."],
+    "Price": ["'Price' must be greater than or equal to '0'."]
+  }
+}
+```
+
+**Unhandled exceptions (500)** -- Any other unhandled exception returns a generic response without leaking internal details:
+
+```json
+{
+  "status": 500,
+  "title": "An unexpected error occurred.",
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.6.1"
+}
+```
+
+{: .note }
+> The generated OpenAPI summaries document `ProblemDetails` as the 400 response type for create and update endpoints.

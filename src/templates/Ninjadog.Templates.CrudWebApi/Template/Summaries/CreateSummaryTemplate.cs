@@ -20,6 +20,7 @@ public sealed class CreateSummaryTemplate
         var content =
             $$"""
 
+              using Microsoft.AspNetCore.Mvc;
               using {{rootNamespace}}.Contracts.Responses;
               using {{rootNamespace}}.Endpoints;
               using FastEndpoints;
@@ -33,7 +34,7 @@ public sealed class CreateSummaryTemplate
                       Summary = "Creates a new {{st.ModelHumanized}} in the system";
                       Description = "Creates a new {{st.ModelHumanized}} in the system";
                       Response<{{st.ClassModelResponse}}>(201, "{{st.ModelHumanized}} was successfully created");
-                      Response<ErrorResponse>(400, "The request did not pass validation checks");
+                      Response<ProblemDetails>(400, "The request did not pass validation checks");
                   }
               }
               """;

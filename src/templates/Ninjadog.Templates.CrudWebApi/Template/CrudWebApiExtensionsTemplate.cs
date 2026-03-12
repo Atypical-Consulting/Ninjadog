@@ -42,6 +42,7 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
             $$"""
 
               using Microsoft.AspNetCore.Diagnostics;
+              using Microsoft.AspNetCore.Mvc;
               using {{rootNamespace}}.Database;
               using {{rootNamespace}}.Repositories;
               using {{rootNamespace}}.Services;
@@ -54,6 +55,8 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
 
               public static class NinjadogExtensions
               {
+                  private const string ProblemJsonContentType = "application/problem+json";
+
                   public static IServiceCollection AddNinjadog(
                       this IServiceCollection services,
                       ConfigurationManager config)
@@ -75,7 +78,7 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
 
                   public static WebApplication UseNinjadog(this WebApplication app)
                   {
-                      app.UseValidationExceptionHandler();
+                      app.UseGlobalExceptionHandler();
                       app.UseDefaultFiles();
                       app.UseStaticFiles();
                       app.UseFastEndpoints();
@@ -96,7 +99,7 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
                       return app;
                   }
 
-              {{GenerateValidationExceptionHandler(aot: false)}}
+              {{GenerateGlobalExceptionHandler(aot: false)}}
               }
               """;
     }
@@ -109,6 +112,7 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
 
               using System.Text.Json;
               using Microsoft.AspNetCore.Diagnostics;
+              using Microsoft.AspNetCore.Mvc;
               using {{rootNamespace}}.Database;
               using {{rootNamespace}}.Repositories;
               using {{rootNamespace}}.Services;
@@ -119,6 +123,8 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
 
               public static class NinjadogExtensions
               {
+                  private const string ProblemJsonContentType = "application/problem+json";
+
                   public static IServiceCollection AddNinjadog(
                       this IServiceCollection services,
                       ConfigurationManager config)
@@ -134,13 +140,13 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
 
                   public static WebApplication UseNinjadog(this WebApplication app)
                   {
-                      app.UseValidationExceptionHandler();
+                      app.UseGlobalExceptionHandler();
                       app.UseFastEndpoints();
 
                       return app;
                   }
 
-              {{GenerateValidationExceptionHandler(aot: true)}}
+              {{GenerateGlobalExceptionHandler(aot: true)}}
               }
               """;
     }
@@ -171,37 +177,59 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
         return sb.ToString();
     }
 
-    private static string GenerateValidationExceptionHandler(bool aot)
+    private static string GenerateGlobalExceptionHandler(bool aot)
     {
         var writeAsJsonCall = aot
-            ? "await ctx.Response.WriteAsJsonAsync(validationFailureResponse, AppJsonSerializerContext.Default.ErrorResponse);"
-            : "await ctx.Response.WriteAsJsonAsync(validationFailureResponse);";
+            ? "await ctx.Response.WriteAsJsonAsync(problemDetails, AppJsonSerializerContext.Default.ProblemDetails, ctx.RequestAborted);"
+            : "await ctx.Response.WriteAsJsonAsync(problemDetails, ctx.RequestAborted);";
 
         return
             $$"""
-                  public static WebApplication UseValidationExceptionHandler(this WebApplication app)
+                  private static WebApplication UseGlobalExceptionHandler(this WebApplication app)
                   {
                       app.UseExceptionHandler(errApp =>
                       {
                           errApp.Run(async ctx =>
                           {
                               var exHandlerFeature = ctx.Features.Get<IExceptionHandlerFeature>();
+                              var error = exHandlerFeature?.Error;
 
-                              if (exHandlerFeature?.Error is ValidationException exception)
+                              int statusCode;
+                              ProblemDetails problemDetails;
+
+                              if (error is ValidationException validationException)
                               {
-                                  var validationFailureResponse = new ErrorResponse
+                                  statusCode = StatusCodes.Status400BadRequest;
+                                  problemDetails = new ProblemDetails
                                   {
-                                      StatusCode = 400,
-                                      Message = "One or more errors occured!",
-                                      Errors = exception.Errors
-                                          .GroupBy(failure => failure.PropertyName)
-                                          .ToDictionary(
-                                              failures => failures.Key,
-                                              failures => failures.Select(failure => failure.ErrorMessage).ToList())
+                                      Status = statusCode,
+                                      Title = "One or more validation errors occurred.",
+                                      Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                                      Detail = "See the errors property for details.",
+                                      Extensions =
+                                      {
+                                          ["errors"] = validationException.Errors
+                                              .GroupBy(f => f.PropertyName)
+                                              .ToDictionary(
+                                                  g => g.Key,
+                                                  g => g.Select(f => f.ErrorMessage).ToArray())
+                                      }
                                   };
-
-                                  {{writeAsJsonCall}}
                               }
+                              else
+                              {
+                                  statusCode = StatusCodes.Status500InternalServerError;
+                                  problemDetails = new ProblemDetails
+                                  {
+                                      Status = statusCode,
+                                      Title = "An unexpected error occurred.",
+                                      Type = "https://tools.ietf.org/html/rfc9110#section-15.6.1"
+                                  };
+                              }
+
+                              ctx.Response.StatusCode = statusCode;
+                              ctx.Response.ContentType = ProblemJsonContentType;
+                              {{writeAsJsonCall}}
                           });
                       });
 
