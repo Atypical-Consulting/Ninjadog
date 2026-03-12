@@ -13,7 +13,6 @@
 using TestApp.Api.Contracts.Requests;
 using TestApp.Api.Services;
 using FastEndpoints;
-using Microsoft.AspNetCore.Authorization;
 
 namespace TestApp.Api.Endpoints;
 

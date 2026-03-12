@@ -22,12 +22,9 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
             $$"""
 
               using Microsoft.AspNetCore.Diagnostics;
-              using {{rootNamespace}}.Contracts.Responses;
               using {{rootNamespace}}.Database;
-              using {{rootNamespace}}.Mapping;
               using {{rootNamespace}}.Repositories;
               using {{rootNamespace}}.Services;
-              using {{rootNamespace}}.Validation;
               using FastEndpoints;
               using FastEndpoints.ClientGen;
               using FastEndpoints.Swagger;

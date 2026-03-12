@@ -22,8 +22,6 @@ public sealed class RepositoryInterfaceTemplate
             $$"""
 
               using {{rootNamespace}}.Contracts.Data;
-              using {{rootNamespace}}.Database;
-              using Dapper;
 
               {{WriteFileScopedNamespace(ns)}}
 

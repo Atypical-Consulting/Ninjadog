@@ -24,7 +24,6 @@ public sealed class GetAllEndpointTemplate
               using {{rootNamespace}}.Mapping;
               using {{rootNamespace}}.Services;
               using FastEndpoints;
-              using Microsoft.AspNetCore.Authorization;
 
               {{WriteFileScopedNamespace(ns)}}
 

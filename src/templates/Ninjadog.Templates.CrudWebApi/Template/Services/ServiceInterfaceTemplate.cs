@@ -22,6 +22,7 @@ public sealed class ServiceInterfaceTemplate
             $$"""
 
               using {{rootNamespace}}.Domain;
+              using FluentValidation;
 
               {{WriteFileScopedNamespace(ns)}}
 

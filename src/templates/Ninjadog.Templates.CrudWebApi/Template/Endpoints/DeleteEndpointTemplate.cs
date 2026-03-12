@@ -24,7 +24,6 @@ public sealed class DeleteEndpointTemplate
               using {{rootNamespace}}.Contracts.Requests;
               using {{rootNamespace}}.Services;
               using FastEndpoints;
-              using Microsoft.AspNetCore.Authorization;
 
               {{WriteFileScopedNamespace(ns)}}
 

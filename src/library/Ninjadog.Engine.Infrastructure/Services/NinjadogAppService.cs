@@ -109,6 +109,7 @@ public class NinjadogAppService : INinjadogAppService
     public virtual async Task NewProjectFileAsync()
     {
         await _dotnet.ExecuteNewAsync("webapi", ProjectPath);
+        SetRootNamespaceInProject();
     }
 
     /// <inheritdoc />
@@ -138,5 +139,39 @@ public class NinjadogAppService : INinjadogAppService
 
             await _dotnet.ExecuteAddPackageAsync(ProjectPath, packageName, version);
         }
+    }
+
+    /// <summary>
+    /// Sets the RootNamespace property in the generated .csproj file so that
+    /// it matches the user-configured root namespace instead of defaulting to
+    /// the project folder name (which includes the manifest suffix).
+    /// </summary>
+    private void SetRootNamespaceInProject()
+    {
+        var rootNamespace = _settings.Config.RootNamespace;
+        var projectFolderName = $"{AppName}.{_manifest.Name}";
+
+        // Skip if the root namespace already matches the project folder name
+        if (rootNamespace == projectFolderName)
+        {
+            return;
+        }
+
+        var csprojPath = Path.Combine(ProjectPath, $"{projectFolderName}.csproj");
+        if (!File.Exists(csprojPath))
+        {
+            return;
+        }
+
+        var content = File.ReadAllText(csprojPath);
+        var rootNsElement = $"<RootNamespace>{rootNamespace}</RootNamespace>";
+
+        // Insert RootNamespace after the first <PropertyGroup> tag
+        content = content.Replace(
+            "<PropertyGroup>",
+            $"<PropertyGroup>\n    {rootNsElement}",
+            StringComparison.Ordinal);
+
+        File.WriteAllText(csprojPath, content);
     }
 }
