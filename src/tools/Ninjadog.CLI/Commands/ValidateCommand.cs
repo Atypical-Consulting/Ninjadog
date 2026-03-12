@@ -19,11 +19,16 @@ internal sealed class ValidateCommand
             return ExitCodeFileNotFound;
         }
 
-        MarkupLine($"Validating [cyan]{filePath.EscapeMarkup()}[/]...");
-        WriteLine();
+        var result = AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .SpinnerStyle(new Style(Color.Cyan))
+            .Start($"Validating [cyan]{filePath.EscapeMarkup()}[/]...", _ =>
+            {
+                var jsonContent = File.ReadAllText(filePath);
+                return NinjadogConfigValidator.Validate(jsonContent);
+            });
 
-        var jsonContent = File.ReadAllText(filePath);
-        var result = NinjadogConfigValidator.Validate(jsonContent);
+        WriteLine();
 
         return RenderResult(result, settings.Strict);
     }

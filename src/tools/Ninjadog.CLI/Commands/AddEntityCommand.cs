@@ -92,7 +92,7 @@ internal sealed class AddEntityCommand
             var updatedJson = System.Text.Encoding.UTF8.GetString(stream.ToArray());
             File.WriteAllText(settingsFilePath, updatedJson);
 
-            MarkupLine($"[green]Entity '{settings.EntityName}' added successfully.[/]");
+            MarkupLine($"[green]Entity '{settings.EntityName.EscapeMarkup()}' added successfully.[/]");
             return 0;
         }
         catch (Exception e)

@@ -11,6 +11,16 @@ internal sealed class NinjadogEngineEventDisplayService(IDomainEventDispatcher d
 
     private int _filesGeneratedForCurrentTemplate;
 
+    private ProgressContext? _progressContext;
+    private ProgressTask? _scaffoldTask;
+    private ProgressTask? _nugetTask;
+    private ProgressTask? _generateTask;
+
+    internal void SetProgressContext(ProgressContext ctx)
+    {
+        _progressContext = ctx;
+    }
+
     protected override void BeforeEngineRun(BeforeEngineRunEvent domainEvent)
     {
         var config = domainEvent.Settings.Config;
@@ -48,27 +58,28 @@ internal sealed class NinjadogEngineEventDisplayService(IDomainEventDispatcher d
             WriteLine();
             MarkupLine("[bold]Scaffolding project...[/]");
         }
-        else
+        else if (_progressContext is not null)
         {
-            Markup($"Scaffolding [green]{config.Name}[/] project...");
+            _scaffoldTask = _progressContext.AddTask($"Scaffolding [green]{config.Name.EscapeMarkup()}[/]", maxValue: 1);
+            _nugetTask = _progressContext.AddTask($"Adding NuGet packages ({manifest.NuGetPackages.Count})", autoStart: false, maxValue: 1);
+            _generateTask = _progressContext.AddTask("Generating files", autoStart: false, maxValue: manifest.Templates.Count);
         }
     }
 
     protected override void ScaffoldingCompleted(ScaffoldingCompletedEvent domainEvent)
     {
-        var entities = domainEvent.Settings.Entities;
-        var manifest = domainEvent.TemplateManifest;
-
         if (verbose)
         {
             MarkupLine("[bold]Scaffolding complete. Generating files...[/]");
         }
-        else
+        else if (_progressContext is not null)
         {
-            var entityLabel = entities.Count == 1 ? "entity" : "entities";
-            MarkupLine($"            [green]done[/]");
-            MarkupLine($"Adding NuGet packages ({manifest.NuGetPackages.Count})...            [green]done[/]");
-            MarkupLine($"Generating files for {entities.Count} {entityLabel}...");
+            _scaffoldTask?.Increment(1);
+
+            _nugetTask?.StartTask();
+            _nugetTask?.Increment(1);
+
+            _generateTask?.StartTask();
         }
     }
 
@@ -86,13 +97,8 @@ internal sealed class NinjadogEngineEventDisplayService(IDomainEventDispatcher d
             MarkupLine($"- Total files generated: [green]{totalFilesGenerated:N0}[/] files");
             WriteLine();
         }
-        else
-        {
-            MarkupLine($"Generating files...                     [green]done[/]");
-            WriteLine();
-            MarkupLine($"[bold]Build completed in {elapsed.TotalSeconds:F1}s[/] — [green]{totalFilesGenerated} files[/] generated");
-            WriteLine();
-        }
+
+        // Summary is printed after progress completes (in BuildCommand)
     }
 
     protected override void BeforeTemplateGenerated(BeforeTemplateParsedEvent domainEvent)
@@ -102,17 +108,29 @@ internal sealed class NinjadogEngineEventDisplayService(IDomainEventDispatcher d
         if (verbose)
         {
             var templateName = domainEvent.Template.Name;
-
             WriteLine();
             MarkupLine($"- Processing template [yellow]{templateName}[/]...");
+        }
+        else if (_generateTask is not null)
+        {
+            var templateName = domainEvent.Template.Name;
+            _generateTask.Description = $"Generating [yellow]{templateName.EscapeMarkup()}[/]";
+            _progressContext?.Refresh();
         }
     }
 
     protected override void AfterTemplateGenerated(AfterTemplateParsedEvent domainEvent)
     {
-        if (verbose && _filesGeneratedForCurrentTemplate == 0)
+        if (verbose)
         {
-            MarkupLine("  [yellow](skipped)[/]");
+            if (_filesGeneratedForCurrentTemplate == 0)
+            {
+                MarkupLine("  [yellow](skipped)[/]");
+            }
+        }
+        else
+        {
+            _generateTask?.Increment(1);
         }
     }
 
@@ -132,13 +150,8 @@ internal sealed class NinjadogEngineEventDisplayService(IDomainEventDispatcher d
             Markup($" with a length of [green]{length:N0}[/] characters.");
             WriteLine();
         }
-        else
-        {
-            var fileNumber = domainEvent.ContextSnapshot.TotalFilesGenerated;
-            Markup($"  [grey][[{fileNumber}]][/] ");
-            WriteTextPath(fileKey);
-            WriteLine();
-        }
+
+        // In non-verbose mode with progress, individual files are tracked via the progress bar
     }
 
     protected override void OnErrorOccurred(ErrorOccurredEvent domainEvent)
