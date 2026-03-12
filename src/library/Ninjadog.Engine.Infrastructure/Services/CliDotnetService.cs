@@ -28,7 +28,7 @@ public sealed class CliDotnetService(NinjadogVerbosityOptions verbosityOptions) 
     {
         var cmd = Cli
             .Wrap(DotnetCommand)
-            .WithArguments(["new", templateKey, "--output", outputPath]);
+            .WithArguments(["new", templateKey, "--output", outputPath, "--force"]);
 
         await ListenCommandAsync(cmd);
     }
