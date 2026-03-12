@@ -46,5 +46,11 @@ const NinjadogApi = (() => {
         return res.json();
     }
 
-    return { getConfig, saveConfig, validate, build, getSchema };
+    async function getDirectories(path) {
+        const res = await fetch(`/api/directories?path=${encodeURIComponent(path || '.')}`);
+        if (!res.ok) throw new Error(`GET /api/directories failed: ${res.status}`);
+        return res.json();
+    }
+
+    return { getConfig, saveConfig, validate, build, getSchema, getDirectories };
 })();

@@ -20,6 +20,9 @@ dotnet test --filter "FullyQualifiedName~RepositoryTemplateTests"
 
 # Install CLI locally (preferred method)
 ./scripts/install.sh
+
+# Run the web-based config builder UI (requires local install)
+ninjadog ui --port 5391 --no-browser
 ```
 
 The install script derives version from the latest git tag with a `-local` suffix, bypassing MinVer.

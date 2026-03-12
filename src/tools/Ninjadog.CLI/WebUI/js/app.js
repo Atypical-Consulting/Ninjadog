@@ -3,8 +3,8 @@
  */
 const App = (() => {
     let state = {};
+    let savedSnapshot = '';
     let activeTab = 'config';
-    let rawEditMode = false;
     let validateTimer = null;
 
     async function init() {
@@ -16,12 +16,23 @@ const App = (() => {
             state = {};
         }
 
+        savedSnapshot = JSON.stringify(state);
+
         setupTabs();
         setupHeaderButtons();
-        setupRawToggle();
         renderActiveTab();
-        JsonPreview.update(state);
+
+        // Initialize Monaco editor and register bidirectional sync
+        await JsonPreview.init(state);
+        JsonPreview.onExternalEdit((parsed) => {
+            state = parsed;
+            renderActiveTab();
+            scheduleValidation();
+            updateDirtyIndicator();
+        });
+
         scheduleValidation();
+        updateDirtyIndicator();
     }
 
     function setupTabs() {
@@ -43,6 +54,8 @@ const App = (() => {
             try {
                 const json = JsonPreview.getJson(state);
                 await NinjadogApi.saveConfig(json);
+                savedSnapshot = JSON.stringify(state);
+                updateDirtyIndicator();
                 badge.textContent = 'Saved';
                 badge.className = 'text-xs px-2 py-0.5 rounded-full bg-emerald-900 text-emerald-300';
                 badge.classList.remove('hidden');
@@ -61,6 +74,8 @@ const App = (() => {
                 // Save first
                 const json = JsonPreview.getJson(state);
                 await NinjadogApi.saveConfig(json);
+                savedSnapshot = JSON.stringify(state);
+                updateDirtyIndicator();
                 const result = await NinjadogApi.build();
                 badge.textContent = result.success ? 'Build succeeded' : 'Build failed';
                 badge.className = result.success
@@ -73,37 +88,6 @@ const App = (() => {
                 badge.className = 'text-xs px-2 py-0.5 rounded-full bg-red-900 text-red-300';
                 badge.classList.remove('hidden');
                 setTimeout(() => badge.classList.add('hidden'), 3000);
-            }
-        });
-    }
-
-    function setupRawToggle() {
-        const btn = document.getElementById('btn-toggle-raw');
-        const preview = document.getElementById('json-preview');
-        const raw = document.getElementById('json-raw');
-
-        btn.addEventListener('click', () => {
-            rawEditMode = !rawEditMode;
-            if (rawEditMode) {
-                preview.classList.add('hidden');
-                raw.classList.remove('hidden');
-                raw.value = JSON.stringify(JsonPreview.getJson(state), null, 2);
-                btn.textContent = 'Preview';
-            } else {
-                // Try to parse raw edit
-                try {
-                    state = JSON.parse(raw.value);
-                    renderActiveTab();
-                    scheduleValidation();
-                } catch {
-                    // invalid JSON, stay in raw mode
-                    rawEditMode = true;
-                    return;
-                }
-                preview.classList.remove('hidden');
-                raw.classList.add('hidden');
-                btn.textContent = 'Raw Edit';
-                JsonPreview.update(state);
             }
         });
     }
@@ -129,6 +113,21 @@ const App = (() => {
     function onStateChanged() {
         JsonPreview.update(state);
         scheduleValidation();
+        updateDirtyIndicator();
+    }
+
+    function updateDirtyIndicator() {
+        const isDirty = JSON.stringify(state) !== savedSnapshot;
+        const dot = document.getElementById('dirty-indicator');
+        const saveBtn = document.getElementById('btn-save');
+
+        if (isDirty) {
+            dot.classList.remove('hidden');
+            saveBtn.classList.add('header-btn-dirty');
+        } else {
+            dot.classList.add('hidden');
+            saveBtn.classList.remove('header-btn-dirty');
+        }
     }
 
     function scheduleValidation() {

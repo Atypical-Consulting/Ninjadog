@@ -1,5 +1,6 @@
 /**
  * Entities tab — list of entities with expandable property/relationship editors.
+ * No modals: uses inline forms for add/remove. Property renames propagate to seed data.
  */
 const EntityEditor = (() => {
     const propertyTypes = [
@@ -15,17 +16,48 @@ const EntityEditor = (() => {
         container.innerHTML = `
             <div class="flex items-center justify-between mb-4">
                 <div class="section-title mb-0">Entities (${names.length})</div>
-                <button id="btn-add-entity" class="btn-sm btn-primary">+ Add Entity</button>
+                <div id="entity-add-area">
+                    <button id="btn-add-entity" class="btn-sm btn-primary">+ Add Entity</button>
+                    <div id="entity-add-form" class="inline-add-form hidden">
+                        <input id="entity-add-input" class="field-input text-sm py-1" style="width:200px" placeholder="Entity name (PascalCase)" />
+                        <button id="entity-add-confirm" class="btn-sm btn-primary">Create</button>
+                        <button id="entity-add-cancel" class="btn-sm btn-ghost">Cancel</button>
+                    </div>
+                </div>
             </div>
             <div id="entity-list">${names.map(n => entityCard(n, state.entities[n], state)).join('')}</div>
         `;
 
-        container.querySelector('#btn-add-entity').addEventListener('click', () => {
-            const name = prompt('Entity name (PascalCase):');
+        // Inline add entity
+        const addBtn = container.querySelector('#btn-add-entity');
+        const addForm = container.querySelector('#entity-add-form');
+        const addInput = container.querySelector('#entity-add-input');
+        const addConfirm = container.querySelector('#entity-add-confirm');
+        const addCancel = container.querySelector('#entity-add-cancel');
+
+        addBtn.addEventListener('click', () => {
+            addBtn.classList.add('hidden');
+            addForm.classList.remove('hidden');
+            addInput.value = '';
+            addInput.focus();
+        });
+
+        addConfirm.addEventListener('click', () => {
+            const name = addInput.value.trim();
             if (!name) return;
             state.entities[name] = { properties: {} };
             render(container, state);
             App.onStateChanged();
+        });
+
+        addCancel.addEventListener('click', () => {
+            addForm.classList.add('hidden');
+            addBtn.classList.remove('hidden');
+        });
+
+        addInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') addConfirm.click();
+            if (e.key === 'Escape') addCancel.click();
         });
 
         // Bind all entity interactions
@@ -44,14 +76,21 @@ const EntityEditor = (() => {
                 <span class="font-medium text-sm">${esc(name)}</span>
                 <div class="flex items-center gap-2">
                     <span class="text-xs text-gray-500">${propNames.length} props</span>
-                    <button class="btn-sm btn-danger entity-remove" data-entity="${esc(name)}">Remove</button>
+                    <button class="btn-sm btn-danger entity-remove" data-entity="${esc(name)}" data-confirmed="false">Remove</button>
                 </div>
             </div>
             <div class="entity-body">
                 <div class="mb-3">
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-xs font-medium text-gray-400">Properties</span>
-                        <button class="btn-sm btn-ghost prop-add" data-entity="${esc(name)}">+ Property</button>
+                        <div class="prop-add-area" data-entity="${esc(name)}">
+                            <button class="btn-sm btn-ghost prop-add-btn" data-entity="${esc(name)}">+ Property</button>
+                            <div class="inline-add-form hidden prop-add-form">
+                                <input class="field-input text-xs py-1 prop-add-input" style="width:150px" placeholder="Property name (camelCase)" data-entity="${esc(name)}" />
+                                <button class="btn-sm btn-primary prop-add-confirm" data-entity="${esc(name)}">Add</button>
+                                <button class="btn-sm btn-ghost prop-add-cancel" data-entity="${esc(name)}">Cancel</button>
+                            </div>
+                        </div>
                     </div>
                     ${propNames.length > 0 ? `
                     <table class="data-table">
@@ -68,7 +107,14 @@ const EntityEditor = (() => {
                 <div>
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-xs font-medium text-gray-400">Relationships</span>
-                        <button class="btn-sm btn-ghost rel-add" data-entity="${esc(name)}">+ Relationship</button>
+                        <div class="rel-add-area" data-entity="${esc(name)}">
+                            <button class="btn-sm btn-ghost rel-add-btn" data-entity="${esc(name)}">+ Relationship</button>
+                            <div class="inline-add-form hidden rel-add-form">
+                                <input class="field-input text-xs py-1 rel-add-input" style="width:150px" placeholder="Relationship name" data-entity="${esc(name)}" />
+                                <button class="btn-sm btn-primary rel-add-confirm" data-entity="${esc(name)}">Add</button>
+                                <button class="btn-sm btn-ghost rel-add-cancel" data-entity="${esc(name)}">Cancel</button>
+                            </div>
+                        </div>
                     </div>
                     ${relNames.length > 0 ? `
                     <table class="data-table">
@@ -112,29 +158,67 @@ const EntityEditor = (() => {
     }
 
     function bindEntityEvents(container, state) {
-        // Remove entity
+        // Remove entity — two-click confirmation (no modal)
         container.querySelectorAll('.entity-remove').forEach(btn => {
+            let confirmTimer = null;
             btn.addEventListener('click', e => {
                 e.stopPropagation();
                 const name = btn.dataset.entity;
-                if (confirm(`Remove entity "${name}"?`)) {
+                if (btn.dataset.confirmed === 'true') {
+                    // Second click — actually remove
+                    clearTimeout(confirmTimer);
                     delete state.entities[name];
                     render(container, state);
                     App.onStateChanged();
+                } else {
+                    // First click — ask confirmation
+                    btn.dataset.confirmed = 'true';
+                    btn.textContent = 'Sure?';
+                    btn.classList.remove('btn-danger');
+                    btn.classList.add('btn-confirm-danger');
+                    confirmTimer = setTimeout(() => {
+                        btn.dataset.confirmed = 'false';
+                        btn.textContent = 'Remove';
+                        btn.classList.add('btn-danger');
+                        btn.classList.remove('btn-confirm-danger');
+                    }, 3000);
                 }
             });
         });
 
-        // Add property
-        container.querySelectorAll('.prop-add').forEach(btn => {
+        // Inline add property
+        container.querySelectorAll('.prop-add-btn').forEach(btn => {
+            const entity = btn.dataset.entity;
+            const area = btn.closest('.prop-add-area');
+            const form = area.querySelector('.prop-add-form');
+            const input = area.querySelector('.prop-add-input');
+            const confirm = area.querySelector('.prop-add-confirm');
+            const cancel = area.querySelector('.prop-add-cancel');
+
             btn.addEventListener('click', () => {
-                const entity = btn.dataset.entity;
-                const pname = prompt('Property name (camelCase):');
+                btn.classList.add('hidden');
+                form.classList.remove('hidden');
+                input.value = '';
+                input.focus();
+            });
+
+            confirm.addEventListener('click', () => {
+                const pname = input.value.trim();
                 if (!pname) return;
                 state.entities[entity].properties = state.entities[entity].properties || {};
                 state.entities[entity].properties[pname] = { type: 'string' };
                 render(container, state);
                 App.onStateChanged();
+            });
+
+            cancel.addEventListener('click', () => {
+                form.classList.add('hidden');
+                btn.classList.remove('hidden');
+            });
+
+            input.addEventListener('keydown', e => {
+                if (e.key === 'Enter') confirm.click();
+                if (e.key === 'Escape') cancel.click();
             });
         });
 
@@ -144,6 +228,14 @@ const EntityEditor = (() => {
                 const tr = btn.closest('tr');
                 const entity = tr.dataset.entity;
                 const prop = tr.dataset.prop;
+
+                // Also remove from seed data
+                if (state.entities[entity].seedData) {
+                    state.entities[entity].seedData.forEach(row => {
+                        delete row[prop];
+                    });
+                }
+
                 delete state.entities[entity].properties[prop];
                 render(container, state);
                 App.onStateChanged();
@@ -156,16 +248,39 @@ const EntityEditor = (() => {
             el.addEventListener(event, () => collectProperties(container, state));
         });
 
-        // Add relationship
-        container.querySelectorAll('.rel-add').forEach(btn => {
+        // Inline add relationship
+        container.querySelectorAll('.rel-add-btn').forEach(btn => {
+            const entity = btn.dataset.entity;
+            const area = btn.closest('.rel-add-area');
+            const form = area.querySelector('.rel-add-form');
+            const input = area.querySelector('.rel-add-input');
+            const confirm = area.querySelector('.rel-add-confirm');
+            const cancel = area.querySelector('.rel-add-cancel');
+
             btn.addEventListener('click', () => {
-                const entity = btn.dataset.entity;
-                const rname = prompt('Relationship name:');
+                btn.classList.add('hidden');
+                form.classList.remove('hidden');
+                input.value = '';
+                input.focus();
+            });
+
+            confirm.addEventListener('click', () => {
+                const rname = input.value.trim();
                 if (!rname) return;
                 state.entities[entity].relationships = state.entities[entity].relationships || {};
                 state.entities[entity].relationships[rname] = { type: 'hasMany', targetEntity: '' };
                 render(container, state);
                 App.onStateChanged();
+            });
+
+            cancel.addEventListener('click', () => {
+                form.classList.add('hidden');
+                btn.classList.remove('hidden');
+            });
+
+            input.addEventListener('keydown', e => {
+                if (e.key === 'Enter') confirm.click();
+                if (e.key === 'Escape') cancel.click();
             });
         });
 
@@ -215,9 +330,19 @@ const EntityEditor = (() => {
 
             if (!prop.type) prop.type = 'string';
 
-            // Handle rename
+            // Handle rename — also propagate to seed data
             if (newName !== origName) {
                 delete state.entities[entity].properties[origName];
+
+                // Update seed data keys
+                if (state.entities[entity].seedData) {
+                    state.entities[entity].seedData.forEach(row => {
+                        if (origName in row) {
+                            row[newName] = row[origName];
+                            delete row[origName];
+                        }
+                    });
+                }
             }
             state.entities[entity].properties[newName] = prop;
         });

@@ -2,6 +2,9 @@
  * Config tab — form fields for the top-level "config" section.
  */
 const ConfigEditor = (() => {
+    let dirBrowserOpen = false;
+    let dirBrowserPath = '.';
+
     function render(container, state) {
         const c = state.config || {};
         const cors = c.cors || {};
@@ -31,7 +34,14 @@ const ConfigEditor = (() => {
                         </div>
                         <div>
                             <label class="field-label">Output Path</label>
-                            <input class="field-input" data-field="outputPath" value="${esc(c.outputPath || '.')}" />
+                            <div class="flex gap-2">
+                                <input class="field-input flex-1" data-field="outputPath" value="${esc(c.outputPath || '.')}" />
+                                <button id="btn-browse-output" class="btn-sm btn-ghost flex items-center gap-1 whitespace-nowrap" title="Browse directories">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                                    Browse
+                                </button>
+                            </div>
+                            <div id="dir-browser" class="mt-2 hidden"></div>
                         </div>
                     </div>
                 </div>
@@ -88,6 +98,90 @@ const ConfigEditor = (() => {
         container.querySelectorAll('[data-field]').forEach(el => {
             const event = el.type === 'checkbox' ? 'change' : 'input';
             el.addEventListener(event, () => collectConfig(container, state));
+        });
+
+        // Browse button
+        container.querySelector('#btn-browse-output').addEventListener('click', () => {
+            dirBrowserOpen = !dirBrowserOpen;
+            if (dirBrowserOpen) {
+                dirBrowserPath = container.querySelector('[data-field="outputPath"]').value || '.';
+                loadDirectories(container, state);
+            } else {
+                container.querySelector('#dir-browser').classList.add('hidden');
+            }
+        });
+    }
+
+    async function loadDirectories(container, state) {
+        const browser = container.querySelector('#dir-browser');
+        browser.classList.remove('hidden');
+        browser.innerHTML = '<div class="dir-browser"><div class="dir-current">Loading...</div></div>';
+
+        try {
+            const data = await NinjadogApi.getDirectories(dirBrowserPath);
+            renderDirBrowser(container, state, data);
+        } catch {
+            browser.innerHTML = '<div class="dir-browser"><div class="dir-current">Failed to load directories</div></div>';
+        }
+    }
+
+    function renderDirBrowser(container, state, data) {
+        const browser = container.querySelector('#dir-browser');
+        const dirs = data.directories || [];
+
+        let html = '<div class="dir-browser">';
+        html += `<div class="dir-current">
+            <span>${esc(data.absolute || data.current)}</span>
+            <button class="dir-close-btn btn-sm btn-ghost" style="padding:2px 8px;font-size:10px;">Close</button>
+        </div>`;
+
+        // Parent directory
+        if (data.parent) {
+            html += `<button class="dir-item dir-item-parent" data-path="${esc(data.parent)}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                ..
+            </button>`;
+        }
+
+        // Subdirectories
+        dirs.forEach(d => {
+            const subPath = data.current === '.' ? d : `${data.current}/${d}`;
+            html += `<button class="dir-item" data-path="${esc(subPath)}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                ${esc(d)}
+            </button>`;
+        });
+
+        // Select current directory
+        html += `<button class="dir-item dir-item-select" data-select="${esc(data.current)}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Select this folder
+        </button>`;
+
+        html += '</div>';
+        browser.innerHTML = html;
+
+        // Bind navigation
+        browser.querySelectorAll('.dir-item:not(.dir-item-select)').forEach(btn => {
+            btn.addEventListener('click', () => {
+                dirBrowserPath = btn.dataset.path;
+                loadDirectories(container, state);
+            });
+        });
+
+        // Bind select
+        browser.querySelector('.dir-item-select').addEventListener('click', () => {
+            const input = container.querySelector('[data-field="outputPath"]');
+            input.value = browser.querySelector('.dir-item-select').dataset.select;
+            dirBrowserOpen = false;
+            browser.classList.add('hidden');
+            collectConfig(container, state);
+        });
+
+        // Bind close
+        browser.querySelector('.dir-close-btn').addEventListener('click', () => {
+            dirBrowserOpen = false;
+            browser.classList.add('hidden');
         });
     }
 
