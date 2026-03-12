@@ -18,6 +18,7 @@ public class RegisterEndpointTemplate : NinjadogTemplate
         }
 
         var rootNamespace = ninjadogSettings.Config.RootNamespace;
+        var apiVersion = ninjadogSettings.Config.Versioning?.DefaultVersion;
         const string fileName = "RegisterEndpoint.cs";
 
         var content =
@@ -33,7 +34,7 @@ public class RegisterEndpointTemplate : NinjadogTemplate
                   public override void Configure()
                   {
                       Post("/api/auth/register");
-                      AllowAnonymous();
+                      AllowAnonymous();{{GenerateVersionCall(apiVersion)}}
                   }
 
                   public override async Task HandleAsync(RegisterRequest req, CancellationToken ct)

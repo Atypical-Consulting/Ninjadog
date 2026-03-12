@@ -6,8 +6,17 @@ namespace Ninjadog.Templates.CrudWebAPI.Template.Endpoints;
 public sealed class GetEndpointTemplate
     : NinjadogTemplate
 {
+    private int? _apiVersion;
+
     /// <inheritdoc />
     public override string Name => "GetEndpoint";
+
+    /// <inheritdoc />
+    public override IEnumerable<NinjadogContentFile> GenerateMany(NinjadogSettings ninjadogSettings)
+    {
+        _apiVersion = ninjadogSettings.Config.Versioning?.DefaultVersion;
+        return base.GenerateMany(ninjadogSettings);
+    }
 
     /// <inheritdoc />
     public override NinjadogContentFile GenerateOneByEntity(
@@ -35,7 +44,7 @@ public sealed class GetEndpointTemplate
                   public override void Configure()
                   {
                       Get("{{st.ModelEndpoint}}/{id:{{GetRouteConstraint(entityKey.Type)}}}");
-                      AllowAnonymous();
+                      AllowAnonymous();{{GenerateVersionCall(_apiVersion)}}
                   }
 
                   public override async Task HandleAsync({{st.ClassGetModelRequest}} req, CancellationToken ct)

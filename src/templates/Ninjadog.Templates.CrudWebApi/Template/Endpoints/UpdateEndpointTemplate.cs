@@ -7,6 +7,7 @@ public sealed class UpdateEndpointTemplate
     : NinjadogTemplate
 {
     private bool _hasAuth;
+    private int? _apiVersion;
 
     /// <inheritdoc />
     public override string Name => "UpdateEndpoint";
@@ -15,6 +16,7 @@ public sealed class UpdateEndpointTemplate
     public override IEnumerable<NinjadogContentFile> GenerateMany(NinjadogSettings ninjadogSettings)
     {
         _hasAuth = ninjadogSettings.Config.Auth is not null;
+        _apiVersion = ninjadogSettings.Config.Versioning?.DefaultVersion;
         return base.GenerateMany(ninjadogSettings);
     }
 
@@ -43,7 +45,7 @@ public sealed class UpdateEndpointTemplate
               {
                   public override void Configure()
                   {
-                      Put("{{st.ModelEndpoint}}/{id:{{GetRouteConstraint(entityKey.Type)}}}");{{(_hasAuth ? string.Empty : "\n        AllowAnonymous();")}}
+                      Put("{{st.ModelEndpoint}}/{id:{{GetRouteConstraint(entityKey.Type)}}}");{{(_hasAuth ? string.Empty : "\n        AllowAnonymous();")}}{{GenerateVersionCall(_apiVersion)}}
                   }
 
                   public override async Task HandleAsync({{st.ClassUpdateModelRequest}} req, CancellationToken ct)

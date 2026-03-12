@@ -7,6 +7,7 @@ public sealed class DeleteEndpointTemplate
     : NinjadogTemplate
 {
     private bool _hasAuth;
+    private int? _apiVersion;
 
     /// <inheritdoc />
     public override string Name => "DeleteEndpoint";
@@ -15,6 +16,7 @@ public sealed class DeleteEndpointTemplate
     public override IEnumerable<NinjadogContentFile> GenerateMany(NinjadogSettings ninjadogSettings)
     {
         _hasAuth = ninjadogSettings.Config.Auth is not null;
+        _apiVersion = ninjadogSettings.Config.Versioning?.DefaultVersion;
         return base.GenerateMany(ninjadogSettings);
     }
 
@@ -41,7 +43,7 @@ public sealed class DeleteEndpointTemplate
               {
                   public override void Configure()
                   {
-                      Delete("{{st.ModelEndpoint}}/{id:{{GetRouteConstraint(entityKey.Type)}}}");{{(_hasAuth ? string.Empty : "\n        AllowAnonymous();")}}
+                      Delete("{{st.ModelEndpoint}}/{id:{{GetRouteConstraint(entityKey.Type)}}}");{{(_hasAuth ? string.Empty : "\n        AllowAnonymous();")}}{{GenerateVersionCall(_apiVersion)}}
                   }
 
                   public override async Task HandleAsync({{st.ClassDeleteModelRequest}} req, CancellationToken ct)

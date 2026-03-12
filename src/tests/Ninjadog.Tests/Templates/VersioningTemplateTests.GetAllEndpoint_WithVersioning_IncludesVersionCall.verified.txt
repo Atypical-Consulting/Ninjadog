@@ -1,0 +1,69 @@
+﻿//------------------------------------------------------------------------------
+// This code was powered by the Ninjadog Engine
+//
+// Developed by: Atypical Consulting SRL - Philippe Matray
+// Generated on: [SCRUBBED]
+// Version     : [SCRUBBED]
+//
+// This file is part of a custom software solution crafted to meet your
+// specific needs. For optimal performance and compatibility, modifications
+// should be coordinated with Ninjadog support services.
+//------------------------------------------------------------------------------
+
+using TestApp.Api.Contracts.Responses;
+using TestApp.Api.Mapping;
+using TestApp.Api.Services;
+using FastEndpoints;
+
+namespace TestApp.Api.Endpoints;
+
+public partial class GetAllTodoItemsEndpoint(ITodoItemService todoItemService)
+    : EndpointWithoutRequest<GetAllTodoItemsResponse>
+{
+    private static readonly HashSet<string> FilterableProperties = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Title", "Description", "IsCompleted", "DueDate", "Priority", "Cost"
+    };
+
+    public override void Configure()
+    {
+        Get("/todo-items");
+        AllowAnonymous();
+        Version(1);
+    }
+
+    public override async Task HandleAsync(CancellationToken ct)
+    {
+        var page = int.TryParse(HttpContext.Request.Query["page"], out var p) && p > 0 ? p : 1;
+        var pageSize = int.TryParse(HttpContext.Request.Query["pageSize"], out var ps) && ps > 0 ? ps : 10;
+
+        // Parse filters from query parameters matching entity properties
+        var filters = new Dictionary<string, string>();
+        foreach (var key in HttpContext.Request.Query.Keys)
+        {
+            if (FilterableProperties.Contains(key))
+            {
+                var value = HttpContext.Request.Query[key].ToString();
+                if (!string.IsNullOrEmpty(value))
+                {
+                    filters[key] = value;
+                }
+            }
+        }
+
+        // Parse sort parameters
+        var sortBy = HttpContext.Request.Query["sortBy"].ToString();
+        if (!string.IsNullOrEmpty(sortBy) && !FilterableProperties.Contains(sortBy))
+        {
+            sortBy = null;
+        }
+
+        var sortDescending = string.Equals(
+            HttpContext.Request.Query["sortDir"].ToString(), "desc", StringComparison.OrdinalIgnoreCase);
+
+        var (todoItems, totalCount) = await todoItemService.GetAllAsync(
+            page, pageSize, filters, sortBy, sortDescending);
+        var todoItemsResponse = todoItems.ToTodoItemsResponse(page, pageSize, totalCount);
+        await Send.OkAsync(todoItemsResponse, ct);
+    }
+}

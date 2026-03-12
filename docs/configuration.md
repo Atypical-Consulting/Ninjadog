@@ -55,6 +55,12 @@ The following skeleton shows **every** configuration option at a glance. Require
       "roles": ["Admin", "User"],             // optional
       "generateLoginEndpoint": true,          // default: true
       "generateRegisterEndpoint": true        // default: true
+    },
+    "versioning": {
+      "strategy": "UrlPath",                  // "UrlPath" | "HeaderBased"
+      "defaultVersion": 1,                    // default: 1
+      "prefix": "v",                          // default: "v"
+      "headerName": "X-Api-Version"           // default: "X-Api-Version"
     }
   },
   "enums": {
@@ -118,7 +124,8 @@ The `config` object contains project-level settings.
     "cors": { ... },
     "features": { ... },
     "database": { ... },
-    "auth": { ... }
+    "auth": { ... },
+    "versioning": { ... }
   }
 }
 ```
@@ -211,6 +218,40 @@ When auth is enabled:
 
 {: .note }
 > When the `auth` block is absent, all endpoints use `AllowAnonymous()` and no auth infrastructure is generated. This is fully backward-compatible.
+
+### Versioning
+
+The optional `versioning` object enables API versioning for all generated endpoints.
+
+```json
+{
+  "config": {
+    "versioning": {
+      "strategy": "UrlPath",
+      "defaultVersion": 1,
+      "prefix": "v",
+      "headerName": "X-Api-Version"
+    }
+  }
+}
+```
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `strategy` | `string` | `"UrlPath"` | Versioning strategy. `UrlPath` prepends version to routes (e.g., `/v1/products`). `HeaderBased` appends version to routes for header-based resolution. |
+| `defaultVersion` | `integer` | `1` | The default API version assigned to all generated endpoints. |
+| `prefix` | `string` | `"v"` | Version prefix string (e.g., `"v"` produces `/v1/`). |
+| `headerName` | `string` | `"X-Api-Version"` | Header name for header-based versioning (documentation only for `UrlPath` strategy). |
+
+When versioning is enabled:
+- All CRUD endpoints (GET, POST, PUT, DELETE) include a `Version(N)` declaration
+- Auth endpoints (login, register) are also versioned
+- Health and readiness endpoints (`/health`, `/ready`) remain unversioned
+- `UseFastEndpoints()` is configured with versioning options
+- For `UrlPath` strategy, routes become `/v1/products`, `/v1/products/{id}`, etc.
+
+{: .tip }
+> Start with `UrlPath` strategy — it's the most explicit and easiest to test. Routes clearly show which API version is being called. When the `versioning` block is absent, no versioning infrastructure is generated.
 
 ## Entities
 
@@ -401,6 +442,11 @@ A full `ninjadog.json` demonstrating all features:
       "audience": "bookstore-api",
       "tokenExpirationMinutes": 120,
       "roles": ["Admin", "Editor"]
+    },
+    "versioning": {
+      "strategy": "UrlPath",
+      "defaultVersion": 1,
+      "prefix": "v"
     }
   },
   "enums": {

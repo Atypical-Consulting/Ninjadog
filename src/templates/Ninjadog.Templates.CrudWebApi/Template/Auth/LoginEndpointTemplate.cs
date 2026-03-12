@@ -18,6 +18,7 @@ public class LoginEndpointTemplate : NinjadogTemplate
         }
 
         var rootNamespace = ninjadogSettings.Config.RootNamespace;
+        var apiVersion = ninjadogSettings.Config.Versioning?.DefaultVersion;
         const string fileName = "LoginEndpoint.cs";
 
         var content =
@@ -33,7 +34,7 @@ public class LoginEndpointTemplate : NinjadogTemplate
                   public override void Configure()
                   {
                       Post("/api/auth/login");
-                      AllowAnonymous();
+                      AllowAnonymous();{{GenerateVersionCall(apiVersion)}}
                   }
 
                   public override async Task HandleAsync(LoginRequest req, CancellationToken ct)

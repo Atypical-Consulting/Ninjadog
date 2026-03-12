@@ -81,6 +81,16 @@ public abstract record NinjadogSettings(
             }
         }
 
+        NinjadogVersioningConfiguration? versioning = null;
+        if (TryGetOptionalObject(configElement, "versioning", out var versioningElement))
+        {
+            var strategy = GetOptionalString(versioningElement, "strategy") ?? NinjadogVersioningConfiguration.UrlPathStrategy;
+            var defaultVersion = GetOptionalInt32(versioningElement, "defaultVersion") ?? 1;
+            var prefix = GetOptionalString(versioningElement, "prefix") ?? "v";
+            var headerName = GetOptionalString(versioningElement, "headerName") ?? "X-Api-Version";
+            versioning = new NinjadogVersioningConfiguration(strategy, defaultVersion, prefix, headerName);
+        }
+
         NinjadogAuthConfiguration? auth = null;
         if (TryGetOptionalObject(configElement, "auth", out var authElement))
         {
@@ -106,7 +116,8 @@ public abstract record NinjadogSettings(
             Auditing: auditing,
             DatabaseProvider: databaseProvider,
             Aot: aot,
-            Auth: auth);
+            Auth: auth,
+            Versioning: versioning);
 
         var entities = new NinjadogLoadedEntities();
 

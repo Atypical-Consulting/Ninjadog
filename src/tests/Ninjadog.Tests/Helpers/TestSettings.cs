@@ -140,6 +140,32 @@ public sealed class AotSeededEntitiesCollection : NinjadogEntities
 public sealed record AotSeededSettings()
     : NinjadogSettings(new AotConfiguration(), new AotSeededEntitiesCollection());
 
+public sealed record VersioningConfiguration()
+    : NinjadogConfiguration(
+        Name: "TestApp",
+        Version: "1.0.0",
+        Description: "Test application",
+        RootNamespace: "TestApp.Api",
+        OutputPath: "output",
+        SaveGeneratedFiles: false,
+        Versioning: new NinjadogVersioningConfiguration());
+
+public sealed record VersioningSettings()
+    : NinjadogSettings(new VersioningConfiguration(), new TestEntitiesCollection());
+
+public sealed record HeaderVersioningConfiguration()
+    : NinjadogConfiguration(
+        Name: "TestApp",
+        Version: "1.0.0",
+        Description: "Test application",
+        RootNamespace: "TestApp.Api",
+        OutputPath: "output",
+        SaveGeneratedFiles: false,
+        Versioning: new NinjadogVersioningConfiguration(Strategy: "HeaderBased"));
+
+public sealed record HeaderVersioningSettings()
+    : NinjadogSettings(new HeaderVersioningConfiguration(), new TestEntitiesCollection());
+
 public sealed record AuthConfiguration()
     : NinjadogConfiguration(
         Name: "TestApp",

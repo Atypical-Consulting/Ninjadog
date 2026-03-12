@@ -1,0 +1,134 @@
+﻿//------------------------------------------------------------------------------
+// This code was powered by the Ninjadog Engine
+//
+// Developed by: Atypical Consulting SRL - Philippe Matray
+// Generated on: [SCRUBBED]
+// Version     : [SCRUBBED]
+//
+// This file is part of a custom software solution crafted to meet your
+// specific needs. For optimal performance and compatibility, modifications
+// should be coordinated with Ninjadog support services.
+//------------------------------------------------------------------------------
+
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
+using TestApp.Api.Database;
+using TestApp.Api.Repositories;
+using TestApp.Api.Services;
+using FastEndpoints;
+using FastEndpoints.ClientGen;
+using FastEndpoints.Swagger;
+using FluentValidation;
+
+namespace TestApp.Api;
+
+public static class NinjadogExtensions
+{
+    private const string ProblemJsonContentType = "application/problem+json";
+
+    public static IServiceCollection AddNinjadog(
+        this IServiceCollection services,
+        ConfigurationManager config)
+    {
+        services.AddFastEndpoints();
+        services.SwaggerDocument(o =>
+        {
+            o.DocumentSettings = s =>
+            {
+                s.Title = "TestApp";
+                s.Version = "v1.0.0";
+                s.Description = "Test application";
+            };
+        });
+
+        var connectionString =
+            config.GetValue<string>("Database:ConnectionString")
+            ?? throw new InvalidOperationException("Database:ConnectionString is not configured.");
+
+        services.AddSingleton<IDbConnectionFactory>(_ => new SqliteConnectionFactory(connectionString));
+        services.AddSingleton<DatabaseInitializer>();
+        services.AddSingleton<ITodoItemRepository, TodoItemRepository>();
+        services.AddSingleton<ITodoItemService, TodoItemService>();
+
+        return services;
+    }
+
+    public static WebApplication UseNinjadog(this WebApplication app)
+    {
+        app.UseGlobalExceptionHandler();
+        app.UseDefaultFiles();
+        app.UseStaticFiles();
+        app.UseFastEndpoints(c =>
+        {
+            c.Versioning.Prefix = "v";
+            c.Versioning.DefaultVersion = 1;
+            c.Versioning.PrependToRoute = true;
+        });
+        app.UseSwaggerGen();
+
+        app.MapCSharpClientEndpoint("/cs-client", "version 1", s =>
+        {
+            s.ClassName = "ApiClient";
+            s.CSharpGeneratorSettings.Namespace = "TestApp.Api.Client";
+        });
+
+        app.MapTypeScriptClientEndpoint("/ts-client", "version 1", s =>
+        {
+            s.ClassName = "ApiClient";
+            s.TypeScriptGeneratorSettings.Namespace = "TestApp.Api.Client";
+        });
+
+        return app;
+    }
+
+    private static WebApplication UseGlobalExceptionHandler(this WebApplication app)
+    {
+        app.UseExceptionHandler(errApp =>
+        {
+            errApp.Run(async ctx =>
+            {
+                var exHandlerFeature = ctx.Features.Get<IExceptionHandlerFeature>();
+                var error = exHandlerFeature?.Error;
+
+                int statusCode;
+                ProblemDetails problemDetails;
+
+                if (error is ValidationException validationException)
+                {
+                    statusCode = StatusCodes.Status400BadRequest;
+                    problemDetails = new ProblemDetails
+                    {
+                        Status = statusCode,
+                        Title = "One or more validation errors occurred.",
+                        Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                        Detail = "See the errors property for details.",
+                        Extensions =
+                        {
+                            ["errors"] = validationException.Errors
+                                .GroupBy(f => f.PropertyName)
+                                .ToDictionary(
+                                    g => g.Key,
+                                    g => g.Select(f => f.ErrorMessage).ToArray())
+                        }
+                    };
+                }
+                else
+                {
+                    statusCode = StatusCodes.Status500InternalServerError;
+                    problemDetails = new ProblemDetails
+                    {
+                        Status = statusCode,
+                        Title = "An unexpected error occurred.",
+                        Type = "https://tools.ietf.org/html/rfc9110#section-15.6.1"
+                    };
+                }
+
+                ctx.Response.StatusCode = statusCode;
+                ctx.Response.ContentType = ProblemJsonContentType;
+                await ctx.Response.WriteAsJsonAsync(problemDetails, ctx.RequestAborted);
+            });
+        });
+
+        return app;
+    }
+}

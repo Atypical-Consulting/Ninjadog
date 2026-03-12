@@ -17,6 +17,7 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
         var hasAuth = ninjadogSettings.Config.Auth is not null;
         var provider = ninjadogSettings.Config.DatabaseProvider;
         var aot = ninjadogSettings.Config.Aot;
+        var versioning = ninjadogSettings.Config.Versioning;
         var factoryClassName = GetFactoryClassName(provider);
         var projectName = ninjadogSettings.Config.Name;
         var projectVersion = ninjadogSettings.Config.Version;
@@ -25,7 +26,7 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
 
         var content = aot
             ? GenerateAotContent(rootNamespace, entities, hasSeedData, hasAuth, factoryClassName)
-            : GenerateStandardContent(rootNamespace, entities, hasSeedData, hasAuth, factoryClassName, projectName, projectVersion, projectDescription);
+            : GenerateStandardContent(rootNamespace, entities, hasSeedData, hasAuth, factoryClassName, projectName, projectVersion, projectDescription, versioning);
 
         return CreateNinjadogContentFile(fileName, content);
     }
@@ -38,7 +39,8 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
         string factoryClassName,
         string projectName,
         string projectVersion,
-        string projectDescription)
+        string projectDescription,
+        NinjadogVersioningConfiguration? versioning)
     {
         return
             $$"""
@@ -83,7 +85,7 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
                       app.UseGlobalExceptionHandler();
                       app.UseDefaultFiles();
                       app.UseStaticFiles();
-                      app.UseFastEndpoints();
+              {{GenerateUseFastEndpoints(versioning)}}
                       app.UseSwaggerGen();
 
                       app.MapCSharpClientEndpoint("/cs-client", "version 1", s =>
@@ -252,6 +254,25 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
                       return app;
                   }
               """;
+    }
+
+    private static string GenerateUseFastEndpoints(NinjadogVersioningConfiguration? versioning)
+    {
+        if (versioning is null)
+        {
+            return "        app.UseFastEndpoints();";
+        }
+
+        var prepend = versioning.IsUrlPath ? "true" : "false";
+
+        return $$"""
+                     app.UseFastEndpoints(c =>
+                     {
+                         c.Versioning.Prefix = "{{versioning.Prefix}}";
+                         c.Versioning.DefaultVersion = {{versioning.DefaultVersion}};
+                         c.Versioning.PrependToRoute = {{prepend}};
+                     });
+             """;
     }
 
     private static string GetFactoryClassName(string provider)

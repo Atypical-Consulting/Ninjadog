@@ -1,0 +1,44 @@
+﻿//------------------------------------------------------------------------------
+// This code was powered by the Ninjadog Engine
+//
+// Developed by: Atypical Consulting SRL - Philippe Matray
+// Generated on: [SCRUBBED]
+// Version     : [SCRUBBED]
+//
+// This file is part of a custom software solution crafted to meet your
+// specific needs. For optimal performance and compatibility, modifications
+// should be coordinated with Ninjadog support services.
+//------------------------------------------------------------------------------
+
+using TestApp.Api.Contracts.Requests;
+using TestApp.Api.Contracts.Responses;
+using TestApp.Api.Mapping;
+using TestApp.Api.Services;
+using FastEndpoints;
+
+namespace TestApp.Api.Endpoints;
+
+public partial class GetTodoItemEndpoint(ITodoItemService todoItemService)
+    : Endpoint<GetTodoItemRequest, TodoItemResponse>
+{
+    public override void Configure()
+    {
+        Get("/todo-items/{id:guid}");
+        AllowAnonymous();
+        Version(1);
+    }
+
+    public override async Task HandleAsync(GetTodoItemRequest req, CancellationToken ct)
+    {
+        var todoItem = await todoItemService.GetAsync(req.Id);
+
+        if (todoItem is null)
+        {
+            await Send.NotFoundAsync(ct);
+            return;
+        }
+
+        var todoItemResponse = todoItem.ToTodoItemResponse();
+        await Send.OkAsync(todoItemResponse, ct);
+    }
+}

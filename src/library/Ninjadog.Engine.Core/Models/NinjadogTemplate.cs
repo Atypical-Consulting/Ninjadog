@@ -96,6 +96,19 @@ public abstract class NinjadogTemplate
     }
 
     /// <summary>
+    /// Generates a FastEndpoints Version() call for the given API version.
+    /// Returns an empty string when no version is specified.
+    /// </summary>
+    /// <param name="apiVersion">The optional API version number.</param>
+    /// <returns>A Version() call string with leading newline and indentation, or empty.</returns>
+    protected static string GenerateVersionCall(int? apiVersion)
+    {
+        return apiVersion.HasValue
+            ? $"\n        Version({apiVersion.Value});"
+            : string.Empty;
+    }
+
+    /// <summary>
     /// Creates a new instance of <see cref="NinjadogContentFile"/> with the specified file name and content.
     /// </summary>
     /// <param name="fileName">The name of the file to be created.</param>

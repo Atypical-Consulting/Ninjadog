@@ -7,6 +7,7 @@ public sealed class CreateEndpointTemplate
     : NinjadogTemplate
 {
     private bool _hasAuth;
+    private int? _apiVersion;
 
     /// <inheritdoc />
     public override string Name => "CreateEndpoint";
@@ -15,6 +16,7 @@ public sealed class CreateEndpointTemplate
     public override IEnumerable<NinjadogContentFile> GenerateMany(NinjadogSettings ninjadogSettings)
     {
         _hasAuth = ninjadogSettings.Config.Auth is not null;
+        _apiVersion = ninjadogSettings.Config.Versioning?.DefaultVersion;
         return base.GenerateMany(ninjadogSettings);
     }
 
@@ -43,7 +45,7 @@ public sealed class CreateEndpointTemplate
               {
                   public override void Configure()
                   {
-                      Post("{{st.ModelEndpoint}}");{{(_hasAuth ? string.Empty : "\n        AllowAnonymous();")}}
+                      Post("{{st.ModelEndpoint}}");{{(_hasAuth ? string.Empty : "\n        AllowAnonymous();")}}{{GenerateVersionCall(_apiVersion)}}
                   }
 
                   public override async Task HandleAsync({{st.ClassCreateModelRequest}} req, CancellationToken ct)

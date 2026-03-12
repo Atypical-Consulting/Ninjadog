@@ -17,6 +17,7 @@ namespace Ninjadog.Settings.Config;
 /// <param name="DatabaseProvider">The database provider to use (sqlite, postgresql, sqlserver). Default is sqlite.</param>
 /// <param name="Aot">Indicates whether Native AOT publishing support should be enabled in the generated project. Default is false.</param>
 /// <param name="Auth">The optional JWT authentication configuration for the application.</param>
+/// <param name="Versioning">The optional API versioning configuration. When set, enables versioned endpoints.</param>
 public abstract record NinjadogConfiguration(
     string Name,
     string Version,
@@ -29,4 +30,5 @@ public abstract record NinjadogConfiguration(
     bool Auditing = false,
     string DatabaseProvider = "sqlite",
     bool Aot = false,
-    NinjadogAuthConfiguration? Auth = null);
+    NinjadogAuthConfiguration? Auth = null,
+    NinjadogVersioningConfiguration? Versioning = null);
