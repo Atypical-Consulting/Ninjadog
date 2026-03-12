@@ -4,6 +4,14 @@
 const ConfigEditor = (() => {
     let dirBrowserOpen = false;
     let dirBrowserPath = '.';
+    let interactedFields = new Set();
+
+    function tooltip(text) {
+        return `<span class="tooltip-wrapper">
+    <span class="tooltip-icon">?</span>
+    <span class="tooltip-content">${esc(text)}</span>
+</span>`;
+    }
 
     function render(container, state) {
         const c = state.config || {};
@@ -19,6 +27,7 @@ const ConfigEditor = (() => {
                         <div>
                             <label class="field-label">Name</label>
                             <input class="field-input" data-field="name" value="${esc(c.name || '')}" />
+                            <div class="field-error-msg" data-error-for="name"></div>
                         </div>
                         <div>
                             <label class="field-label">Version</label>
@@ -29,11 +38,12 @@ const ConfigEditor = (() => {
                             <input class="field-input" data-field="description" value="${esc(c.description || '')}" />
                         </div>
                         <div>
-                            <label class="field-label">Root Namespace</label>
+                            <label class="field-label">Root Namespace ${tooltip('The root C# namespace for generated code. Example: MyCompany.Api')}</label>
                             <input class="field-input" data-field="rootNamespace" value="${esc(c.rootNamespace || '')}" />
+                            <div class="field-error-msg" data-error-for="rootNamespace"></div>
                         </div>
                         <div>
-                            <label class="field-label">Output Path</label>
+                            <label class="field-label">Output Path ${tooltip('Directory where generated files will be written, relative to ninjadog.json')}</label>
                             <div class="flex gap-2">
                                 <input class="field-input flex-1" data-field="outputPath" value="${esc(c.outputPath || '.')}" />
                                 <button id="btn-browse-output" class="btn-sm btn-ghost flex items-center gap-1 whitespace-nowrap" title="Browse directories">
@@ -50,7 +60,7 @@ const ConfigEditor = (() => {
                     <div class="section-title">Database</div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="field-label">Provider</label>
+                            <label class="field-label">Provider ${tooltip('The database engine for generated repository code')}</label>
                             <select class="field-select" data-field="databaseProvider">
                                 <option value="sqlite" ${database.provider === 'sqlite' || !database.provider ? 'selected' : ''}>SQLite</option>
                                 <option value="postgres" ${database.provider === 'postgres' ? 'selected' : ''}>PostgreSQL</option>
@@ -63,8 +73,9 @@ const ConfigEditor = (() => {
                 <div class="section-card">
                     <div class="section-title">CORS</div>
                     <div>
-                        <label class="field-label">Origins (comma-separated)</label>
+                        <label class="field-label">Origins (comma-separated) ${tooltip('Allowed origins for cross-origin requests. Use * for all origins (not recommended for production)')}</label>
                         <input class="field-input" data-field="corsOrigins" value="${esc((cors.origins || []).join(', '))}" />
+                        <div class="field-error-msg" data-error-for="corsOrigins"></div>
                     </div>
                     <div class="grid grid-cols-2 gap-4 mt-3">
                         <div>
@@ -83,21 +94,26 @@ const ConfigEditor = (() => {
                     <div class="flex items-center gap-6">
                         <label class="flex items-center gap-2 text-sm">
                             <input type="checkbox" class="field-checkbox" data-field="softDelete" ${features.softDelete ? 'checked' : ''} />
-                            Soft Delete
+                            Soft Delete ${tooltip('Adds IsDeleted and DeletedAt columns instead of permanently deleting records')}
                         </label>
                         <label class="flex items-center gap-2 text-sm">
                             <input type="checkbox" class="field-checkbox" data-field="auditing" ${features.auditing ? 'checked' : ''} />
-                            Auditing
+                            Auditing ${tooltip('Adds CreatedAt and UpdatedAt timestamp columns to all entities')}
                         </label>
                     </div>
                 </div>
+
+                ${renderEmptyState(state)}
             </div>
         `;
 
         // Bind change events
         container.querySelectorAll('[data-field]').forEach(el => {
             const event = el.type === 'checkbox' ? 'change' : 'input';
-            el.addEventListener(event, () => collectConfig(container, state));
+            el.addEventListener(event, () => {
+                interactedFields.add(el.dataset.field);
+                collectConfig(container, state);
+            });
         });
 
         // Browse button
@@ -110,6 +126,98 @@ const ConfigEditor = (() => {
                 container.querySelector('#dir-browser').classList.add('hidden');
             }
         });
+
+        // Empty state buttons
+        const btnTemplate = container.querySelector('#btn-start-template');
+        if (btnTemplate) {
+            btnTemplate.addEventListener('click', () => App.showTemplatePicker());
+        }
+        const btnScratch = container.querySelector('#btn-start-scratch');
+        if (btnScratch) {
+            btnScratch.addEventListener('click', () => {
+                const entitiesTab = document.querySelector('[data-tab="entities"]');
+                if (entitiesTab) entitiesTab.click();
+            });
+        }
+    }
+
+    function renderEmptyState(state) {
+        const entities = state.entities || [];
+        if (entities.length > 0) return '';
+
+        return `
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 2L9 9L2 12L9 15L12 22L15 15L22 12L15 9L12 2Z"/>
+                    </svg>
+                </div>
+                <div class="empty-state-title">Ready to build your API</div>
+                <div class="empty-state-text">Configure your project settings above, then add entities to generate a complete CRUD Web API.</div>
+                <div class="empty-state-actions">
+                    <button class="btn-sm btn-primary" id="btn-start-template">Start from Template</button>
+                    <button class="btn-sm btn-ghost" id="btn-start-scratch">Add First Entity</button>
+                </div>
+            </div>
+        `;
+    }
+
+    function validateFields(container) {
+        let valid = true;
+
+        // Clear all previous errors
+        container.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+        container.querySelectorAll('.field-error-msg').forEach(el => { el.textContent = ''; el.style.display = 'none'; });
+
+        // Name validation
+        if (interactedFields.has('name')) {
+            const nameInput = container.querySelector('[data-field="name"]');
+            const nameVal = (nameInput?.value || '').trim();
+            const nameError = container.querySelector('[data-error-for="name"]');
+            if (!nameVal) {
+                setFieldError(nameInput, nameError, 'Project name is required');
+                valid = false;
+            } else if (!/^[a-zA-Z0-9.\-]+$/.test(nameVal)) {
+                setFieldError(nameInput, nameError, 'Use only letters, numbers, dots, and hyphens');
+                valid = false;
+            }
+        }
+
+        // Root Namespace validation
+        if (interactedFields.has('rootNamespace')) {
+            const nsInput = container.querySelector('[data-field="rootNamespace"]');
+            const nsVal = (nsInput?.value || '').trim();
+            const nsError = container.querySelector('[data-error-for="rootNamespace"]');
+            if (nsVal && !/^[A-Z][a-zA-Z0-9]*(\.[A-Z][a-zA-Z0-9]*)*$/.test(nsVal)) {
+                setFieldError(nsInput, nsError, 'Invalid namespace format. Use PascalCase with dots');
+                valid = false;
+            }
+        }
+
+        // CORS Origins validation
+        if (interactedFields.has('corsOrigins')) {
+            const originsInput = container.querySelector('[data-field="corsOrigins"]');
+            const originsVal = (originsInput?.value || '').trim();
+            const originsError = container.querySelector('[data-error-for="corsOrigins"]');
+            if (originsVal) {
+                const origins = originsVal.split(',').map(s => s.trim()).filter(Boolean);
+                const allValid = origins.every(o => o === '*' || /^https?:\/\//.test(o));
+                if (!allValid) {
+                    setFieldError(originsInput, originsError, 'Origins must be URLs (http/https) or *');
+                    valid = false;
+                }
+            }
+        }
+
+        return valid;
+    }
+
+    function setFieldError(input, errorDiv, message) {
+        if (input) input.classList.add('field-error');
+        if (errorDiv) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
     }
 
     async function loadDirectories(container, state) {
@@ -189,6 +297,11 @@ const ConfigEditor = (() => {
         const val = f => (container.querySelector(`[data-field="${f}"]`)?.value || '').trim();
         const checked = f => container.querySelector(`[data-field="${f}"]`)?.checked || false;
         const csvArr = f => val(f).split(',').map(s => s.trim()).filter(Boolean);
+
+        // Run validation (visual feedback only, does not block state updates)
+        validateFields(container);
+
+        App.pushUndo();
 
         state.config = state.config || {};
         state.config.name = val('name');

@@ -1,6 +1,7 @@
 /**
  * Entities tab — list of entities with expandable property/relationship editors.
  * No modals: uses inline forms for add/remove. Property renames propagate to seed data.
+ * Features: color coding, duplication, drag-to-reorder, presets, bulk actions, sidebar nav.
  */
 const EntityEditor = (() => {
     const propertyTypes = [
@@ -9,9 +10,44 @@ const EntityEditor = (() => {
     ];
     const relationshipTypes = ['hasMany', 'hasOne', 'belongsTo'];
 
+    const presets = {
+        id:          [{ name: 'id', type: 'Guid', isKey: true }],
+        name:        [{ name: 'name', type: 'string', required: true, maxLength: 200 }],
+        timestamps:  [
+            { name: 'createdAt', type: 'DateTime' },
+            { name: 'updatedAt', type: 'DateTime' }
+        ],
+        email:       [{ name: 'email', type: 'string', required: true, maxLength: 255, pattern: '^[^@]+@[^@]+$' }],
+        description: [{ name: 'description', type: 'string', maxLength: 2000 }]
+    };
+
+    // Module state for sidebar navigation
+    let focusedEntity = null;
+    // Track which properties are checked per entity for bulk actions
+    let checkedProps = {};
+
     function render(container, state) {
         state.entities = state.entities || {};
         const names = Object.keys(state.entities);
+        const useSidebar = names.length >= 5;
+
+        // Ensure focusedEntity is valid
+        if (useSidebar) {
+            if (!focusedEntity || !state.entities[focusedEntity]) {
+                focusedEntity = names[0] || null;
+            }
+        } else {
+            focusedEntity = null;
+        }
+
+        // Reset checked props for entities that no longer exist
+        Object.keys(checkedProps).forEach(e => {
+            if (!state.entities[e]) delete checkedProps[e];
+        });
+
+        const entityListHtml = useSidebar
+            ? (focusedEntity ? entityCard(focusedEntity, state.entities[focusedEntity], state) : '')
+            : names.map(n => entityCard(n, state.entities[n], state)).join('');
 
         container.innerHTML = `
             <div class="flex items-center justify-between mb-4">
@@ -25,7 +61,22 @@ const EntityEditor = (() => {
                     </div>
                 </div>
             </div>
-            <div id="entity-list">${names.map(n => entityCard(n, state.entities[n], state)).join('')}</div>
+            ${useSidebar ? `
+            <div class="flex gap-4">
+                <div class="entity-sidebar">
+                    <div class="entity-sidebar-header">Entities</div>
+                    ${names.map(n => `
+                        <button class="entity-sidebar-item ${n === focusedEntity ? 'active' : ''}" data-entity="${esc(n)}">
+                            <span class="entity-color-dot" style="background: ${App.getEntityColor(n)}"></span>
+                            ${esc(n)}
+                        </button>
+                    `).join('')}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div id="entity-list">${entityListHtml}</div>
+                </div>
+            </div>` : `
+            <div id="entity-list">${entityListHtml}</div>`}
         `;
 
         // Inline add entity
@@ -45,7 +96,9 @@ const EntityEditor = (() => {
         addConfirm.addEventListener('click', () => {
             const name = addInput.value.trim();
             if (!name) return;
+            App.pushUndo();
             state.entities[name] = { properties: {} };
+            focusedEntity = name;
             render(container, state);
             App.onStateChanged();
         });
@@ -60,6 +113,16 @@ const EntityEditor = (() => {
             if (e.key === 'Escape') addCancel.click();
         });
 
+        // Sidebar navigation
+        if (useSidebar) {
+            container.querySelectorAll('.entity-sidebar-item').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    focusedEntity = btn.dataset.entity;
+                    render(container, state);
+                });
+            });
+        }
+
         // Bind all entity interactions
         bindEntityEvents(container, state);
     }
@@ -69,13 +132,20 @@ const EntityEditor = (() => {
         const rels = entity.relationships || {};
         const propNames = Object.keys(props);
         const relNames = Object.keys(rels);
+        const checked = checkedProps[name] || {};
+        const checkedCount = propNames.filter(p => checked[p]).length;
 
         return `
         <div class="entity-card" data-entity="${esc(name)}">
             <div class="entity-header">
-                <span class="font-medium text-sm">${esc(name)}</span>
                 <div class="flex items-center gap-2">
-                    <span class="text-xs text-gray-500">${propNames.length} props</span>
+                    <span class="entity-color-dot" style="background: ${App.getEntityColor(name)}"></span>
+                    <span class="font-medium text-sm">${esc(name)}</span>
+                    <span class="badge badge-secondary">${propNames.length} prop${propNames.length !== 1 ? 's' : ''}</span>
+                    ${relNames.length > 0 ? `<span class="badge badge-secondary">${relNames.length} rel${relNames.length !== 1 ? 's' : ''}</span>` : ''}
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="btn-sm btn-ghost entity-clone" data-entity="${esc(name)}">Clone</button>
                     <button class="btn-sm btn-danger entity-remove" data-entity="${esc(name)}" data-confirmed="false">Remove</button>
                 </div>
             </div>
@@ -92,14 +162,28 @@ const EntityEditor = (() => {
                             </div>
                         </div>
                     </div>
+                    <div class="preset-bar" data-entity="${esc(name)}">
+                        <span class="text-xs text-gray-500 mr-1">Quick add:</span>
+                        <button class="preset-btn" data-preset="id" data-entity="${esc(name)}">ID Field</button>
+                        <button class="preset-btn" data-preset="name" data-entity="${esc(name)}">Name</button>
+                        <button class="preset-btn" data-preset="timestamps" data-entity="${esc(name)}">Timestamps</button>
+                        <button class="preset-btn" data-preset="email" data-entity="${esc(name)}">Email</button>
+                        <button class="preset-btn" data-preset="description" data-entity="${esc(name)}">Description</button>
+                    </div>
+                    ${checkedCount > 0 ? `
+                    <div class="bulk-toolbar" data-entity="${esc(name)}">
+                        <span class="text-xs">${checkedCount} selected</span>
+                        <button class="btn-sm btn-danger bulk-delete" data-entity="${esc(name)}">Delete Selected</button>
+                        <button class="btn-sm btn-ghost bulk-toggle-required" data-entity="${esc(name)}">Toggle Required</button>
+                    </div>` : ''}
                     ${propNames.length > 0 ? `
                     <table class="data-table">
                         <thead><tr>
-                            <th>Name</th><th>Type</th><th>Key</th><th>Required</th>
+                            <th></th><th></th><th>Name</th><th>Type</th><th>Key</th><th>Required</th>
                             <th>MaxLen</th><th>MinLen</th><th>Min</th><th>Max</th><th>Pattern</th><th></th>
                         </tr></thead>
                         <tbody>
-                            ${propNames.map(p => propRow(name, p, props[p])).join('')}
+                            ${propNames.map((p, i) => propRow(name, p, props[p], i, checked[p])).join('')}
                         </tbody>
                     </table>` : '<p class="text-xs text-gray-500">No properties defined.</p>'}
                 </div>
@@ -128,8 +212,10 @@ const EntityEditor = (() => {
         </div>`;
     }
 
-    function propRow(entity, propName, prop) {
-        return `<tr data-entity="${esc(entity)}" data-prop="${esc(propName)}">
+    function propRow(entity, propName, prop, index, isChecked) {
+        return `<tr data-entity="${esc(entity)}" data-prop="${esc(propName)}" data-index="${index}" draggable="true">
+            <td class="drag-handle" title="Drag to reorder">&#10303;</td>
+            <td class="text-center"><input type="checkbox" class="field-checkbox prop-bulk-check" data-entity="${esc(entity)}" data-prop="${esc(propName)}" ${isChecked ? 'checked' : ''} /></td>
             <td><input class="field-input py-1 text-xs prop-field" data-key="name" value="${esc(propName)}" /></td>
             <td><select class="field-select py-1 text-xs prop-field" data-key="type">
                 ${propertyTypes.map(t => `<option value="${t}" ${prop.type === t ? 'selected' : ''}>${t}</option>`).join('')}
@@ -158,6 +244,21 @@ const EntityEditor = (() => {
     }
 
     function bindEntityEvents(container, state) {
+        // Clone entity
+        container.querySelectorAll('.entity-clone').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                const name = btn.dataset.entity;
+                const cloneName = name + 'Copy';
+                App.pushUndo();
+                state.entities[cloneName] = JSON.parse(JSON.stringify(state.entities[name]));
+                focusedEntity = cloneName;
+                render(container, state);
+                App.onStateChanged();
+                App.showToast(`Cloned "${name}" as "${cloneName}"`, 'success');
+            });
+        });
+
         // Remove entity — two-click confirmation (no modal)
         container.querySelectorAll('.entity-remove').forEach(btn => {
             let confirmTimer = null;
@@ -167,7 +268,13 @@ const EntityEditor = (() => {
                 if (btn.dataset.confirmed === 'true') {
                     // Second click — actually remove
                     clearTimeout(confirmTimer);
+                    App.pushUndo();
                     delete state.entities[name];
+                    delete checkedProps[name];
+                    if (focusedEntity === name) {
+                        const remaining = Object.keys(state.entities);
+                        focusedEntity = remaining[0] || null;
+                    }
                     render(container, state);
                     App.onStateChanged();
                 } else {
@@ -185,6 +292,98 @@ const EntityEditor = (() => {
                 }
             });
         });
+
+        // Preset buttons
+        container.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const entityName = btn.dataset.entity;
+                const presetKey = btn.dataset.preset;
+                const presetItems = presets[presetKey];
+                if (!presetItems) return;
+
+                App.pushUndo();
+                state.entities[entityName].properties = state.entities[entityName].properties || {};
+
+                presetItems.forEach(item => {
+                    const propDef = Object.assign({}, item);
+                    const pName = propDef.name;
+                    delete propDef.name;
+                    if (!propDef.type) propDef.type = 'string';
+                    state.entities[entityName].properties[pName] = propDef;
+                });
+
+                render(container, state);
+                App.onStateChanged();
+                App.showToast(`Added "${presetKey}" preset to ${entityName}`, 'success');
+            });
+        });
+
+        // Bulk delete
+        container.querySelectorAll('.bulk-delete').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const entityName = btn.dataset.entity;
+                const checked = checkedProps[entityName] || {};
+                const toDelete = Object.keys(checked).filter(p => checked[p]);
+                if (toDelete.length === 0) return;
+
+                App.pushUndo();
+                toDelete.forEach(p => {
+                    // Also remove from seed data
+                    if (state.entities[entityName].seedData) {
+                        state.entities[entityName].seedData.forEach(row => {
+                            delete row[p];
+                        });
+                    }
+                    delete state.entities[entityName].properties[p];
+                });
+                delete checkedProps[entityName];
+                render(container, state);
+                App.onStateChanged();
+                App.showToast(`Deleted ${toDelete.length} properties`, 'success');
+            });
+        });
+
+        // Bulk toggle required
+        container.querySelectorAll('.bulk-toggle-required').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const entityName = btn.dataset.entity;
+                const checked = checkedProps[entityName] || {};
+                const toToggle = Object.keys(checked).filter(p => checked[p]);
+                if (toToggle.length === 0) return;
+
+                App.pushUndo();
+                toToggle.forEach(p => {
+                    const prop = state.entities[entityName].properties[p];
+                    if (prop) {
+                        if (prop.required) {
+                            delete prop.required;
+                        } else {
+                            prop.required = true;
+                        }
+                    }
+                });
+                render(container, state);
+                App.onStateChanged();
+            });
+        });
+
+        // Bulk checkboxes
+        container.querySelectorAll('.prop-bulk-check').forEach(cb => {
+            cb.addEventListener('change', () => {
+                const entityName = cb.dataset.entity;
+                const propName = cb.dataset.prop;
+                if (!checkedProps[entityName]) checkedProps[entityName] = {};
+                if (cb.checked) {
+                    checkedProps[entityName][propName] = true;
+                } else {
+                    delete checkedProps[entityName][propName];
+                }
+                render(container, state);
+            });
+        });
+
+        // Drag-to-reorder properties
+        bindDragReorder(container, state);
 
         // Inline add property
         container.querySelectorAll('.prop-add-btn').forEach(btn => {
@@ -205,6 +404,7 @@ const EntityEditor = (() => {
             confirm.addEventListener('click', () => {
                 const pname = input.value.trim();
                 if (!pname) return;
+                App.pushUndo();
                 state.entities[entity].properties = state.entities[entity].properties || {};
                 state.entities[entity].properties[pname] = { type: 'string' };
                 render(container, state);
@@ -229,6 +429,8 @@ const EntityEditor = (() => {
                 const entity = tr.dataset.entity;
                 const prop = tr.dataset.prop;
 
+                App.pushUndo();
+
                 // Also remove from seed data
                 if (state.entities[entity].seedData) {
                     state.entities[entity].seedData.forEach(row => {
@@ -237,6 +439,7 @@ const EntityEditor = (() => {
                 }
 
                 delete state.entities[entity].properties[prop];
+                if (checkedProps[entity]) delete checkedProps[entity][prop];
                 render(container, state);
                 App.onStateChanged();
             });
@@ -267,6 +470,7 @@ const EntityEditor = (() => {
             confirm.addEventListener('click', () => {
                 const rname = input.value.trim();
                 if (!rname) return;
+                App.pushUndo();
                 state.entities[entity].relationships = state.entities[entity].relationships || {};
                 state.entities[entity].relationships[rname] = { type: 'hasMany', targetEntity: '' };
                 render(container, state);
@@ -290,6 +494,7 @@ const EntityEditor = (() => {
                 const tr = btn.closest('tr');
                 const entity = tr.dataset.entity;
                 const rel = tr.dataset.rel;
+                App.pushUndo();
                 delete state.entities[entity].relationships[rel];
                 if (Object.keys(state.entities[entity].relationships).length === 0) {
                     delete state.entities[entity].relationships;
@@ -302,6 +507,70 @@ const EntityEditor = (() => {
         // Relationship field changes
         container.querySelectorAll('.rel-field').forEach(el => {
             el.addEventListener('input', () => collectRelationships(container, state));
+        });
+    }
+
+    function bindDragReorder(container, state) {
+        let dragSrcIndex = null;
+        let dragEntity = null;
+
+        container.querySelectorAll('tr[data-entity][data-prop]').forEach(tr => {
+            tr.addEventListener('dragstart', e => {
+                dragSrcIndex = parseInt(tr.dataset.index, 10);
+                dragEntity = tr.dataset.entity;
+                tr.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', '');
+            });
+
+            tr.addEventListener('dragover', e => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                // Only highlight if same entity
+                if (tr.dataset.entity === dragEntity) {
+                    tr.classList.add('drag-over');
+                }
+            });
+
+            tr.addEventListener('dragleave', () => {
+                tr.classList.remove('drag-over');
+            });
+
+            tr.addEventListener('drop', e => {
+                e.preventDefault();
+                tr.classList.remove('drag-over');
+                const targetIndex = parseInt(tr.dataset.index, 10);
+                const entityName = tr.dataset.entity;
+
+                if (entityName !== dragEntity || dragSrcIndex === targetIndex) return;
+
+                App.pushUndo();
+
+                // Reorder properties using ordered keys
+                const props = state.entities[entityName].properties || {};
+                const keys = Object.keys(props);
+                const movedKey = keys[dragSrcIndex];
+
+                // Remove from old position
+                keys.splice(dragSrcIndex, 1);
+                // Insert at new position
+                keys.splice(targetIndex, 0, movedKey);
+
+                // Rebuild properties object in new order
+                const reordered = {};
+                keys.forEach(k => { reordered[k] = props[k]; });
+                state.entities[entityName].properties = reordered;
+
+                render(container, state);
+                App.onStateChanged();
+            });
+
+            tr.addEventListener('dragend', () => {
+                tr.classList.remove('dragging');
+                container.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+                dragSrcIndex = null;
+                dragEntity = null;
+            });
         });
     }
 
@@ -342,6 +611,12 @@ const EntityEditor = (() => {
                             delete row[origName];
                         }
                     });
+                }
+
+                // Update checked props tracking
+                if (checkedProps[entity] && checkedProps[entity][origName]) {
+                    checkedProps[entity][newName] = true;
+                    delete checkedProps[entity][origName];
                 }
             }
             state.entities[entity].properties[newName] = prop;

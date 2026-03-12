@@ -12,7 +12,100 @@
 </head>
 <body class="dark h-full font-body">
     <div id="app" class="flex flex-col h-full">
-        <!-- Header -->
+        <!-- Toast container (fixed top-right) -->
+        <div id="toast-container" class="toast-container"></div>
+
+        <!-- Keyboard shortcut overlay (hidden by default) -->
+        <div id="shortcut-overlay" class="shortcut-overlay hidden">
+            <div class="shortcut-panel">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="shortcut-title" style="margin-bottom: 0;">Keyboard Shortcuts</h2>
+                    <button id="shortcut-overlay-close" class="header-btn-icon" style="width:28px;height:28px;" title="Close">&times;</button>
+                </div>
+                <div class="shortcut-grid">
+                    <div class="shortcut-row">
+                        <span class="shortcut-key"><kbd>Ctrl</kbd><kbd>S</kbd></span>
+                        <span class="shortcut-desc">Save configuration</span>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-key"><kbd>Ctrl</kbd><kbd>B</kbd></span>
+                        <span class="shortcut-desc">Build project</span>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-key"><kbd>Ctrl</kbd><kbd>Z</kbd></span>
+                        <span class="shortcut-desc">Undo</span>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-key"><kbd>Ctrl</kbd><kbd>Y</kbd></span>
+                        <span class="shortcut-desc">Redo</span>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-key"><kbd>Ctrl</kbd><kbd>E</kbd></span>
+                        <span class="shortcut-desc">Add entity</span>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-key"><kbd>1</kbd> &ndash; <kbd>4</kbd></span>
+                        <span class="shortcut-desc">Switch tabs</span>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-key"><kbd>?</kbd></span>
+                        <span class="shortcut-desc">Show this overlay</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import modal (hidden by default) -->
+        <div id="import-modal" class="import-modal hidden">
+            <div class="import-modal-panel">
+                <h2 class="import-modal-title">Import Seed Data</h2>
+                <p class="text-xs text-gray-400 mb-3">Paste CSV or JSON data below. CSV should have a header row matching property names.</p>
+                <textarea id="import-textarea" class="import-textarea" placeholder="name,email,age&#10;John,john@example.com,30&#10;Jane,jane@example.com,25"></textarea>
+                <div class="import-actions">
+                    <button id="import-cancel" class="btn-sm btn-ghost">Cancel</button>
+                    <button id="import-confirm" class="btn-sm btn-primary">Import</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Template picker modal (hidden by default) -->
+        <div id="template-picker" class="template-picker hidden">
+            <div class="template-picker-panel">
+                <h2 class="template-picker-title">Start from a Template</h2>
+                <p class="template-picker-subtitle">Choose a starter configuration or start from scratch.</p>
+                <div class="template-grid" id="template-grid">
+                    <div class="template-card" data-template="blank">
+                        <div class="template-card-icon">&#128196;</div>
+                        <div class="template-card-title">Blank</div>
+                        <div class="template-card-desc">Start with an empty configuration file.</div>
+                        <div class="template-card-meta">0 entities</div>
+                    </div>
+                    <div class="template-card" data-template="todo">
+                        <div class="template-card-icon">&#9989;</div>
+                        <div class="template-card-title">Todo App</div>
+                        <div class="template-card-desc">A simple todo list API with categories.</div>
+                        <div class="template-card-meta">2 entities</div>
+                    </div>
+                    <div class="template-card" data-template="blog">
+                        <div class="template-card-icon">&#128221;</div>
+                        <div class="template-card-title">Blog API</div>
+                        <div class="template-card-desc">Posts, comments, and authors for a blog platform.</div>
+                        <div class="template-card-meta">3 entities</div>
+                    </div>
+                    <div class="template-card" data-template="ecommerce">
+                        <div class="template-card-icon">&#128722;</div>
+                        <div class="template-card-title">E-Commerce</div>
+                        <div class="template-card-desc">Products, orders, customers, and categories.</div>
+                        <div class="template-card-meta">4 entities</div>
+                    </div>
+                </div>
+                <div class="flex justify-end mt-4">
+                    <button id="template-picker-close" class="btn-sm btn-ghost">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Header bar -->
         <header class="header-bar flex items-center justify-between px-6 py-3 shrink-0">
             <div class="flex items-center gap-3">
                 <div class="ninja-icon" aria-hidden="true">
@@ -30,6 +123,30 @@
                 <span id="status-badge" class="status-badge text-xs px-2.5 py-0.5 rounded-full font-semibold hidden ml-2"></span>
             </div>
             <div class="flex items-center gap-2">
+                <!-- Undo/Redo buttons -->
+                <button id="btn-undo" class="header-btn header-btn-icon" title="Undo (Ctrl+Z)" disabled>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                </button>
+                <button id="btn-redo" class="header-btn header-btn-icon" title="Redo (Ctrl+Y)" disabled>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.13-9.36L23 10"/></svg>
+                </button>
+                <div class="header-separator"></div>
+                <!-- Auto-save toggle -->
+                <label class="auto-save-toggle" title="Auto-save">
+                    <input type="checkbox" id="auto-save-checkbox" />
+                    <span class="auto-save-label">Auto</span>
+                    <span id="auto-save-indicator" class="auto-save-indicator hidden">&#x2713;</span>
+                </label>
+                <!-- Export button -->
+                <button id="btn-export" class="header-btn header-btn-icon" title="Download JSON">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                </button>
+                <!-- Keyboard shortcuts button -->
+                <button id="btn-shortcuts" class="header-btn header-btn-icon" title="Keyboard Shortcuts (?)">
+                    <span style="font-size: 14px; font-weight: 700;">?</span>
+                </button>
+                <div class="header-separator"></div>
+                <!-- Save & Build -->
                 <button id="btn-save" class="header-btn header-btn-secondary">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                     Save
@@ -43,32 +160,67 @@
 
         <!-- Main content -->
         <div class="flex flex-1 overflow-hidden">
-            <!-- Left panel: Tabs + form -->
-            <div class="flex flex-col flex-1 min-w-0">
-                <!-- Tab bar -->
-                <nav class="tab-bar flex border-b border-bdr bg-surface-base shrink-0" style="height: 42px;">
+            <!-- Left panel -->
+            <div id="left-panel" class="flex flex-col flex-1 min-w-0">
+                <!-- Tab bar with badges -->
+                <nav class="tab-bar flex items-center border-b border-bdr bg-surface-base shrink-0" style="height: 42px;">
                     <button class="tab-btn active px-5 text-sm font-medium" data-tab="config">Config</button>
-                    <button class="tab-btn px-5 text-sm font-medium" data-tab="entities">Entities</button>
-                    <button class="tab-btn px-5 text-sm font-medium" data-tab="enums">Enums</button>
-                    <button class="tab-btn px-5 text-sm font-medium" data-tab="seed">Seed Data</button>
+                    <button class="tab-btn px-5 text-sm font-medium" data-tab="entities">Entities <span class="tab-badge hidden" id="badge-entities"></span></button>
+                    <button class="tab-btn px-5 text-sm font-medium" data-tab="enums">Enums <span class="tab-badge hidden" id="badge-enums"></span></button>
+                    <button class="tab-btn px-5 text-sm font-medium" data-tab="seed">Seed Data <span class="tab-badge hidden" id="badge-seed"></span></button>
+
+                    <!-- View toggle (right side of tab bar) -->
+                    <div class="ml-auto flex items-center gap-1 px-3">
+                        <div class="view-toggle">
+                            <button class="view-toggle-btn active" data-view="split" title="Split View">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+                            </button>
+                            <button class="view-toggle-btn" data-view="form" title="Form Only">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+                            </button>
+                            <button class="view-toggle-btn" data-view="json" title="JSON Only">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                            </button>
+                        </div>
+                    </div>
                 </nav>
 
-                <!-- Tab content -->
+                <!-- Breadcrumb bar -->
+                <div id="breadcrumb-bar" class="breadcrumb-bar shrink-0 hidden">
+                    <span class="breadcrumb-item" data-tab="config">Config Builder</span>
+                </div>
+
+                <!-- Tab content with transition wrapper -->
                 <div class="flex-1 overflow-auto p-6 content-area">
-                    <div id="tab-config" class="tab-content"></div>
-                    <div id="tab-entities" class="tab-content hidden"></div>
-                    <div id="tab-enums" class="tab-content hidden"></div>
-                    <div id="tab-seed" class="tab-content hidden"></div>
+                    <div id="tab-config" class="tab-content tab-content-active"></div>
+                    <div id="tab-entities" class="tab-content"></div>
+                    <div id="tab-enums" class="tab-content"></div>
+                    <div id="tab-seed" class="tab-content"></div>
                 </div>
             </div>
 
-            <!-- Right panel: JSON editor (Monaco) -->
-            <div id="json-panel" class="w-[420px] flex flex-col border-l border-bdr shrink-0">
+            <!-- Resize handle -->
+            <div id="resize-handle" class="resize-handle"></div>
+
+            <!-- Right panel: JSON editor -->
+            <div id="json-panel" class="flex flex-col border-l border-bdr shrink-0" style="width: 420px;">
                 <div class="flex items-center justify-between px-4 border-b border-bdr bg-surface-base" style="height: 42px;">
                     <span class="text-[11px] font-mono font-medium text-gray-500 uppercase tracking-widest">JSON Editor</span>
+                    <button id="btn-copy-json" class="copy-btn" title="Copy to clipboard">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
                 </div>
                 <div id="monaco-container" class="flex-1 overflow-hidden"></div>
             </div>
+        </div>
+
+        <!-- Build console (collapsed by default) -->
+        <div id="build-console" class="build-console hidden">
+            <div class="build-console-header">
+                <span>Build Output</span>
+                <button id="build-console-close" class="text-gray-400 hover:text-white" style="background:none;border:none;cursor:pointer;font-size:1.25rem;">&times;</button>
+            </div>
+            <div id="build-console-body" class="build-console-body"></div>
         </div>
 
         <!-- Validation panel -->
