@@ -46,7 +46,7 @@ public sealed class CreateEndpointTemplate
                       await {{st.VarModelService}}.CreateAsync({{st.VarModel}});
 
                       var {{st.VarModelResponse}} = {{st.VarModel}}.{{st.MethodToModelResponse}}();
-                      await SendCreatedAtAsync<{{st.ClassGetModelEndpoint}}>(
+                      await Send.CreatedAtAsync<{{st.ClassGetModelEndpoint}}>(
                           new { Id = {{st.VarModel}}.{{entityKey.Key}} }, {{st.VarModelResponse}}, generateAbsoluteUrl: true, cancellation: ct);
                   }
               }

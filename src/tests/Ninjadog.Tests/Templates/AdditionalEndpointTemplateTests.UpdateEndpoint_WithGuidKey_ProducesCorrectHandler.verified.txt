@@ -34,7 +34,7 @@ public partial class UpdateTodoItemEndpoint(ITodoItemService todoItemService)
 
         if (existingTodoItem is null)
         {
-            await SendNotFoundAsync(ct);
+            await Send.NotFoundAsync(ct);
             return;
         }
 
@@ -42,6 +42,6 @@ public partial class UpdateTodoItemEndpoint(ITodoItemService todoItemService)
         await todoItemService.UpdateAsync(todoItem);
 
         var todoItemResponse = todoItem.ToTodoItemResponse();
-        await SendOkAsync(todoItemResponse, ct);
+        await Send.OkAsync(todoItemResponse, ct);
     }
 }

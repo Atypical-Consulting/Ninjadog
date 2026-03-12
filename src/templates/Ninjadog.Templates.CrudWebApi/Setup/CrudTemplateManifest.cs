@@ -24,14 +24,14 @@ public class CrudTemplateManifest : NinjadogTemplateManifest
     public override List<string> NuGetPackages { get; init; } =
     [
         "Dapper:2.1.72",
-        "FastEndpoints:5.32.0",
-        "FastEndpoints.ClientGen:5.32.0",
-        "FastEndpoints.Swagger:5.32.0",
+        "FastEndpoints:8.0.1",
+        "FastEndpoints.ClientGen:8.0.1",
+        "FastEndpoints.Swagger:8.0.1",
         "FluentValidation:12.1.1",
         "ValueOf:2.0.31",
         "Microsoft.Data.Sqlite:10.0.4",
-        "Npgsql:9.0.3",
-        "Microsoft.Data.SqlClient:6.0.1"
+        "Npgsql:10.0.1",
+        "Microsoft.Data.SqlClient:6.1.4"
     ];
 
     /// <inheritdoc />

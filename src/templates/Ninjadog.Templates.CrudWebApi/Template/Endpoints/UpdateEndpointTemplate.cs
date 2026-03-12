@@ -45,7 +45,7 @@ public sealed class UpdateEndpointTemplate
 
                       if ({{st.VarExistingModel}} is null)
                       {
-                          await SendNotFoundAsync(ct);
+                          await Send.NotFoundAsync(ct);
                           return;
                       }
 
@@ -53,7 +53,7 @@ public sealed class UpdateEndpointTemplate
                       await {{st.VarModelService}}.UpdateAsync({{st.VarModel}});
 
                       var {{st.VarModelResponse}} = {{st.VarModel}}.{{st.MethodToModelResponse}}();
-                      await SendOkAsync({{st.VarModelResponse}}, ct);
+                      await Send.OkAsync({{st.VarModelResponse}}, ct);
                   }
               }
               """;

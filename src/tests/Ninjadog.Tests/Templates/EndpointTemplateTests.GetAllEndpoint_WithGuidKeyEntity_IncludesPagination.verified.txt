@@ -34,6 +34,6 @@ public partial class GetAllTodoItemsEndpoint(ITodoItemService todoItemService)
 
         var (todoItems, totalCount) = await todoItemService.GetAllAsync(page, pageSize);
         var todoItemsResponse = todoItems.ToTodoItemsResponse(page, pageSize, totalCount);
-        await SendOkAsync(todoItemsResponse, ct);
+        await Send.OkAsync(todoItemsResponse, ct);
     }
 }

@@ -34,7 +34,7 @@ public partial class UpdateOrderEndpoint(IOrderService orderService)
 
         if (existingOrder is null)
         {
-            await SendNotFoundAsync(ct);
+            await Send.NotFoundAsync(ct);
             return;
         }
 
@@ -42,6 +42,6 @@ public partial class UpdateOrderEndpoint(IOrderService orderService)
         await orderService.UpdateAsync(order);
 
         var orderResponse = order.ToOrderResponse();
-        await SendOkAsync(orderResponse, ct);
+        await Send.OkAsync(orderResponse, ct);
     }
 }
