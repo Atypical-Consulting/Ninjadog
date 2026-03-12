@@ -22,7 +22,7 @@ public static class ApiContractToDomainMapper
     {
         return new TodoItem
         {
-                        Id = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Title = request.Title,
             Description = request.Description,
             IsCompleted = request.IsCompleted,
@@ -36,7 +36,7 @@ public static class ApiContractToDomainMapper
     {
         return new TodoItem
         {
-                        Id = request.Id,
+            Id = request.Id,
             Title = request.Title,
             Description = request.Description,
             IsCompleted = request.IsCompleted,

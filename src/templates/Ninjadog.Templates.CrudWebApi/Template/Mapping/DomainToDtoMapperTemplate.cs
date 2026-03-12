@@ -80,13 +80,15 @@ public sealed class DomainToDtoMapperTemplate
             }
         }
 
+        var properties = sb.ToString().TrimStart();
+
         return $$"""
 
                      public static {{st.ClassModelDto}} {{st.MethodToModelDto}}(this {{st.Model}} {{st.VarModel}})
                      {
                          return new {{st.ClassModelDto}}
                          {
-                             {{sb}}
+                             {{properties}}
                          };
                      }
                  """;

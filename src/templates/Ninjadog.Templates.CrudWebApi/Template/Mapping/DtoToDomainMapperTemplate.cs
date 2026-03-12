@@ -43,8 +43,6 @@ public sealed class DtoToDomainMapperTemplate : NinjadogTemplate
 
         IndentedStringBuilder sb = new(3);
 
-        sb.IncrementIndent(3);
-
         for (var i = 0; i < modelProperties.Count; i++)
         {
             var isLastItem = i == modelProperties.Count - 1;
@@ -88,13 +86,15 @@ public sealed class DtoToDomainMapperTemplate : NinjadogTemplate
             }
         }
 
+        var properties = sb.ToString().TrimStart();
+
         return $$"""
 
                      public static {{st.Model}} {{st.MethodToModel}}(this {{st.ClassModelDto}} {{st.VarModelDto}})
                      {
                          return new {{st.Model}}
                          {
-                             {{sb}}
+                             {{properties}}
                          };
                      }
                  """;

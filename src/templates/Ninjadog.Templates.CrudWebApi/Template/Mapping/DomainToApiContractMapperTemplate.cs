@@ -79,13 +79,15 @@ public sealed class DomainToApiContractMapperTemplate
             }
         }
 
+        var properties = sb.ToString().TrimStart();
+
         return $$"""
 
                      public static {{st.ClassModelResponse}} {{st.MethodToModelResponse}}(this {{st.Model}} {{st.VarModel}})
                      {
                          return new {{st.ClassModelResponse}}
                          {
-                             {{sb}}
+                             {{properties}}
                          };
                      }
                  """;
@@ -131,6 +133,8 @@ public sealed class DomainToApiContractMapperTemplate
             }
         }
 
+        var properties = sb.ToString().TrimStart();
+
         return $$"""
 
                      public static {{st.ClassGetAllModelsResponse}} {{st.MethodToModelsResponse}}(this IEnumerable<{{st.Model}}> {{st.VarModels}}, int page, int pageSize, int totalCount)
@@ -139,7 +143,7 @@ public sealed class DomainToApiContractMapperTemplate
                          {
                              {{st.Models}} = {{st.VarModels}}.Select(x => new {{st.ClassModelResponse}}
                              {
-                                 {{sb}}
+                                 {{properties}}
                              }),
                              Page = page,
                              PageSize = pageSize,
