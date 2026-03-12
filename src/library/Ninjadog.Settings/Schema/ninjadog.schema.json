@@ -165,6 +165,11 @@
           "type": "boolean",
           "description": "Enable audit fields. Adds CreatedAt and UpdatedAt timestamps automatically managed on insert and update.",
           "default": false
+        },
+        "aot": {
+          "type": "boolean",
+          "description": "Enable Native AOT publishing support. Generates AOT-compatible code with Dapper.AOT, slim builder, and JSON source generators.",
+          "default": false
         }
       },
       "additionalProperties": false
