@@ -31,7 +31,9 @@ public sealed class GetAllSummaryTemplate
                   public {{st.ClassGetAllModelsSummary}}()
                   {
                       Summary = "Returns all the {{st.ModelsHumanized}} in the system";
-                      Description = "Returns all the {{st.ModelsHumanized}} in the system";
+                      Description = "Returns all the {{st.ModelsHumanized}} in the system. "
+                          + "Supports pagination (page, pageSize), filtering by property values, "
+                          + "and sorting (sortBy, sortDir=asc|desc).";
                       Response<{{st.ClassGetAllModelsResponse}}>(200, "All {{st.ModelsHumanized}} in the system are returned");
                   }
               }

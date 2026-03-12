@@ -44,12 +44,19 @@ public sealed class ServiceInterfaceTemplate
                   Task<{{st.Model}}?> GetAsync({{entityKey.Type}} id);
 
                   /// <summary>
-                  /// Retrieves a paginated list of {{st.ModelsHumanized}}.
+                  /// Retrieves a paginated, filterable, and sortable list of {{st.ModelsHumanized}}.
                   /// </summary>
                   /// <param name="page">The page number (1-based).</param>
                   /// <param name="pageSize">The number of items per page.</param>
+                  /// <param name="filters">Optional dictionary of property name/value pairs to filter by.</param>
+                  /// <param name="sortBy">Optional property name to sort by.</param>
+                  /// <param name="sortDescending">Whether to sort in descending order.</param>
                   /// <returns>A tuple containing the items and total count.</returns>
-                  Task<(IEnumerable<{{st.Model}}> Items, int TotalCount)> GetAllAsync(int page, int pageSize);
+                  Task<(IEnumerable<{{st.Model}}> Items, int TotalCount)> GetAllAsync(
+                      int page, int pageSize,
+                      Dictionary<string, string>? filters = null,
+                      string? sortBy = null,
+                      bool sortDescending = false);
 
                   /// <summary>
                   /// Updates an existing {{st.ModelHumanized}}.

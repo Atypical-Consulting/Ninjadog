@@ -61,10 +61,15 @@ public sealed class ServiceTemplate
                   }
               
                   /// <inheritdoc />
-                  public async Task<(IEnumerable<{{st.Model}}> Items, int TotalCount)> GetAllAsync(int page, int pageSize)
+                  public async Task<(IEnumerable<{{st.Model}}> Items, int TotalCount)> GetAllAsync(
+                      int page, int pageSize,
+                      Dictionary<string, string>? filters = null,
+                      string? sortBy = null,
+                      bool sortDescending = false)
                   {
-                      var {{st.VarModelDtos}} = await {{st.VarModelRepository}}.GetAllAsync(page, pageSize);
-                      var totalCount = await {{st.VarModelRepository}}.CountAsync();
+                      var {{st.VarModelDtos}} = await {{st.VarModelRepository}}.GetAllAsync(
+                          page, pageSize, filters, sortBy, sortDescending);
+                      var totalCount = await {{st.VarModelRepository}}.CountAsync(filters);
                       var items = {{st.VarModelDtos}}.Select(x => x.{{st.MethodToModel}}());
                       return (items, totalCount);
                   }

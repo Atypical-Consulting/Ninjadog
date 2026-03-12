@@ -249,6 +249,18 @@ WHERE Id = @Id
 
 Generates a concrete repository with Dapper-based CRUD operations (`GetAllAsync`, `GetAsync`, `CreateAsync`, `UpdateAsync`, `DeleteAsync`).
 
+The `GetAllAsync` method accepts optional filtering and sorting parameters:
+
+```csharp
+Task<IEnumerable<TodoItemDto>> GetAllAsync(
+    int page, int pageSize,
+    Dictionary<string, string>? filters = null,
+    string? sortBy = null,
+    bool sortDescending = false);
+```
+
+SQL queries are built dynamically at runtime. A compile-time whitelist of allowed column names prevents SQL injection. The `CountAsync` method also accepts filters so that `TotalCount` reflects the filtered result set.
+
 ### RepositoryInterfaceGenerator
 
 | Scope | Per Entity |
