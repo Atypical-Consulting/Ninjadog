@@ -1,8 +1,12 @@
 /**
  * Seed Data tab — per-entity seed data table editor.
  * Supports auto-generation of key values (Guid or int/long).
+ * Supports CSV/JSON import, cell validation, and undo.
  */
 const SeedEditor = (() => {
+    /** Validation patterns by type. */
+    const GUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
     /** Find the key property name and type for an entity, or null if none. */
     function findKeyProp(entity) {
         const props = entity.properties || {};
@@ -39,6 +43,42 @@ const SeedEditor = (() => {
         return '';
     }
 
+    /**
+     * Validate a cell value against the property type.
+     * Returns null if valid, or an error message string if invalid.
+     */
+    function validateCell(value, propType) {
+        if (value === '' || value === undefined || value === null) return null;
+        const v = String(value).trim();
+        if (v === '') return null;
+
+        const t = (propType || 'string').toLowerCase();
+
+        if (t === 'int' || t === 'long') {
+            if (!/^-?\d+$/.test(v)) return `Expected an integer value`;
+            return null;
+        }
+        if (t === 'decimal' || t === 'double' || t === 'float') {
+            if (isNaN(Number(v))) return `Expected a numeric value`;
+            return null;
+        }
+        if (t === 'bool') {
+            if (v !== 'true' && v !== 'false') return `Expected "true" or "false"`;
+            return null;
+        }
+        if (t === 'guid') {
+            if (!GUID_RE.test(v)) return `Expected a valid GUID (e.g. 00000000-0000-0000-0000-000000000000)`;
+            return null;
+        }
+        if (t === 'datetime' || t === 'dateonly' || t === 'timeonly') {
+            const d = new Date(v);
+            if (isNaN(d.getTime())) return `Expected a valid date/time value`;
+            return null;
+        }
+
+        return null; // string and unknown types accept anything
+    }
+
     function render(container, state) {
         state.entities = state.entities || {};
         const entityNames = Object.keys(state.entities);
@@ -61,14 +101,16 @@ const SeedEditor = (() => {
         const seedData = entity.seedData || [];
         const keyProp = findKeyProp(entity);
         const canAutoKey = keyProp && ['guid', 'int', 'long'].includes((keyProp.type || '').toLowerCase());
+        const colorDot = `<span class="entity-color-dot" style="background: ${App.getEntityColor(name)}"></span>`;
 
         return `
         <div class="entity-card" data-seed-entity="${esc(name)}">
             <div class="entity-header">
-                <span class="font-medium text-sm">${esc(name)}</span>
+                <span class="font-medium text-sm">${colorDot}${esc(name)}</span>
                 <div class="flex items-center gap-2">
                     <span class="text-xs text-gray-500">${seedData.length} rows</span>
                     ${canAutoKey && seedData.length > 0 ? `<button class="btn-sm btn-ghost seed-fill-keys" data-entity="${esc(name)}" title="Auto-fill empty ${esc(keyProp.name)} values">Fill Keys</button>` : ''}
+                    <button class="btn-sm btn-ghost seed-import" data-entity="${esc(name)}">Import</button>
                     <button class="btn-sm btn-ghost seed-add-row" data-entity="${esc(name)}">+ Row</button>
                 </div>
             </div>
@@ -85,11 +127,16 @@ const SeedEditor = (() => {
                     <tbody>
                         ${seedData.map((row, i) => `<tr data-entity="${esc(name)}" data-row="${i}">
                             ${props.map(p => {
-                                const isKey = entity.properties[p] && entity.properties[p].isKey;
-                                const canGen = isKey && ['guid', 'int', 'long'].includes((entity.properties[p].type || '').toLowerCase());
-                                return `<td class="relative">`
-                                    + `<input class="field-input py-1 text-xs seed-field${isKey ? ' font-mono' : ''}" data-prop="${esc(p)}" value="${esc(row[p] ?? '')}" />`
-                                    + (canGen ? `<button class="seed-gen-key absolute right-1 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-blue-500 cursor-pointer" data-entity="${esc(name)}" data-row="${i}" title="Generate ${esc(entity.properties[p].type)} key">&#x21bb;</button>` : '')
+                                const propDef = entity.properties[p] || {};
+                                const isKey = propDef.isKey;
+                                const canGen = isKey && ['guid', 'int', 'long'].includes((propDef.type || '').toLowerCase());
+                                const cellValue = row[p] ?? '';
+                                const error = validateCell(cellValue, propDef.type);
+                                const errorClass = error ? ' cell-error' : '';
+                                const errorTitle = error ? ` title="${esc(error)}"` : '';
+                                return `<td class="relative${errorClass}"${errorTitle}>`
+                                    + `<input class="field-input py-1 text-xs seed-field${isKey ? ' font-mono' : ''}" data-prop="${esc(p)}" value="${esc(cellValue)}" />`
+                                    + (canGen ? `<button class="seed-gen-key absolute right-1 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-blue-500 cursor-pointer" data-entity="${esc(name)}" data-row="${i}" title="Generate ${esc(propDef.type)} key">&#x21bb;</button>` : '')
                                     + `</td>`;
                             }).join('')}
                             <td><button class="btn-sm btn-danger seed-remove-row" data-entity="${esc(name)}" data-row="${i}">X</button></td>
@@ -116,9 +163,28 @@ const SeedEditor = (() => {
                     row[keyProp.name] = generateKeyValue(ent, keyProp);
                 }
 
+                App.pushUndo();
                 ent.seedData.push(row);
                 render(container, state);
                 App.onStateChanged();
+            });
+        });
+
+        // Import seed data
+        container.querySelectorAll('.seed-import').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const entityName = btn.dataset.entity;
+                App.showImportModal(entityName, (importedRows) => {
+                    if (!Array.isArray(importedRows) || importedRows.length === 0) return;
+                    const ent = state.entities[entityName];
+                    ent.seedData = ent.seedData || [];
+                    App.pushUndo();
+                    importedRows.forEach(row => {
+                        ent.seedData.push(row);
+                    });
+                    render(container, state);
+                    App.onStateChanged();
+                });
             });
         });
 
@@ -130,6 +196,7 @@ const SeedEditor = (() => {
                 const ent = state.entities[entity];
                 const keyProp = findKeyProp(ent);
                 if (!keyProp) return;
+                App.pushUndo();
                 ent.seedData[idx][keyProp.name] = generateKeyValue(ent, keyProp);
                 render(container, state);
                 App.onStateChanged();
@@ -143,6 +210,7 @@ const SeedEditor = (() => {
                 const ent = state.entities[entity];
                 const keyProp = findKeyProp(ent);
                 if (!keyProp || !ent.seedData) return;
+                App.pushUndo();
                 ent.seedData.forEach(row => {
                     const val = row[keyProp.name];
                     if (val === '' || val === undefined || val === null) {
@@ -159,6 +227,7 @@ const SeedEditor = (() => {
             btn.addEventListener('click', () => {
                 const entity = btn.dataset.entity;
                 const idx = parseInt(btn.dataset.row, 10);
+                App.pushUndo();
                 state.entities[entity].seedData.splice(idx, 1);
                 if (state.entities[entity].seedData.length === 0) {
                     delete state.entities[entity].seedData;
@@ -170,7 +239,15 @@ const SeedEditor = (() => {
 
         // Field changes
         container.querySelectorAll('.seed-field').forEach(el => {
-            el.addEventListener('input', () => collectSeedData(container, state));
+            let undoPushed = false;
+            el.addEventListener('focus', () => { undoPushed = false; });
+            el.addEventListener('input', () => {
+                if (!undoPushed) {
+                    App.pushUndo();
+                    undoPushed = true;
+                }
+                collectSeedData(container, state);
+            });
         });
     }
 
@@ -187,6 +264,21 @@ const SeedEditor = (() => {
                 else if (v === 'false') row[prop] = false;
                 else if (v !== '' && !isNaN(Number(v))) row[prop] = Number(v);
                 else row[prop] = v;
+
+                // Update validation styling on the parent <td>
+                const td = f.closest('td');
+                if (td) {
+                    const entityObj = state.entities[entity];
+                    const propDef = entityObj && entityObj.properties ? entityObj.properties[prop] : null;
+                    const error = propDef ? validateCell(v, propDef.type) : null;
+                    if (error) {
+                        td.classList.add('cell-error');
+                        td.title = error;
+                    } else {
+                        td.classList.remove('cell-error');
+                        td.removeAttribute('title');
+                    }
+                }
             });
             state.entities[entity].seedData = state.entities[entity].seedData || [];
             state.entities[entity].seedData[idx] = row;

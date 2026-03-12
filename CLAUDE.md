@@ -98,12 +98,12 @@ Every feature or bugfix follows this procedure **in order**:
 
 4. **Implement & commit** — Only NOW may you edit code. Make one or more focused commits using conventional commit messages (`feat:`, `fix:`, `chore:`, `docs:`). Each commit should be atomic and build successfully.
 
-5. **Update documentation** — If the change adds or modifies user-facing behavior, update the relevant pages under `docs/` (Jekyll site). Common files to update:
-   - `docs/cli.md` — new or changed CLI commands/flags
-   - `docs/configuration.md` — new `ninjadog.json` options
-   - `docs/generators/` — new or changed templates
-   - `docs/getting-started.md` — workflow changes
-   - Create new doc pages when the feature warrants its own section
+5. **Update documentation (MANDATORY)** — If the change adds or modifies user-facing behavior, you MUST update the relevant pages under `docs/` (Jekyll site) BEFORE proceeding. **Do NOT skip this step.** Common files to update:
+    - `docs/cli.md` — new or changed CLI commands/flags
+    - `docs/configuration.md` — new `ninjadog.json` options
+    - `docs/generators/` — new or changed templates
+    - `docs/getting-started.md` — workflow changes
+    - Create new doc pages when the feature warrants its own section
 
 6. **Run all tests** — Ensure the full test suite passes:
    ```bash
@@ -111,9 +111,9 @@ Every feature or bugfix follows this procedure **in order**:
    ```
    If snapshot tests changed, review and commit the updated `.verified.txt` files.
 
-7. **Simplify & verify** — Run `/simplify` to review changed code for reuse, quality, and efficiency. Then launch the UI (`ninjadog ui --port 5391 --no-browser`) and use the browser MCP to test your implementation end-to-end. Fix any problems found during testing before proceeding.
+7. **Simplify & verify (MANDATORY)** — You MUST run `/simplify` to review changed code for reuse, quality, and efficiency. Then launch the UI (`ninjadog ui --port 5391 --no-browser`) and use the browser MCP to test your implementation end-to-end. **Fix any problems found during testing before proceeding. Do NOT skip this step.**
 
-8. **Create a PR** — Push the branch and open a pull request targeting `dev`:
+8. **Create a PR (MANDATORY)** — You MUST push the branch and open a pull request targeting `dev` before considering the task complete. **The task is NOT done until the PR exists. Do NOT skip this step.**
    ```bash
    gh pr create --base dev --title "feat: short description" --body "..."
    ```

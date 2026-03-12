@@ -1,6 +1,7 @@
 /**
  * Enums tab — list of enum definitions with value management.
  * No modals: uses inline forms for add/remove.
+ * Supports undo and entity color coding.
  */
 const EnumEditor = (() => {
     function render(container, state) {
@@ -39,6 +40,7 @@ const EnumEditor = (() => {
         addConfirm.addEventListener('click', () => {
             const name = addInput.value.trim();
             if (!name) return;
+            App.pushUndo();
             state.enums[name] = [];
             render(container, state);
             App.onStateChanged();
@@ -58,10 +60,12 @@ const EnumEditor = (() => {
     }
 
     function enumCard(name, values) {
+        const colorDot = `<span class="entity-color-dot" style="background: ${App.getEntityColor(name)}"></span>`;
+
         return `
         <div class="entity-card" data-enum="${esc(name)}">
             <div class="entity-header">
-                <span class="font-medium text-sm">${esc(name)}</span>
+                <span class="font-medium text-sm">${colorDot}${esc(name)}</span>
                 <div class="flex items-center gap-2">
                     <span class="text-xs text-gray-500">${values.length} values</span>
                     <button class="btn-sm btn-danger enum-remove" data-enum="${esc(name)}" data-confirmed="false">Remove</button>
@@ -93,6 +97,7 @@ const EnumEditor = (() => {
                 const name = btn.dataset.enum;
                 if (btn.dataset.confirmed === 'true') {
                     clearTimeout(confirmTimer);
+                    App.pushUndo();
                     delete state.enums[name];
                     if (Object.keys(state.enums).length === 0) delete state.enums;
                     render(container, state);
@@ -117,6 +122,7 @@ const EnumEditor = (() => {
             btn.addEventListener('click', () => {
                 const name = btn.dataset.enum;
                 const idx = parseInt(btn.dataset.index, 10);
+                App.pushUndo();
                 state.enums[name].splice(idx, 1);
                 render(container, state);
                 App.onStateChanged();
@@ -139,6 +145,7 @@ const EnumEditor = (() => {
         const input = container.querySelector(`.enum-val-input[data-enum="${enumName}"]`);
         const val = input.value.trim();
         if (!val) return;
+        App.pushUndo();
         state.enums[enumName].push(val);
         render(container, state);
         App.onStateChanged();
