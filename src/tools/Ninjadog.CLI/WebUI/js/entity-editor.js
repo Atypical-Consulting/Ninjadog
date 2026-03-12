@@ -216,8 +216,8 @@ const EntityEditor = (() => {
         return `<tr data-entity="${esc(entity)}" data-prop="${esc(propName)}" data-index="${index}" draggable="true">
             <td class="drag-handle" title="Drag to reorder">&#10303;</td>
             <td class="text-center"><input type="checkbox" class="field-checkbox prop-bulk-check" data-entity="${esc(entity)}" data-prop="${esc(propName)}" ${isChecked ? 'checked' : ''} /></td>
-            <td><input class="field-input py-1 text-xs prop-field" data-key="name" value="${esc(propName)}" /></td>
-            <td><select class="field-select py-1 text-xs prop-field" data-key="type">
+            <td><input class="field-input py-1 text-xs prop-field" style="min-width:120px" data-key="name" value="${esc(propName)}" /></td>
+            <td><select class="field-select py-1 text-xs prop-field" style="min-width:110px" data-key="type">
                 ${propertyTypes.map(t => `<option value="${t}" ${prop.type === t ? 'selected' : ''}>${t}</option>`).join('')}
             </select></td>
             <td class="text-center"><input type="checkbox" class="field-checkbox prop-field" data-key="isKey" ${prop.isKey ? 'checked' : ''} /></td>
