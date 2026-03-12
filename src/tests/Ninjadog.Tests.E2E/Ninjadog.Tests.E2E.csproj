@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);CA1001;CA1707;CS1591;SA1128;SA1201;SA1202;SA1313;SA1401;SA1501;SA1502;SA1503;SA1515;SA1516;SA1611;SA1615</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Playwright" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../tools/Ninjadog.CLI/Ninjadog.CLI.csproj" />
+  </ItemGroup>
+
+</Project>

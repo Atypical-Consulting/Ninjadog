@@ -37,6 +37,7 @@
     <!-- CAKE -->
     <PackageVersion Include="Cake.Frosting" Version="6.1.0" />
     <!-- Test Frameworks -->
+    <PackageVersion Include="Microsoft.Playwright" Version="1.52.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
