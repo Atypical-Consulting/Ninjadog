@@ -22,13 +22,13 @@ public static class DtoToDomainMapper
     {
         return new TodoItem
         {
-                                    Id = Guid.Parse(todoItemDto.Id),
-                        Title = todoItemDto.Title,
-                        Description = todoItemDto.Description,
-                        IsCompleted = todoItemDto.IsCompleted,
-                        DueDate = todoItemDto.DueDate,
-                        Priority = todoItemDto.Priority,
-                        Cost = todoItemDto.Cost
+            Id = Guid.Parse(todoItemDto.Id),
+            Title = todoItemDto.Title,
+            Description = todoItemDto.Description,
+            IsCompleted = todoItemDto.IsCompleted,
+            DueDate = todoItemDto.DueDate,
+            Priority = todoItemDto.Priority,
+            Cost = todoItemDto.Cost
         };
     }
 }

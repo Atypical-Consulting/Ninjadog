@@ -89,13 +89,15 @@ public sealed class ApiContractToDomainMapperTemplate
             }
         }
 
+        var properties = sb.ToString().TrimStart();
+
         return $$"""
 
                      public static {{st.Model}} {{st.MethodToModel}}(this {{st.ClassCreateModelRequest}} request)
                      {
                          return new {{st.Model}}
                          {
-                             {{sb}}
+                             {{properties}}
                          };
                      }
                  """;
@@ -148,6 +150,8 @@ public sealed class ApiContractToDomainMapperTemplate
             }
         }
 
+        var properties = sb.ToString().TrimStart();
+
         return
             $$"""
 
@@ -155,7 +159,7 @@ public sealed class ApiContractToDomainMapperTemplate
                   {
                       return new {{st.Model}}
                       {
-                          {{sb}}
+                          {{properties}}
                       };
                   }
               """;

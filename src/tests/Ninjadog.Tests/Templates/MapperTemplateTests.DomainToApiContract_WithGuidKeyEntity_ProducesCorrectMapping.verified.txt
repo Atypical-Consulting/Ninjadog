@@ -24,7 +24,7 @@ public static class DomainToApiContractMapper
         {
             TodoItems = todoItems.Select(x => new TodoItemResponse
             {
-                                Id = x.Id,
+                Id = x.Id,
                 Title = x.Title,
                 Description = x.Description,
                 IsCompleted = x.IsCompleted,
@@ -42,7 +42,7 @@ public static class DomainToApiContractMapper
     {
         return new TodoItemResponse
         {
-                        Id = todoItem.Id,
+            Id = todoItem.Id,
             Title = todoItem.Title,
             Description = todoItem.Description,
             IsCompleted = todoItem.IsCompleted,
