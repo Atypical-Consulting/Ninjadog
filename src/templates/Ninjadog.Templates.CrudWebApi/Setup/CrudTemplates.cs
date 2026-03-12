@@ -31,6 +31,10 @@ public class CrudTemplates : NinjadogTemplates
         Add(new CrudWebApiExtensionsTemplate());
 
         AddTemplates(
+            "Properties",
+            new LaunchSettingsTemplate());
+
+        AddTemplates(
             "Contracts/Data",
             new DtoTemplate());
 
