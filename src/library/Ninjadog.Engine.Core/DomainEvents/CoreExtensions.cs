@@ -21,6 +21,7 @@ public static class CoreExtensions
         services.AddTransient<IDomainEventProcessor<AfterTemplateParsedEvent>, AfterTemplateParsedProcessor>();
         services.AddTransient<IDomainEventProcessor<BeforeContentGeneratedEvent>, BeforeContentGeneratedProcessor>();
         services.AddTransient<IDomainEventProcessor<AfterContentGeneratedEvent>, AfterContentGeneratedProcessor>();
+        services.AddTransient<IDomainEventProcessor<ScaffoldingCompletedEvent>, ScaffoldingCompletedProcessor>();
         services.AddTransient<IDomainEventProcessor<ErrorOccurredEvent>, ErrorOccurredProcessor>();
 
         return services;

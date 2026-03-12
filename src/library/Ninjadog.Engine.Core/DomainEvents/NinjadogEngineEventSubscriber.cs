@@ -14,6 +14,7 @@ public abstract class NinjadogEngineEventSubscriber(IDomainEventDispatcher dispa
     public virtual void RegisterAllHandlers()
     {
         RegisterOnBeforeEngineRun();
+        RegisterOnScaffoldingCompleted();
         RegisterOnAfterEngineRun();
         RegisterOnBeforeTemplateGenerated();
         RegisterOnAfterTemplateGenerated();
@@ -28,6 +29,16 @@ public abstract class NinjadogEngineEventSubscriber(IDomainEventDispatcher dispa
     /// </summary>
     /// <param name="domainEvent">The event data for the 'BeforeEngineRun' event.</param>
     protected virtual void BeforeEngineRun(BeforeEngineRunEvent domainEvent)
+    {
+        // Do nothing
+    }
+
+    /// <summary>
+    /// Handles the event triggered after scaffolding and NuGet package installation complete.
+    /// Override to perform custom actions when the project structure is ready.
+    /// </summary>
+    /// <param name="domainEvent">The event data for the 'ScaffoldingCompleted' event.</param>
+    protected virtual void ScaffoldingCompleted(ScaffoldingCompletedEvent domainEvent)
     {
         // Do nothing
     }
@@ -97,6 +108,15 @@ public abstract class NinjadogEngineEventSubscriber(IDomainEventDispatcher dispa
         dispatcher.RegisterHandler((BeforeEngineRunEvent domainEvent) =>
         {
             BeforeEngineRun(domainEvent);
+            return Task.CompletedTask;
+        });
+    }
+
+    private void RegisterOnScaffoldingCompleted()
+    {
+        dispatcher.RegisterHandler((ScaffoldingCompletedEvent domainEvent) =>
+        {
+            ScaffoldingCompleted(domainEvent);
             return Task.CompletedTask;
         });
     }

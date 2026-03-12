@@ -46,12 +46,27 @@ internal sealed class NinjadogEngineEventDisplayService(IDomainEventDispatcher d
             WriteLine();
 
             WriteLine();
-            MarkupLine("[bold]Generating files...[/]");
+            MarkupLine("[bold]Scaffolding project...[/]");
+        }
+        else
+        {
+            Markup($"Scaffolding [green]{config.Name}[/] project...");
+        }
+    }
+
+    protected override void ScaffoldingCompleted(ScaffoldingCompletedEvent domainEvent)
+    {
+        var entities = domainEvent.Settings.Entities;
+        var manifest = domainEvent.TemplateManifest;
+
+        if (verbose)
+        {
+            MarkupLine("[bold]Scaffolding complete. Generating files...[/]");
         }
         else
         {
             var entityLabel = entities.Count == 1 ? "entity" : "entities";
-            MarkupLine($"Scaffolding [green]{config.Name}[/] project...            [green]done[/]");
+            MarkupLine($"            [green]done[/]");
             MarkupLine($"Adding NuGet packages ({manifest.NuGetPackages.Count})...            [green]done[/]");
             MarkupLine($"Generating files for {entities.Count} {entityLabel}...");
         }
@@ -120,7 +135,7 @@ internal sealed class NinjadogEngineEventDisplayService(IDomainEventDispatcher d
         else
         {
             var fileNumber = domainEvent.ContextSnapshot.TotalFilesGenerated;
-            Write($"  [grey][[{fileNumber}]][/] ");
+            Markup($"  [grey][[{fileNumber}]][/] ");
             WriteTextPath(fileKey);
             WriteLine();
         }
