@@ -25,7 +25,7 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
         const string fileName = "CrudWebApiExtensions.cs";
 
         var content = aot
-            ? GenerateAotContent(rootNamespace, entities, hasSeedData, hasAuth, factoryClassName)
+            ? GenerateAotContent(rootNamespace, entities, hasSeedData, hasAuth, factoryClassName, versioning)
             : GenerateStandardContent(rootNamespace, entities, hasSeedData, hasAuth, factoryClassName, projectName, projectVersion, projectDescription, versioning);
 
         return CreateNinjadogContentFile(fileName, content);
@@ -109,7 +109,7 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
     }
 
     private static string GenerateAotContent(
-        string rootNamespace, List<NinjadogEntityWithKey> entities, bool hasSeedData, bool hasAuth, string factoryClassName)
+        string rootNamespace, List<NinjadogEntityWithKey> entities, bool hasSeedData, bool hasAuth, string factoryClassName, NinjadogVersioningConfiguration? versioning)
     {
         return
             $$"""
@@ -145,7 +145,7 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
                   public static WebApplication UseNinjadog(this WebApplication app)
                   {
                       app.UseGlobalExceptionHandler();
-                      app.UseFastEndpoints();
+              {{GenerateUseFastEndpoints(versioning)}}
 
                       return app;
                   }

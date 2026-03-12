@@ -43,6 +43,15 @@ public partial class VersioningTemplateTests
     }
 
     [Fact]
+    public Task UpdateEndpoint_WithVersioning_IncludesVersionCall()
+    {
+        var template = new UpdateEndpointTemplate();
+        var settings = new VersioningSettings();
+        var results = template.GenerateMany(settings).ToList();
+        return Verify(results[0].Content);
+    }
+
+    [Fact]
     public Task Extensions_WithUrlPathVersioning_ConfiguresVersioningInUseFastEndpoints()
     {
         var template = new CrudWebApiExtensionsTemplate();
