@@ -283,7 +283,7 @@
       "title": "Entity Relationship",
       "description": "Defines a relationship between two entities.",
       "type": "object",
-      "required": ["relatedEntity", "type"],
+      "required": ["relatedEntity", "relationshipType"],
       "properties": {
         "relatedEntity": {
           "type": "string",
@@ -291,7 +291,7 @@
           "pattern": "^[A-Z][a-zA-Z0-9]*$",
           "minLength": 1
         },
-        "type": {
+        "relationshipType": {
           "type": "string",
           "description": "The cardinality of the relationship.",
           "enum": ["OneToOne", "OneToMany", "ManyToMany", "OneWay", "ManyWay"]

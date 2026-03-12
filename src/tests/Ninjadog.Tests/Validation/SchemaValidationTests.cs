@@ -198,7 +198,7 @@ public class SchemaValidationTests
                   "relationships": {
                     "Customer": {
                       "relatedEntity": "Customer",
-                      "type": "InvalidType"
+                      "relationshipType": "InvalidType"
                     }
                   }
                 }
