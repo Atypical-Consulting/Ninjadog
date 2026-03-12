@@ -40,18 +40,47 @@ public partial class TodoItemRepository(IDbConnectionFactory connectionFactory)
             new { Id = id.ToString() });
     }
 
-    public async Task<IEnumerable<TodoItemDto>> GetAllAsync(int page, int pageSize)
+    public async Task<IEnumerable<TodoItemDto>> GetAllAsync(
+        int page, int pageSize,
+        Dictionary<string, string>? filters = null,
+        string? sortBy = null,
+        bool sortDescending = false)
     {
         using var connection = await connectionFactory.CreateConnectionAsync();
-        return await connection.QueryAsync<TodoItemDto>(
-            "SELECT * FROM TodoItems LIMIT @PageSize OFFSET @Offset",
-            new { PageSize = pageSize, Offset = (page - 1) * pageSize });
+
+        var (whereClause, parameters) = BuildWhereClause(filters);
+        parameters.Add("PageSize", pageSize);
+        parameters.Add("Offset", (page - 1) * pageSize);
+
+        var orderBy = BuildOrderByClause(sortBy, sortDescending);
+        var sql = "SELECT * FROM TodoItems";
+        if (!string.IsNullOrEmpty(whereClause))
+        {
+            sql += " WHERE " + whereClause;
+        }
+        
+        if (!string.IsNullOrEmpty(orderBy))
+        {
+            sql += " ORDER BY " + orderBy;
+        }
+        
+        sql += " LIMIT @PageSize OFFSET @Offset";
+
+        return await connection.QueryAsync<TodoItemDto>(sql, parameters);
     }
 
-    public async Task<int> CountAsync()
+    public async Task<int> CountAsync(Dictionary<string, string>? filters = null)
     {
         using var connection = await connectionFactory.CreateConnectionAsync();
-        return await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM TodoItems");
+
+        var (whereClause, parameters) = BuildWhereClause(filters);
+        var sql = "SELECT COUNT(*) FROM TodoItems";
+        if (!string.IsNullOrEmpty(whereClause))
+        {
+            sql += " WHERE " + whereClause;
+        }
+
+        return await connection.ExecuteScalarAsync<int>(sql, parameters);
     }
 
     public async Task<bool> UpdateAsync(TodoItemDto todoItem)
@@ -74,6 +103,48 @@ public partial class TodoItemRepository(IDbConnectionFactory connectionFactory)
             new { Id = id.ToString() });
 
         return result > 0;
+    }
+
+    private static readonly HashSet<string> AllowedColumns = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Title", "Description", "IsCompleted", "DueDate", "Priority", "Cost"
+    };
+
+    private static (string WhereClause, Dictionary<string, object> Parameters) BuildWhereClause(
+        Dictionary<string, string>? filters)
+    {
+        var parameters = new Dictionary<string, object>();
+        if (filters is null || filters.Count == 0)
+        {
+            return (string.Empty, parameters);
+        }
+
+        var conditions = new List<string>();
+        foreach (var (key, value) in filters)
+        {
+            if (AllowedColumns.Contains(key))
+            {
+                conditions.Add($"{key} = @Filter_{key}");
+                parameters[$"Filter_{key}"] = value;
+            }
+        }
+
+        var whereClause = conditions.Count > 0
+            ? string.Join(" AND ", conditions)
+            : string.Empty;
+
+        return (whereClause, parameters);
+    }
+
+    private static string BuildOrderByClause(string? sortBy, bool sortDescending)
+    {
+        if (string.IsNullOrEmpty(sortBy) || !AllowedColumns.Contains(sortBy))
+        {
+            return string.Empty;
+        }
+
+        var direction = sortDescending ? "DESC" : "ASC";
+        return $"{sortBy} {direction}";
     }
 }
 
