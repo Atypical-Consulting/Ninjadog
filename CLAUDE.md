@@ -67,3 +67,33 @@ The install script derives version from the latest git tag with a `-local` suffi
 
 - `dev` is the main development branch (PR target)
 - Feature branches branch from `dev`
+
+## Feature / Bugfix Workflow
+
+Every feature or bugfix follows this procedure:
+
+1. **Work in a worktree** — Use `git worktree add` (or the `EnterWorktree` tool) to isolate work from the main checkout. This keeps `dev` clean and allows parallel work.
+
+2. **Create a branch** — Branch from `dev` using conventional naming:
+   - Features: `feat/<short-description>`
+   - Bugfixes: `fix/<short-description>`
+
+3. **Implement & commit** — Make one or more focused commits using conventional commit messages (`feat:`, `fix:`, `chore:`, `docs:`). Each commit should be atomic and build successfully.
+
+4. **Update documentation** — If the change adds or modifies user-facing behavior, update the relevant pages under `docs/` (Jekyll site). Common files to update:
+   - `docs/cli.md` — new or changed CLI commands/flags
+   - `docs/configuration.md` — new `ninjadog.json` options
+   - `docs/generators/` — new or changed templates
+   - `docs/getting-started.md` — workflow changes
+   - Create new doc pages when the feature warrants its own section
+
+5. **Run all tests** — Ensure the full test suite passes:
+   ```bash
+   dotnet test
+   ```
+   If snapshot tests changed, review and commit the updated `.verified.txt` files.
+
+6. **Create a PR** — Push the branch and open a pull request targeting `dev`:
+   ```bash
+   gh pr create --base dev --title "feat: short description" --body "..."
+   ```
