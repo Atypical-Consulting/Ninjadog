@@ -41,11 +41,11 @@ public sealed class DeleteEndpointTemplate
                       var deleted = await {{st.VarModelService}}.DeleteAsync(req.{{entityKey.Key}});
                       if (!deleted)
                       {
-                          await SendNotFoundAsync(ct);
+                          await Send.NotFoundAsync(ct);
                           return;
                       }
 
-                      await SendNoContentAsync(ct);
+                      await Send.NoContentAsync(ct);
                   }
               }
               """;

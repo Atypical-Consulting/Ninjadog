@@ -34,7 +34,7 @@ public partial class CreateTodoItemEndpoint(ITodoItemService todoItemService)
         await todoItemService.CreateAsync(todoItem);
 
         var todoItemResponse = todoItem.ToTodoItemResponse();
-        await SendCreatedAtAsync<GetTodoItemEndpoint>(
+        await Send.CreatedAtAsync<GetTodoItemEndpoint>(
             new { Id = todoItem.Id }, todoItemResponse, generateAbsoluteUrl: true, cancellation: ct);
     }
 }

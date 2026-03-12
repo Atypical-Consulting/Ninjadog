@@ -44,12 +44,12 @@ public sealed class GetEndpointTemplate
 
                       if ({{st.VarModel}} is null)
                       {
-                          await SendNotFoundAsync(ct);
+                          await Send.NotFoundAsync(ct);
                           return;
                       }
 
                       var {{st.VarModelResponse}} = {{st.VarModel}}.{{st.MethodToModelResponse}}();
-                      await SendOkAsync({{st.VarModelResponse}}, ct);
+                      await Send.OkAsync({{st.VarModelResponse}}, ct);
                   }
               }
               """;

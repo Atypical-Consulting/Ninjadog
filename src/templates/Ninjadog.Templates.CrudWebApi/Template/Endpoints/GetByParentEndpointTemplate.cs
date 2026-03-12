@@ -81,7 +81,7 @@ public sealed class GetByParentEndpointTemplate
 
                       var ({{childSt.VarModels}}, totalCount) = await {{childSt.VarModelService}}.GetAllAsync(page, pageSize);
                       var {{childSt.VarModelsResponse}} = {{childSt.VarModels}}.{{childSt.MethodToModelsResponse}}(page, pageSize, totalCount);
-                      await SendOkAsync({{childSt.VarModelsResponse}}, ct);
+                      await Send.OkAsync({{childSt.VarModelsResponse}}, ct);
                   }
               }
               """;

@@ -43,7 +43,7 @@ public sealed class GetAllEndpointTemplate
 
                       var ({{st.VarModels}}, totalCount) = await {{st.VarModelService}}.GetAllAsync(page, pageSize);
                       var {{st.VarModelsResponse}} = {{st.VarModels}}.{{st.MethodToModelsResponse}}(page, pageSize, totalCount);
-                      await SendOkAsync({{st.VarModelsResponse}}, ct);
+                      await Send.OkAsync({{st.VarModelsResponse}}, ct);
                   }
               }
               """;

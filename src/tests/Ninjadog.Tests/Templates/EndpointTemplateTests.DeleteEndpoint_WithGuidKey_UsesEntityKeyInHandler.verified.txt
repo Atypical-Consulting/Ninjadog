@@ -30,10 +30,10 @@ public partial class DeleteTodoItemEndpoint(ITodoItemService todoItemService)
         var deleted = await todoItemService.DeleteAsync(req.Id);
         if (!deleted)
         {
-            await SendNotFoundAsync(ct);
+            await Send.NotFoundAsync(ct);
             return;
         }
 
-        await SendNoContentAsync(ct);
+        await Send.NoContentAsync(ct);
     }
 }

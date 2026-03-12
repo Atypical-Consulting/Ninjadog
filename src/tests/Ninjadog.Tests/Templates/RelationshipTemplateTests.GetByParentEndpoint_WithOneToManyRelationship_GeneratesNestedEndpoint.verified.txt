@@ -35,7 +35,7 @@ public partial class GetPostsByAuthorEndpoint(IPostService postService)
 
         var (posts, totalCount) = await postService.GetAllAsync(page, pageSize);
         var postsResponse = posts.ToPostsResponse(page, pageSize, totalCount);
-        await SendOkAsync(postsResponse, ct);
+        await Send.OkAsync(postsResponse, ct);
     }
 }
 

@@ -33,6 +33,6 @@ public partial class GetAllOrdersEndpoint(IOrderService orderService)
 
         var (orders, totalCount) = await orderService.GetAllAsync(page, pageSize);
         var ordersResponse = orders.ToOrdersResponse(page, pageSize, totalCount);
-        await SendOkAsync(ordersResponse, ct);
+        await Send.OkAsync(ordersResponse, ct);
     }
 }
