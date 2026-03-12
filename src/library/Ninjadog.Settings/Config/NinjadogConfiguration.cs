@@ -16,6 +16,7 @@ namespace Ninjadog.Settings.Config;
 /// <param name="Auditing">Indicates whether audit fields (CreatedAt, UpdatedAt) should be added to generated tables. Default is false.</param>
 /// <param name="DatabaseProvider">The database provider to use (sqlite, postgresql, sqlserver). Default is sqlite.</param>
 /// <param name="Aot">Indicates whether Native AOT publishing support should be enabled in the generated project. Default is false.</param>
+/// <param name="Auth">The optional JWT authentication configuration for the application.</param>
 public abstract record NinjadogConfiguration(
     string Name,
     string Version,
@@ -27,4 +28,5 @@ public abstract record NinjadogConfiguration(
     bool SoftDelete = false,
     bool Auditing = false,
     string DatabaseProvider = "sqlite",
-    bool Aot = false);
+    bool Aot = false,
+    NinjadogAuthConfiguration? Auth = null);

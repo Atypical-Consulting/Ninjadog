@@ -46,6 +46,15 @@ The following skeleton shows **every** configuration option at a glance. Require
     },
     "database": {
       "provider": "sqlite"                    // "sqlite" | "postgresql" | "sqlserver"
+    },
+    "auth": {
+      "provider": "jwt",                      // only "jwt" supported
+      "issuer": "https://myapp.com",          // default: "https://localhost"
+      "audience": "myapp-api",                // default: "api"
+      "tokenExpirationMinutes": 60,           // default: 60
+      "roles": ["Admin", "User"],             // optional
+      "generateLoginEndpoint": true,          // default: true
+      "generateRegisterEndpoint": true        // default: true
     }
   },
   "enums": {
@@ -108,7 +117,8 @@ The `config` object contains project-level settings.
     "saveGeneratedFiles": true,
     "cors": { ... },
     "features": { ... },
-    "database": { ... }
+    "database": { ... },
+    "auth": { ... }
   }
 }
 ```
@@ -157,6 +167,50 @@ The optional `database` object controls the target database provider.
 
 {: .note }
 > The provider affects SQL dialect (e.g., `LIMIT` vs `OFFSET/FETCH`), column type mappings, timestamp functions, NuGet dependencies, and the generated connection factory class.
+
+### Authentication
+
+The optional `auth` object enables JWT authentication and authorization for the generated API.
+
+```json
+{
+  "config": {
+    "auth": {
+      "provider": "jwt",
+      "issuer": "https://myapp.com",
+      "audience": "myapp-api",
+      "tokenExpirationMinutes": 120,
+      "roles": ["Admin", "User"],
+      "generateLoginEndpoint": true,
+      "generateRegisterEndpoint": true
+    }
+  }
+}
+```
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `provider` | `string` | `"jwt"` | Authentication provider. Currently only `jwt` is supported. |
+| `issuer` | `string` | `"https://localhost"` | JWT token issuer URL. |
+| `audience` | `string` | `"api"` | JWT token audience identifier. |
+| `tokenExpirationMinutes` | `integer` | `60` | Token lifetime in minutes. |
+| `roles` | `string[]` | -- | Role names for authorization policies. When set, generates named policies. |
+| `generateLoginEndpoint` | `boolean` | `true` | Generates a `POST /api/auth/login` endpoint. |
+| `generateRegisterEndpoint` | `boolean` | `true` | Generates a `POST /api/auth/register` endpoint. |
+
+When auth is enabled:
+- **GET/GetAll endpoints** remain `AllowAnonymous()` (public reads)
+- **Create/Update/Delete endpoints** require a valid JWT token
+- **Login/Register endpoints** are `AllowAnonymous()`
+- A `Users` table is created automatically at startup
+- Passwords are hashed with BCrypt
+- An `appsettings.json` `Jwt` section is generated with a placeholder secret key
+
+{: .warning }
+> Replace the `Jwt:Secret` value in `appsettings.json` with a strong secret key (minimum 32 characters) before deploying to production. Never commit real secrets to source control.
+
+{: .note }
+> When the `auth` block is absent, all endpoints use `AllowAnonymous()` and no auth infrastructure is generated. This is fully backward-compatible.
 
 ## Entities
 
@@ -340,6 +394,13 @@ A full `ninjadog.json` demonstrating all features:
     },
     "database": {
       "provider": "postgresql"
+    },
+    "auth": {
+      "provider": "jwt",
+      "issuer": "https://bookstore.example.com",
+      "audience": "bookstore-api",
+      "tokenExpirationMinutes": 120,
+      "roles": ["Admin", "Editor"]
     }
   },
   "enums": {

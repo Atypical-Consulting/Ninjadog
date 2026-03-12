@@ -1,0 +1,18 @@
+﻿{
+  "Database": {
+    "ConnectionString": "Data Source=./TestApp.db"
+  },
+  "Jwt": {
+    "Secret": "YOUR-SECRET-KEY-MIN-32-CHARACTERS-LONG-REPLACE-IN-PRODUCTION",
+    "Issuer": "https://localhost",
+    "Audience": "api",
+    "ExpirationMinutes": 60
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+}

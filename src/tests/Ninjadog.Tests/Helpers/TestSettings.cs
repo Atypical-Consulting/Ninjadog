@@ -139,3 +139,16 @@ public sealed class AotSeededEntitiesCollection : NinjadogEntities
 
 public sealed record AotSeededSettings()
     : NinjadogSettings(new AotConfiguration(), new AotSeededEntitiesCollection());
+
+public sealed record AuthConfiguration()
+    : NinjadogConfiguration(
+        Name: "TestApp",
+        Version: "1.0.0",
+        Description: "Test application",
+        RootNamespace: "TestApp.Api",
+        OutputPath: "output",
+        SaveGeneratedFiles: false,
+        Auth: new NinjadogAuthConfiguration(Roles: ["Admin", "User"]));
+
+public sealed record AuthSettings()
+    : NinjadogSettings(new AuthConfiguration(), new TestEntitiesCollection());

@@ -1,0 +1,32 @@
+﻿//------------------------------------------------------------------------------
+// This code was powered by the Ninjadog Engine
+//
+// Developed by: Atypical Consulting SRL - Philippe Matray
+// Generated on: [SCRUBBED]
+// Version     : [SCRUBBED]
+//
+// This file is part of a custom software solution crafted to meet your
+// specific needs. For optimal performance and compatibility, modifications
+// should be coordinated with Ninjadog support services.
+//------------------------------------------------------------------------------
+
+using Dapper;
+using TestApp.Api.Database;
+
+namespace TestApp.Api.Auth;
+
+public class UserInitializer(IDbConnectionFactory connectionFactory)
+{
+    public async Task InitializeAsync()
+    {
+        using var connection = await connectionFactory.CreateConnectionAsync();
+        await connection.ExecuteAsync(
+            @"CREATE TABLE IF NOT EXISTS Users (
+                Id TEXT PRIMARY KEY,
+                Email TEXT NOT NULL UNIQUE,
+                PasswordHash TEXT NOT NULL,
+                Roles TEXT NOT NULL DEFAULT '',
+                CreatedAt TEXT NOT NULL DEFAULT (datetime('now'))
+            )");
+    }
+}

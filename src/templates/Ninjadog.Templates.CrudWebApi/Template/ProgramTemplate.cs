@@ -14,6 +14,7 @@ public class ProgramTemplate : NinjadogTemplate
         var rootNamespace = ninjadogSettings.Config.RootNamespace;
         var cors = ninjadogSettings.Config.Cors;
         var aot = ninjadogSettings.Config.Aot;
+        var auth = ninjadogSettings.Config.Auth;
         var hasSeedData = ninjadogSettings.Entities.FromKeys().Any(e => e.SeedData is { Count: > 0 });
         const string fileName = "Program.cs";
 
@@ -26,7 +27,7 @@ public class ProgramTemplate : NinjadogTemplate
 
               using {{rootNamespace}};
               using {{rootNamespace}}.Database;
-
+              {{GenerateAuthUsing(auth, rootNamespace)}}
               const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
               var builder = {{builderCall}};
@@ -41,19 +42,19 @@ public class ProgramTemplate : NinjadogTemplate
                           {{GenerateCorsPolicy(cors)}}
                       });
               });
-
+              {{GenerateAuthServiceRegistration(auth)}}
               services.AddNinjadog(config);
 
               var app = builder.Build();
 
               app.UseCors(myAllowSpecificOrigins);
-              app.UseNinjadog();
+              {{GenerateAuthMiddleware(auth)}}app.UseNinjadog();
 
               await app.Services
                   .GetRequiredService<DatabaseInitializer>()
                   .InitializeAsync()
                   .ConfigureAwait(false);
-              {{GenerateSeederCall(hasSeedData)}}
+              {{GenerateUserInitializerCall(auth)}}{{GenerateSeederCall(hasSeedData)}}
               app.Run();
               """;
 
@@ -102,6 +103,54 @@ public class ProgramTemplate : NinjadogTemplate
               {
                   options.SerializerOptions.TypeInfoResolverChain.Insert(0, {{rootNamespace}}.AppJsonSerializerContext.Default);
               });
+              """;
+    }
+
+    private static string GenerateAuthUsing(NinjadogAuthConfiguration? auth, string rootNamespace)
+    {
+        return auth is null
+            ? string.Empty
+            : $"using {rootNamespace}.Auth;\n";
+    }
+
+    private static string GenerateAuthServiceRegistration(NinjadogAuthConfiguration? auth)
+    {
+        if (auth is null)
+        {
+            return string.Empty;
+        }
+
+        var result = "\nservices.AddJwtAuthentication(config);";
+
+        if (auth.Roles is { Length: > 0 })
+        {
+            result += "\nservices.AddAuthorizationPolicies();";
+        }
+
+        return result + "\n";
+    }
+
+    private static string GenerateAuthMiddleware(NinjadogAuthConfiguration? auth)
+    {
+        return auth is null
+            ? string.Empty
+            : """
+              app.UseAuthentication();
+              app.UseAuthorization();
+
+              """;
+    }
+
+    private static string GenerateUserInitializerCall(NinjadogAuthConfiguration? auth)
+    {
+        return auth is null
+            ? string.Empty
+            : """
+
+              await app.Services
+                  .GetRequiredService<UserInitializer>()
+                  .InitializeAsync()
+                  .ConfigureAwait(false);
               """;
     }
 

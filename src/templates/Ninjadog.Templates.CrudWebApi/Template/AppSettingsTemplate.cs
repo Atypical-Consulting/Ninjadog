@@ -11,6 +11,7 @@ public class AppSettingsTemplate : NinjadogTemplate
     /// <inheritdoc />
     public override NinjadogContentFile GenerateOne(NinjadogSettings ninjadogSettings)
     {
+        var auth = ninjadogSettings.Config.Auth;
         const string fileName = "appsettings.json";
 
         var content =
@@ -19,7 +20,7 @@ public class AppSettingsTemplate : NinjadogTemplate
                 "Database": {
                   "ConnectionString": "Data Source=./{{ninjadogSettings.Config.Name}}.db"
                 },
-                "Logging": {
+              {{GenerateJwtSection(auth)}}  "Logging": {
                   "LogLevel": {
                     "Default": "Information",
                     "Microsoft.AspNetCore": "Warning"
@@ -30,5 +31,23 @@ public class AppSettingsTemplate : NinjadogTemplate
               """;
 
         return CreateNinjadogContentFile(fileName, content, false);
+    }
+
+    private static string GenerateJwtSection(NinjadogAuthConfiguration? auth)
+    {
+        if (auth is null)
+        {
+            return string.Empty;
+        }
+
+        return $$"""
+                   "Jwt": {
+                     "Secret": "YOUR-SECRET-KEY-MIN-32-CHARACTERS-LONG-REPLACE-IN-PRODUCTION",
+                     "Issuer": "{{auth.Issuer}}",
+                     "Audience": "{{auth.Audience}}",
+                     "ExpirationMinutes": {{auth.TokenExpirationMinutes}}
+                   },
+
+                 """;
     }
 }

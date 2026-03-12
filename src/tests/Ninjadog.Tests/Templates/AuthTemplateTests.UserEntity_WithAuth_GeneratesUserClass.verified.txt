@@ -1,0 +1,22 @@
+﻿//------------------------------------------------------------------------------
+// This code was powered by the Ninjadog Engine
+//
+// Developed by: Atypical Consulting SRL - Philippe Matray
+// Generated on: [SCRUBBED]
+// Version     : [SCRUBBED]
+//
+// This file is part of a custom software solution crafted to meet your
+// specific needs. For optimal performance and compatibility, modifications
+// should be coordinated with Ninjadog support services.
+//------------------------------------------------------------------------------
+
+namespace TestApp.Api.Auth;
+
+public class User
+{
+    public string Id { get; init; } = Guid.NewGuid().ToString();
+    public string Email { get; init; } = default!;
+    public string PasswordHash { get; init; } = default!;
+    public string Roles { get; init; } = string.Empty;
+    public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+}

@@ -81,6 +81,19 @@ public abstract record NinjadogSettings(
             }
         }
 
+        NinjadogAuthConfiguration? auth = null;
+        if (TryGetOptionalObject(configElement, "auth", out var authElement))
+        {
+            var authProvider = GetOptionalString(authElement, "provider") ?? "jwt";
+            var issuer = GetOptionalString(authElement, "issuer") ?? "https://localhost";
+            var audience = GetOptionalString(authElement, "audience") ?? "api";
+            var tokenExpirationMinutes = GetOptionalInt32(authElement, "tokenExpirationMinutes") ?? 60;
+            var roles = GetOptionalStringArray(authElement, "roles");
+            var generateLoginEndpoint = !TryGetOptionalProperty(authElement, "generateLoginEndpoint", out _) || GetOptionalBoolean(authElement, "generateLoginEndpoint");
+            var generateRegisterEndpoint = !TryGetOptionalProperty(authElement, "generateRegisterEndpoint", out _) || GetOptionalBoolean(authElement, "generateRegisterEndpoint");
+            auth = new NinjadogAuthConfiguration(authProvider, issuer, audience, tokenExpirationMinutes, roles, generateLoginEndpoint, generateRegisterEndpoint);
+        }
+
         var config = new NinjadogLoadedConfiguration(
             Name: name,
             Version: GetRequiredString(configElement, "version"),
@@ -92,7 +105,8 @@ public abstract record NinjadogSettings(
             SoftDelete: softDelete,
             Auditing: auditing,
             DatabaseProvider: databaseProvider,
-            Aot: aot);
+            Aot: aot,
+            Auth: auth);
 
         var entities = new NinjadogLoadedEntities();
 

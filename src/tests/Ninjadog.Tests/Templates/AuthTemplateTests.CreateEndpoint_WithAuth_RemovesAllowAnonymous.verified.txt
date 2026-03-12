@@ -1,0 +1,39 @@
+﻿//------------------------------------------------------------------------------
+// This code was powered by the Ninjadog Engine
+//
+// Developed by: Atypical Consulting SRL - Philippe Matray
+// Generated on: [SCRUBBED]
+// Version     : [SCRUBBED]
+//
+// This file is part of a custom software solution crafted to meet your
+// specific needs. For optimal performance and compatibility, modifications
+// should be coordinated with Ninjadog support services.
+//------------------------------------------------------------------------------
+
+using TestApp.Api.Contracts.Requests;
+using TestApp.Api.Contracts.Responses;
+using TestApp.Api.Mapping;
+using TestApp.Api.Services;
+using FastEndpoints;
+
+namespace TestApp.Api.Endpoints;
+
+public partial class CreateTodoItemEndpoint(ITodoItemService todoItemService)
+    : Endpoint<CreateTodoItemRequest, TodoItemResponse>
+{
+    public override void Configure()
+    {
+        Post("/todo-items");
+    }
+
+    public override async Task HandleAsync(CreateTodoItemRequest req, CancellationToken ct)
+    {
+        var todoItem = req.ToTodoItem();
+
+        await todoItemService.CreateAsync(todoItem);
+
+        var todoItemResponse = todoItem.ToTodoItemResponse();
+        await Send.CreatedAtAsync<GetTodoItemEndpoint>(
+            new { Id = todoItem.Id }, todoItemResponse, generateAbsoluteUrl: true, cancellation: ct);
+    }
+}

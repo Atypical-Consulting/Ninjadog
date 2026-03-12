@@ -6,8 +6,17 @@ namespace Ninjadog.Templates.CrudWebAPI.Template.Endpoints;
 public sealed class UpdateEndpointTemplate
     : NinjadogTemplate
 {
+    private bool _hasAuth;
+
     /// <inheritdoc />
     public override string Name => "UpdateEndpoint";
+
+    /// <inheritdoc />
+    public override IEnumerable<NinjadogContentFile> GenerateMany(NinjadogSettings ninjadogSettings)
+    {
+        _hasAuth = ninjadogSettings.Config.Auth is not null;
+        return base.GenerateMany(ninjadogSettings);
+    }
 
     /// <inheritdoc />
     public override NinjadogContentFile GenerateOneByEntity(
@@ -34,8 +43,7 @@ public sealed class UpdateEndpointTemplate
               {
                   public override void Configure()
                   {
-                      Put("{{st.ModelEndpoint}}/{id:{{GetRouteConstraint(entityKey.Type)}}}");
-                      AllowAnonymous();
+                      Put("{{st.ModelEndpoint}}/{id:{{GetRouteConstraint(entityKey.Type)}}}");{{(_hasAuth ? string.Empty : "\n        AllowAnonymous();")}}
                   }
 
                   public override async Task HandleAsync({{st.ClassUpdateModelRequest}} req, CancellationToken ct)

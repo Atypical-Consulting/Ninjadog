@@ -227,6 +227,112 @@ public class NinjadogInitialSettingsTests
     }
 
     [Fact]
+    public void FromJsonString_WithAuthConfig_ParsesAuthSettings()
+    {
+        const string json = """
+            {
+              "config": {
+                "name": "TodoApp",
+                "version": "1.0.0",
+                "description": "A todo app with auth",
+                "rootNamespace": "MyCustomer.TodoApp",
+                "auth": {
+                  "provider": "jwt",
+                  "issuer": "https://myapp.com",
+                  "audience": "myapp-api",
+                  "tokenExpirationMinutes": 120,
+                  "roles": ["Admin", "User"],
+                  "generateLoginEndpoint": true,
+                  "generateRegisterEndpoint": false
+                }
+              },
+              "entities": {
+                "TodoItem": {
+                  "properties": {
+                    "Id": { "type": "Guid", "isKey": true },
+                    "Title": { "type": "string" }
+                  }
+                }
+              }
+            }
+            """;
+
+        var settings = NinjadogSettings.FromJsonString(json);
+
+        Assert.NotNull(settings.Config.Auth);
+        Assert.Equal("jwt", settings.Config.Auth.Provider);
+        Assert.Equal("https://myapp.com", settings.Config.Auth.Issuer);
+        Assert.Equal("myapp-api", settings.Config.Auth.Audience);
+        Assert.Equal(120, settings.Config.Auth.TokenExpirationMinutes);
+        Assert.NotNull(settings.Config.Auth.Roles);
+        Assert.Equal(["Admin", "User"], settings.Config.Auth.Roles);
+        Assert.True(settings.Config.Auth.GenerateLoginEndpoint);
+        Assert.False(settings.Config.Auth.GenerateRegisterEndpoint);
+    }
+
+    [Fact]
+    public void FromJsonString_WithoutAuthConfig_AuthIsNull()
+    {
+        const string json = """
+            {
+              "config": {
+                "name": "TodoApp",
+                "version": "1.0.0",
+                "description": "A todo app",
+                "rootNamespace": "MyCustomer.TodoApp"
+              },
+              "entities": {
+                "TodoItem": {
+                  "properties": {
+                    "Id": { "type": "Guid", "isKey": true },
+                    "Title": { "type": "string" }
+                  }
+                }
+              }
+            }
+            """;
+
+        var settings = NinjadogSettings.FromJsonString(json);
+
+        Assert.Null(settings.Config.Auth);
+    }
+
+    [Fact]
+    public void FromJsonString_WithMinimalAuthConfig_UsesDefaults()
+    {
+        const string json = """
+            {
+              "config": {
+                "name": "TodoApp",
+                "version": "1.0.0",
+                "description": "A todo app",
+                "rootNamespace": "MyCustomer.TodoApp",
+                "auth": {}
+              },
+              "entities": {
+                "TodoItem": {
+                  "properties": {
+                    "Id": { "type": "Guid", "isKey": true },
+                    "Title": { "type": "string" }
+                  }
+                }
+              }
+            }
+            """;
+
+        var settings = NinjadogSettings.FromJsonString(json);
+
+        Assert.NotNull(settings.Config.Auth);
+        Assert.Equal("jwt", settings.Config.Auth.Provider);
+        Assert.Equal("https://localhost", settings.Config.Auth.Issuer);
+        Assert.Equal("api", settings.Config.Auth.Audience);
+        Assert.Equal(60, settings.Config.Auth.TokenExpirationMinutes);
+        Assert.Null(settings.Config.Auth.Roles);
+        Assert.True(settings.Config.Auth.GenerateLoginEndpoint);
+        Assert.True(settings.Config.Auth.GenerateRegisterEndpoint);
+    }
+
+    [Fact]
     public void FromJsonString_WithExplicitNullOptionalSections_LoadsSettings()
     {
         const string json = """
@@ -240,7 +346,8 @@ public class NinjadogInitialSettingsTests
                 "saveGeneratedFiles": null,
                 "cors": null,
                 "features": null,
-                "database": null
+                "database": null,
+                "auth": null
               },
               "entities": {
                 "TodoItem": {
@@ -276,6 +383,7 @@ public class NinjadogInitialSettingsTests
         Assert.False(settings.Config.SoftDelete);
         Assert.False(settings.Config.Auditing);
         Assert.Equal("sqlite", settings.Config.DatabaseProvider);
+        Assert.Null(settings.Config.Auth);
         Assert.Single(settings.Entities);
         Assert.Null(settings.Entities["TodoItem"].Relationships);
         Assert.Null(settings.Entities["TodoItem"].SeedData);

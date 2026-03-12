@@ -95,6 +95,9 @@
         "database": {
           "$ref": "#/$defs/databaseConfig"
         },
+        "auth": {
+          "$ref": "#/$defs/authConfig"
+        },
         "softDelete": {
           "type": "boolean",
           "description": "Enable soft delete support. Flat alternative to features.softDelete.",
@@ -170,6 +173,59 @@
           "type": "boolean",
           "description": "Enable Native AOT publishing support. Generates AOT-compatible code with Dapper.AOT, slim builder, and JSON source generators.",
           "default": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "authConfig": {
+      "title": "Authentication Configuration",
+      "description": "JWT authentication and authorization settings for the generated API.",
+      "type": "object",
+      "properties": {
+        "provider": {
+          "type": "string",
+          "description": "The authentication provider type.",
+          "enum": ["jwt"],
+          "default": "jwt"
+        },
+        "issuer": {
+          "type": "string",
+          "description": "The JWT token issuer URL.",
+          "default": "https://localhost",
+          "examples": ["https://myapp.com", "https://auth.example.com"]
+        },
+        "audience": {
+          "type": "string",
+          "description": "The JWT token audience identifier.",
+          "default": "api",
+          "examples": ["myapp-api", "my-service"]
+        },
+        "tokenExpirationMinutes": {
+          "type": "integer",
+          "description": "Token expiration time in minutes.",
+          "default": 60,
+          "minimum": 1
+        },
+        "roles": {
+          "type": "array",
+          "description": "Role names for authorization policies. When provided, generates named authorization policies.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true,
+          "examples": [["Admin", "User"], ["Admin", "Editor", "Viewer"]]
+        },
+        "generateLoginEndpoint": {
+          "type": "boolean",
+          "description": "Whether to generate a POST /api/auth/login endpoint.",
+          "default": true
+        },
+        "generateRegisterEndpoint": {
+          "type": "boolean",
+          "description": "Whether to generate a POST /api/auth/register endpoint.",
+          "default": true
         }
       },
       "additionalProperties": false

@@ -14,6 +14,7 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
         var rootNamespace = ninjadogSettings.Config.RootNamespace;
         var entities = ninjadogSettings.Entities.FromKeys();
         var hasSeedData = entities.Any(e => e.SeedData is { Count: > 0 });
+        var hasAuth = ninjadogSettings.Config.Auth is not null;
         var provider = ninjadogSettings.Config.DatabaseProvider;
         var aot = ninjadogSettings.Config.Aot;
         var factoryClassName = GetFactoryClassName(provider);
@@ -23,8 +24,8 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
         const string fileName = "CrudWebApiExtensions.cs";
 
         var content = aot
-            ? GenerateAotContent(rootNamespace, entities, hasSeedData, factoryClassName)
-            : GenerateStandardContent(rootNamespace, entities, hasSeedData, factoryClassName, projectName, projectVersion, projectDescription);
+            ? GenerateAotContent(rootNamespace, entities, hasSeedData, hasAuth, factoryClassName)
+            : GenerateStandardContent(rootNamespace, entities, hasSeedData, hasAuth, factoryClassName, projectName, projectVersion, projectDescription);
 
         return CreateNinjadogContentFile(fileName, content);
     }
@@ -33,6 +34,7 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
         string rootNamespace,
         List<NinjadogEntityWithKey> entities,
         bool hasSeedData,
+        bool hasAuth,
         string factoryClassName,
         string projectName,
         string projectVersion,
@@ -46,7 +48,7 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
               using {{rootNamespace}}.Database;
               using {{rootNamespace}}.Repositories;
               using {{rootNamespace}}.Services;
-              using FastEndpoints;
+              {{GenerateAuthUsing(hasAuth, rootNamespace)}}using FastEndpoints;
               using FastEndpoints.ClientGen;
               using FastEndpoints.Swagger;
               using FluentValidation;
@@ -72,7 +74,7 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
                           };
                       });
 
-              {{GenerateConnectionAndDependencies(entities, hasSeedData, factoryClassName)}}
+              {{GenerateConnectionAndDependencies(entities, hasSeedData, hasAuth, factoryClassName)}}
                       return services;
                   }
 
@@ -105,7 +107,7 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
     }
 
     private static string GenerateAotContent(
-        string rootNamespace, List<NinjadogEntityWithKey> entities, bool hasSeedData, string factoryClassName)
+        string rootNamespace, List<NinjadogEntityWithKey> entities, bool hasSeedData, bool hasAuth, string factoryClassName)
     {
         return
             $$"""
@@ -116,7 +118,7 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
               using {{rootNamespace}}.Database;
               using {{rootNamespace}}.Repositories;
               using {{rootNamespace}}.Services;
-              using FastEndpoints;
+              {{GenerateAuthUsing(hasAuth, rootNamespace)}}using FastEndpoints;
               using FluentValidation;
 
               {{WriteFileScopedNamespace(rootNamespace)}}
@@ -134,7 +136,7 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
                           o.SerializerContext = AppJsonSerializerContext.Default;
                       });
 
-              {{GenerateConnectionAndDependencies(entities, hasSeedData, factoryClassName)}}
+              {{GenerateConnectionAndDependencies(entities, hasSeedData, hasAuth, factoryClassName)}}
                       return services;
                   }
 
@@ -151,8 +153,15 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
               """;
     }
 
+    private static string GenerateAuthUsing(bool hasAuth, string rootNamespace)
+    {
+        return hasAuth
+            ? $"using {rootNamespace}.Auth;\n"
+            : string.Empty;
+    }
+
     private static string GenerateConnectionAndDependencies(
-        List<NinjadogEntityWithKey> entities, bool hasSeedData, string factoryClassName)
+        List<NinjadogEntityWithKey> entities, bool hasSeedData, bool hasAuth, string factoryClassName)
     {
         IndentedStringBuilder sb = new(2);
 
@@ -166,6 +175,13 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
         if (hasSeedData)
         {
             sb.AppendLine("services.AddSingleton<DatabaseSeeder>();");
+        }
+
+        if (hasAuth)
+        {
+            sb.AppendLine("services.AddSingleton<ITokenService, TokenService>();")
+                .AppendLine("services.AddSingleton<IUserRepository, UserRepository>();")
+                .AppendLine("services.AddSingleton<UserInitializer>();");
         }
 
         foreach (var st in entities.Select(model => model.StringTokens))

@@ -1,4 +1,5 @@
 using Ninjadog.Templates.CrudWebAPI.Template;
+using Ninjadog.Templates.CrudWebAPI.Template.Auth;
 using Ninjadog.Templates.CrudWebAPI.Template.Contracts.Data;
 using Ninjadog.Templates.CrudWebAPI.Template.Contracts.Requests;
 using Ninjadog.Templates.CrudWebAPI.Template.Contracts.Responses;
@@ -101,6 +102,24 @@ public class CrudTemplates : NinjadogTemplates
             "Validation",
             new CreateRequestValidatorTemplate(),
             new UpdateRequestValidatorTemplate());
+
+        AddTemplates(
+            "Auth",
+            new AuthExtensionsTemplate(),
+            new TokenServiceInterfaceTemplate(),
+            new TokenServiceTemplate(),
+            new UserEntityTemplate(),
+            new UserRepositoryInterfaceTemplate(),
+            new UserRepositoryTemplate(),
+            new UserInitializerTemplate(),
+            new LoginEndpointTemplate(),
+            new RegisterEndpointTemplate(),
+            new LoginRequestTemplate(),
+            new LoginResponseTemplate(),
+            new RegisterRequestTemplate(),
+            new RegisterResponseTemplate(),
+            new LoginRequestValidatorTemplate(),
+            new RegisterRequestValidatorTemplate());
 
         AddTemplates(
             "wwwroot",

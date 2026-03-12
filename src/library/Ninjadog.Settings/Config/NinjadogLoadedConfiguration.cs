@@ -14,5 +14,6 @@ public sealed record NinjadogLoadedConfiguration(
     bool SoftDelete = false,
     bool Auditing = false,
     string DatabaseProvider = "sqlite",
-    bool Aot = false)
-    : NinjadogConfiguration(Name, Version, Description, RootNamespace, OutputPath, SaveGeneratedFiles, Cors, SoftDelete, Auditing, DatabaseProvider, Aot);
+    bool Aot = false,
+    NinjadogAuthConfiguration? Auth = null)
+    : NinjadogConfiguration(Name, Version, Description, RootNamespace, OutputPath, SaveGeneratedFiles, Cors, SoftDelete, Auditing, DatabaseProvider, Aot, Auth);

@@ -1,0 +1,42 @@
+﻿//------------------------------------------------------------------------------
+// This code was powered by the Ninjadog Engine
+//
+// Developed by: Atypical Consulting SRL - Philippe Matray
+// Generated on: [SCRUBBED]
+// Version     : [SCRUBBED]
+//
+// This file is part of a custom software solution crafted to meet your
+// specific needs. For optimal performance and compatibility, modifications
+// should be coordinated with Ninjadog support services.
+//------------------------------------------------------------------------------
+
+using FastEndpoints;
+
+namespace TestApp.Api.Auth;
+
+public class LoginEndpoint(IUserRepository userRepository, ITokenService tokenService)
+    : Endpoint<LoginRequest, LoginResponse>
+{
+    public override void Configure()
+    {
+        Post("/api/auth/login");
+        AllowAnonymous();
+    }
+
+    public override async Task HandleAsync(LoginRequest req, CancellationToken ct)
+    {
+        var user = await userRepository.GetByEmailAsync(req.Email);
+
+        if (user is null || !BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash))
+        {
+            await Send.UnauthorizedAsync(ct);
+            return;
+        }
+
+        var roles = user.Roles.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var token = tokenService.GenerateToken(user.Id, user.Email, roles);
+        var expiresAt = DateTime.UtcNow.AddMinutes(60);
+
+        await Send.OkAsync(new LoginResponse(token, expiresAt), ct);
+    }
+}
