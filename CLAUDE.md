@@ -76,28 +76,35 @@ The install script derives version from the latest git tag with a `-local` suffi
 
 Every feature or bugfix follows this procedure:
 
-1. **Work in a worktree** — Use `git worktree add` (or the `EnterWorktree` tool) to isolate work from the main checkout. This keeps `dev` clean and allows parallel work. **Do NOT edit files on `dev` directly — create the worktree BEFORE writing any code.**
+1. **Sync dev** — Before starting any work, checkout `dev` and pull the latest changes:
+   ```bash
+   git checkout dev && git pull origin dev
+   ```
 
-2. **Create a branch** — Branch from `dev` using conventional naming:
+2. **Work in a worktree** — Use `git worktree add` (or the `EnterWorktree` tool) to isolate work from the main checkout. This keeps `dev` clean and allows parallel work. **Do NOT edit files on `dev` directly — create the worktree BEFORE writing any code.**
+
+3. **Create a branch** — Branch from `dev` using conventional naming:
    - Features: `feat/<short-description>`
    - Bugfixes: `fix/<short-description>`
 
-3. **Implement & commit** — Make one or more focused commits using conventional commit messages (`feat:`, `fix:`, `chore:`, `docs:`). Each commit should be atomic and build successfully.
+4. **Implement & commit** — Make one or more focused commits using conventional commit messages (`feat:`, `fix:`, `chore:`, `docs:`). Each commit should be atomic and build successfully.
 
-4. **Update documentation** — If the change adds or modifies user-facing behavior, update the relevant pages under `docs/` (Jekyll site). Common files to update:
+5. **Update documentation** — If the change adds or modifies user-facing behavior, update the relevant pages under `docs/` (Jekyll site). Common files to update:
    - `docs/cli.md` — new or changed CLI commands/flags
    - `docs/configuration.md` — new `ninjadog.json` options
    - `docs/generators/` — new or changed templates
    - `docs/getting-started.md` — workflow changes
    - Create new doc pages when the feature warrants its own section
 
-5. **Run all tests** — Ensure the full test suite passes:
+6. **Run all tests** — Ensure the full test suite passes:
    ```bash
    dotnet test
    ```
    If snapshot tests changed, review and commit the updated `.verified.txt` files.
 
-6. **Create a PR** — Push the branch and open a pull request targeting `dev`:
+7. **Simplify & verify** — Run `/simplify` to review changed code for reuse, quality, and efficiency. Then launch the UI (`ninjadog ui --port 5391 --no-browser`) and use the browser MCP to test your implementation end-to-end. Fix any problems found during testing before proceeding.
+
+8. **Create a PR** — Push the branch and open a pull request targeting `dev`:
    ```bash
    gh pr create --base dev --title "feat: short description" --body "..."
    ```
