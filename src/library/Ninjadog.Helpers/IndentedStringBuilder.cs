@@ -1,7 +1,3 @@
-// Copyright (c) 2020-2024 Atypical Consulting SRL. All rights reserved.
-// Atypical Consulting SRL licenses this file to you under the Proprietary license.
-// See the LICENSE file in the project root for full license information.
-
 using System.Text;
 
 // https://raw.githubusercontent.com/dotnet/efcore/4a2e4ebc03f07536e400843105b8ed3c9a32a10b/src/EFCore/Infrastructure/IndentedStringBuilder.cs
