@@ -24,13 +24,19 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
 
         var content = aot
             ? GenerateAotContent(rootNamespace, entities, hasSeedData, factoryClassName)
-            : GenerateStandardContent(rootNamespace, entities, hasSeedData, factoryClassName);
+            : GenerateStandardContent(rootNamespace, entities, hasSeedData, factoryClassName, projectName, projectVersion, projectDescription);
 
         return CreateNinjadogContentFile(fileName, content);
     }
 
     private static string GenerateStandardContent(
-        string rootNamespace, List<NinjadogEntityWithKey> entities, bool hasSeedData, string factoryClassName)
+        string rootNamespace,
+        List<NinjadogEntityWithKey> entities,
+        bool hasSeedData,
+        string factoryClassName,
+        string projectName,
+        string projectVersion,
+        string projectDescription)
     {
         return
             $$"""

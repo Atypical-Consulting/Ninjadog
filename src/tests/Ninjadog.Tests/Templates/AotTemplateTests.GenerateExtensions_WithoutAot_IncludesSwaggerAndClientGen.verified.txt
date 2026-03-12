@@ -32,8 +32,9 @@ public static class NinjadogExtensions
         {
             o.DocumentSettings = s =>
             {
-                s.Title = "Ninjadog API";
-                s.Version = "v1";
+                s.Title = "TestApp";
+                s.Version = "v1.0.0";
+                s.Description = "Test application";
             };
         });
 
@@ -52,6 +53,8 @@ public static class NinjadogExtensions
     public static WebApplication UseNinjadog(this WebApplication app)
     {
         app.UseValidationExceptionHandler();
+        app.UseDefaultFiles();
+        app.UseStaticFiles();
         app.UseFastEndpoints();
         app.UseSwaggerGen();
 
