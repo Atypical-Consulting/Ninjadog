@@ -1,5 +1,6 @@
 /**
  * Enums tab — list of enum definitions with value management.
+ * No modals: uses inline forms for add/remove.
  */
 const EnumEditor = (() => {
     function render(container, state) {
@@ -9,17 +10,48 @@ const EnumEditor = (() => {
         container.innerHTML = `
             <div class="flex items-center justify-between mb-4">
                 <div class="section-title mb-0">Enums (${names.length})</div>
-                <button id="btn-add-enum" class="btn-sm btn-primary">+ Add Enum</button>
+                <div id="enum-add-area">
+                    <button id="btn-add-enum" class="btn-sm btn-primary">+ Add Enum</button>
+                    <div id="enum-add-form" class="inline-add-form hidden">
+                        <input id="enum-add-input" class="field-input text-sm py-1" style="width:200px" placeholder="Enum name (PascalCase)" />
+                        <button id="enum-add-confirm" class="btn-sm btn-primary">Create</button>
+                        <button id="enum-add-cancel" class="btn-sm btn-ghost">Cancel</button>
+                    </div>
+                </div>
             </div>
             <div id="enum-list">${names.map(n => enumCard(n, state.enums[n])).join('')}</div>
         `;
 
-        container.querySelector('#btn-add-enum').addEventListener('click', () => {
-            const name = prompt('Enum name (PascalCase):');
+        // Inline add enum
+        const addBtn = container.querySelector('#btn-add-enum');
+        const addForm = container.querySelector('#enum-add-form');
+        const addInput = container.querySelector('#enum-add-input');
+        const addConfirm = container.querySelector('#enum-add-confirm');
+        const addCancel = container.querySelector('#enum-add-cancel');
+
+        addBtn.addEventListener('click', () => {
+            addBtn.classList.add('hidden');
+            addForm.classList.remove('hidden');
+            addInput.value = '';
+            addInput.focus();
+        });
+
+        addConfirm.addEventListener('click', () => {
+            const name = addInput.value.trim();
             if (!name) return;
             state.enums[name] = [];
             render(container, state);
             App.onStateChanged();
+        });
+
+        addCancel.addEventListener('click', () => {
+            addForm.classList.add('hidden');
+            addBtn.classList.remove('hidden');
+        });
+
+        addInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') addConfirm.click();
+            if (e.key === 'Escape') addCancel.click();
         });
 
         bindEvents(container, state);
@@ -32,7 +64,7 @@ const EnumEditor = (() => {
                 <span class="font-medium text-sm">${esc(name)}</span>
                 <div class="flex items-center gap-2">
                     <span class="text-xs text-gray-500">${values.length} values</span>
-                    <button class="btn-sm btn-danger enum-remove" data-enum="${esc(name)}">Remove</button>
+                    <button class="btn-sm btn-danger enum-remove" data-enum="${esc(name)}" data-confirmed="false">Remove</button>
                 </div>
             </div>
             <div class="entity-body">
@@ -53,16 +85,29 @@ const EnumEditor = (() => {
     }
 
     function bindEvents(container, state) {
-        // Remove enum
+        // Remove enum — two-click confirmation (no modal)
         container.querySelectorAll('.enum-remove').forEach(btn => {
+            let confirmTimer = null;
             btn.addEventListener('click', e => {
                 e.stopPropagation();
                 const name = btn.dataset.enum;
-                if (confirm(`Remove enum "${name}"?`)) {
+                if (btn.dataset.confirmed === 'true') {
+                    clearTimeout(confirmTimer);
                     delete state.enums[name];
                     if (Object.keys(state.enums).length === 0) delete state.enums;
                     render(container, state);
                     App.onStateChanged();
+                } else {
+                    btn.dataset.confirmed = 'true';
+                    btn.textContent = 'Sure?';
+                    btn.classList.remove('btn-danger');
+                    btn.classList.add('btn-confirm-danger');
+                    confirmTimer = setTimeout(() => {
+                        btn.dataset.confirmed = 'false';
+                        btn.textContent = 'Remove';
+                        btn.classList.add('btn-danger');
+                        btn.classList.remove('btn-confirm-danger');
+                    }, 3000);
                 }
             });
         });

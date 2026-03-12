@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ninjadog Config Builder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -12,35 +15,69 @@
                 extend: {
                     colors: {
                         ninja: {
-                            50:  '#f0f9ff',
-                            100: '#e0f2fe',
-                            200: '#bae6fd',
-                            300: '#7dd3fc',
-                            400: '#38bdf8',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            700: '#0369a1',
-                            800: '#075985',
-                            900: '#0c4a6e',
-                        }
-                    }
+                            50:  '#fff1f3',
+                            100: '#ffe0e4',
+                            200: '#ffc6cd',
+                            300: '#ff9daa',
+                            400: '#ff6478',
+                            500: '#FF2D55',
+                            600: '#ed1141',
+                            700: '#c80d36',
+                            800: '#a60f32',
+                            900: '#8b1131',
+                        },
+                        surface: {
+                            deep: '#08090e',
+                            base: '#0e1017',
+                            card: '#151821',
+                            elevated: '#1c2030',
+                            hover: '#242838',
+                        },
+                        bdr: {
+                            dim: '#1e2235',
+                            DEFAULT: '#282d42',
+                            bright: '#353b55',
+                        },
+                    },
+                    fontFamily: {
+                        display: ['"Dela Gothic One"', 'cursive'],
+                        body: ['"DM Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
                 }
             }
         }
     </script>
     <link rel="stylesheet" href="/css/app.css" />
 </head>
-<body class="dark h-full bg-gray-900 text-gray-100">
+<body class="dark h-full font-body">
     <div id="app" class="flex flex-col h-full">
         <!-- Header -->
-        <header class="flex items-center justify-between px-6 py-3 bg-gray-800 border-b border-gray-700 shrink-0">
+        <header class="header-bar flex items-center justify-between px-6 py-3 shrink-0">
             <div class="flex items-center gap-3">
-                <h1 class="text-xl font-bold text-ninja-400">Ninjadog Config Builder</h1>
-                <span id="status-badge" class="text-xs px-2 py-0.5 rounded-full bg-gray-700 text-gray-400 hidden"></span>
+                <div class="ninja-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                        <path d="M12 2L9 9L2 12L9 15L12 22L15 15L22 12L15 9L12 2Z"/>
+                    </svg>
+                </div>
+                <div class="flex flex-col leading-tight">
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-lg font-display tracking-wide text-white">NINJADOG</h1>
+                        <span id="dirty-indicator" class="dirty-dot hidden" title="Unsaved changes"></span>
+                    </div>
+                    <span class="text-[10px] uppercase tracking-[0.2em] text-gray-500 -mt-0.5">Config Builder</span>
+                </div>
+                <span id="status-badge" class="status-badge text-xs px-2.5 py-0.5 rounded-full font-semibold hidden ml-2"></span>
             </div>
             <div class="flex items-center gap-2">
-                <button id="btn-save" class="px-4 py-1.5 text-sm font-medium rounded bg-ninja-600 hover:bg-ninja-700 text-white transition">Save</button>
-                <button id="btn-build" class="px-4 py-1.5 text-sm font-medium rounded bg-emerald-600 hover:bg-emerald-700 text-white transition">Build</button>
+                <button id="btn-save" class="header-btn header-btn-secondary">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Save
+                </button>
+                <button id="btn-build" class="header-btn header-btn-primary">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    Build
+                </button>
             </div>
         </header>
 
@@ -49,15 +86,15 @@
             <!-- Left panel: Tabs + form -->
             <div class="flex flex-col flex-1 min-w-0">
                 <!-- Tab bar -->
-                <nav class="flex border-b border-gray-700 bg-gray-800 shrink-0">
-                    <button class="tab-btn active px-4 py-2 text-sm font-medium" data-tab="config">Config</button>
-                    <button class="tab-btn px-4 py-2 text-sm font-medium" data-tab="entities">Entities</button>
-                    <button class="tab-btn px-4 py-2 text-sm font-medium" data-tab="enums">Enums</button>
-                    <button class="tab-btn px-4 py-2 text-sm font-medium" data-tab="seed">Seed Data</button>
+                <nav class="tab-bar flex border-b border-bdr bg-surface-base shrink-0" style="height: 42px;">
+                    <button class="tab-btn active px-5 text-sm font-medium" data-tab="config">Config</button>
+                    <button class="tab-btn px-5 text-sm font-medium" data-tab="entities">Entities</button>
+                    <button class="tab-btn px-5 text-sm font-medium" data-tab="enums">Enums</button>
+                    <button class="tab-btn px-5 text-sm font-medium" data-tab="seed">Seed Data</button>
                 </nav>
 
                 <!-- Tab content -->
-                <div class="flex-1 overflow-auto p-6">
+                <div class="flex-1 overflow-auto p-6 content-area">
                     <div id="tab-config" class="tab-content"></div>
                     <div id="tab-entities" class="tab-content hidden"></div>
                     <div id="tab-enums" class="tab-content hidden"></div>
@@ -65,24 +102,23 @@
                 </div>
             </div>
 
-            <!-- Right panel: JSON preview -->
-            <div id="json-panel" class="w-[420px] flex flex-col border-l border-gray-700 bg-gray-850 shrink-0">
-                <div class="flex items-center justify-between px-4 py-2 border-b border-gray-700 bg-gray-800">
-                    <span class="text-sm font-medium text-gray-300">JSON Preview</span>
-                    <button id="btn-toggle-raw" class="text-xs px-2 py-0.5 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 transition">Raw Edit</button>
+            <!-- Right panel: JSON editor (Monaco) -->
+            <div id="json-panel" class="w-[420px] flex flex-col border-l border-bdr shrink-0">
+                <div class="flex items-center justify-between px-4 border-b border-bdr bg-surface-base" style="height: 42px;">
+                    <span class="text-[11px] font-mono font-medium text-gray-500 uppercase tracking-widest">JSON Editor</span>
                 </div>
-                <div id="json-preview" class="flex-1 overflow-auto p-4 font-mono text-xs leading-relaxed"></div>
-                <textarea id="json-raw" class="hidden flex-1 p-4 bg-gray-900 text-green-400 font-mono text-xs resize-none border-none outline-none"></textarea>
+                <div id="monaco-container" class="flex-1 overflow-hidden"></div>
             </div>
         </div>
 
         <!-- Validation panel -->
-        <div id="validation-panel" class="shrink-0 border-t border-gray-700 bg-gray-800 max-h-40 overflow-auto">
-            <div class="px-4 py-2 text-xs font-medium text-gray-400 border-b border-gray-700">Validation</div>
+        <div id="validation-panel" class="shrink-0 border-t border-bdr bg-surface-base max-h-40 overflow-auto">
+            <div class="validation-header px-4 py-2 text-[11px] font-medium text-gray-500 border-b border-bdr-dim uppercase tracking-widest font-mono">Validation</div>
             <div id="validation-messages" class="px-4 py-2 space-y-1"></div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
     <script src="/js/api.js"></script>
     <script src="/js/config-editor.js"></script>
     <script src="/js/entity-editor.js"></script>
