@@ -1,0 +1,48 @@
+﻿@TestApp.CrudWebAPI_HostAddress = http://localhost:5111
+
+# Get all todo items
+GET {{TestApp.CrudWebAPI_HostAddress}}/todo-items
+Accept: application/json
+
+###
+
+# Get todo item by id
+GET {{TestApp.CrudWebAPI_HostAddress}}/todo-items/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+###
+
+# Create a new todo item
+POST {{TestApp.CrudWebAPI_HostAddress}}/todo-items
+Content-Type: application/json
+
+{
+  "title": "string",
+  "description": "string",
+  "isCompleted": false,
+  "dueDate": "2024-01-01T00:00:00",
+  "priority": 0,
+  "cost": 0.0
+}
+
+###
+
+# Update a todo item
+PUT {{TestApp.CrudWebAPI_HostAddress}}/todo-items/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+
+{
+  "title": "string",
+  "description": "string",
+  "isCompleted": false,
+  "dueDate": "2024-01-01T00:00:00",
+  "priority": 0,
+  "cost": 0.0
+}
+
+###
+
+# Delete a todo item
+DELETE {{TestApp.CrudWebAPI_HostAddress}}/todo-items/00000000-0000-0000-0000-000000000000
+
+###

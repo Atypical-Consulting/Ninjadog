@@ -26,6 +26,7 @@ public class CrudTemplates : NinjadogTemplates
     public CrudTemplates()
     {
         Add(new AppSettingsTemplate());
+        Add(new HttpFileTemplate());
         Add(new ProgramTemplate());
         Add(new CrudWebApiExtensionsTemplate());
 

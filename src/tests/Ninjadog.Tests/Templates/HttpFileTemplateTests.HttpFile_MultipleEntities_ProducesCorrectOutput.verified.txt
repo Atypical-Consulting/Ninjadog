@@ -1,0 +1,79 @@
+﻿@TestApp.CrudWebAPI_HostAddress = http://localhost:5111
+
+# Get all authors
+GET {{TestApp.CrudWebAPI_HostAddress}}/authors
+Accept: application/json
+
+###
+
+# Get author by id
+GET {{TestApp.CrudWebAPI_HostAddress}}/authors/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+###
+
+# Create a new author
+POST {{TestApp.CrudWebAPI_HostAddress}}/authors
+Content-Type: application/json
+
+{
+  "name": "string"
+}
+
+###
+
+# Update a author
+PUT {{TestApp.CrudWebAPI_HostAddress}}/authors/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+
+{
+  "name": "string"
+}
+
+###
+
+# Delete a author
+DELETE {{TestApp.CrudWebAPI_HostAddress}}/authors/00000000-0000-0000-0000-000000000000
+
+###
+
+# Get all posts
+GET {{TestApp.CrudWebAPI_HostAddress}}/posts
+Accept: application/json
+
+###
+
+# Get post by id
+GET {{TestApp.CrudWebAPI_HostAddress}}/posts/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+###
+
+# Create a new post
+POST {{TestApp.CrudWebAPI_HostAddress}}/posts
+Content-Type: application/json
+
+{
+  "title": "string",
+  "content": "string",
+  "authorId": "00000000-0000-0000-0000-000000000000"
+}
+
+###
+
+# Update a post
+PUT {{TestApp.CrudWebAPI_HostAddress}}/posts/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+
+{
+  "title": "string",
+  "content": "string",
+  "authorId": "00000000-0000-0000-0000-000000000000"
+}
+
+###
+
+# Delete a post
+DELETE {{TestApp.CrudWebAPI_HostAddress}}/posts/00000000-0000-0000-0000-000000000000
+
+###
