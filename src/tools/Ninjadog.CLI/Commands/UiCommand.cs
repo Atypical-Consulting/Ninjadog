@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
 using Ninjadog.Settings.Schema;
 using Ninjadog.Settings.Validation;
 
@@ -32,6 +33,9 @@ internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
 
         var builder = WebApplication.CreateSlimBuilder();
         builder.WebHost.UseUrls(url);
+
+        // Suppress all ASP.NET infrastructure logs — we use Spectre.Console for output
+        builder.Logging.ClearProviders();
 
         var app = builder.Build();
 
