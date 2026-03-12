@@ -130,6 +130,9 @@ const JsonPreview = (() => {
 
     function buildJson(state) {
         const result = {};
+        if (state['$schema']) {
+            result['$schema'] = state['$schema'];
+        }
         if (state.config && Object.keys(state.config).length > 0) {
             result.config = state.config;
         }
