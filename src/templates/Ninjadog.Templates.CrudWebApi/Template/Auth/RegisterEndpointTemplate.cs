@@ -3,22 +3,23 @@ namespace Ninjadog.Templates.CrudWebAPI.Template.Auth;
 /// <summary>
 /// Generates the register endpoint (POST /api/auth/register).
 /// </summary>
-public class RegisterEndpointTemplate : NinjadogTemplate
+public class RegisterEndpointTemplate : AuthTemplateBase
 {
     /// <inheritdoc />
     public override string Name => "RegisterEndpoint";
 
     /// <inheritdoc />
-    public override NinjadogContentFile GenerateOne(NinjadogSettings ninjadogSettings)
+    protected override bool ShouldGenerate(NinjadogAuthConfiguration? auth)
     {
-        var auth = ninjadogSettings.Config.Auth;
-        if (auth is null || !auth.GenerateRegisterEndpoint)
-        {
-            return NinjadogContentFile.Empty;
-        }
+        return auth is not null && auth.GenerateRegisterEndpoint;
+    }
 
-        var rootNamespace = ninjadogSettings.Config.RootNamespace;
-        var apiVersion = ninjadogSettings.Config.Versioning?.DefaultVersion;
+    /// <inheritdoc />
+    protected override NinjadogContentFile GenerateAuthContent(
+        NinjadogSettings settings, NinjadogAuthConfiguration auth)
+    {
+        var rootNamespace = settings.Config.RootNamespace;
+        var apiVersion = settings.Config.Versioning?.DefaultVersion;
         const string fileName = "RegisterEndpoint.cs";
 
         var content =

@@ -3,22 +3,17 @@ namespace Ninjadog.Templates.CrudWebAPI.Template.Auth;
 /// <summary>
 /// Generates the UserRepository class with Dapper implementation.
 /// </summary>
-public class UserRepositoryTemplate : NinjadogTemplate
+public class UserRepositoryTemplate : AuthTemplateBase
 {
     /// <inheritdoc />
     public override string Name => "UserRepository";
 
     /// <inheritdoc />
-    public override NinjadogContentFile GenerateOne(NinjadogSettings ninjadogSettings)
+    protected override NinjadogContentFile GenerateAuthContent(
+        NinjadogSettings settings, NinjadogAuthConfiguration auth)
     {
-        var auth = ninjadogSettings.Config.Auth;
-        if (auth is null)
-        {
-            return NinjadogContentFile.Empty;
-        }
-
-        var rootNamespace = ninjadogSettings.Config.RootNamespace;
-        var provider = ninjadogSettings.Config.DatabaseProvider;
+        var rootNamespace = settings.Config.RootNamespace;
+        var provider = settings.Config.DatabaseProvider;
         const string fileName = "UserRepository.cs";
 
         var content =

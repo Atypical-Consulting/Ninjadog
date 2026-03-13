@@ -3,21 +3,22 @@ namespace Ninjadog.Templates.CrudWebAPI.Template.Auth;
 /// <summary>
 /// Generates the FluentValidation validator for RegisterRequest.
 /// </summary>
-public class RegisterRequestValidatorTemplate : NinjadogTemplate
+public class RegisterRequestValidatorTemplate : AuthTemplateBase
 {
     /// <inheritdoc />
     public override string Name => "RegisterRequestValidator";
 
     /// <inheritdoc />
-    public override NinjadogContentFile GenerateOne(NinjadogSettings ninjadogSettings)
+    protected override bool ShouldGenerate(NinjadogAuthConfiguration? auth)
     {
-        var auth = ninjadogSettings.Config.Auth;
-        if (auth is null || !auth.GenerateRegisterEndpoint)
-        {
-            return NinjadogContentFile.Empty;
-        }
+        return auth is not null && auth.GenerateRegisterEndpoint;
+    }
 
-        var rootNamespace = ninjadogSettings.Config.RootNamespace;
+    /// <inheritdoc />
+    protected override NinjadogContentFile GenerateAuthContent(
+        NinjadogSettings settings, NinjadogAuthConfiguration auth)
+    {
+        var rootNamespace = settings.Config.RootNamespace;
         const string fileName = "RegisterRequestValidator.cs";
 
         var content =

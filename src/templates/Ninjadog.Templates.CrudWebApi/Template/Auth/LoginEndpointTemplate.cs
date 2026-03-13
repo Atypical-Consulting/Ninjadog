@@ -3,22 +3,23 @@ namespace Ninjadog.Templates.CrudWebAPI.Template.Auth;
 /// <summary>
 /// Generates the login endpoint (POST /api/auth/login).
 /// </summary>
-public class LoginEndpointTemplate : NinjadogTemplate
+public class LoginEndpointTemplate : AuthTemplateBase
 {
     /// <inheritdoc />
     public override string Name => "LoginEndpoint";
 
     /// <inheritdoc />
-    public override NinjadogContentFile GenerateOne(NinjadogSettings ninjadogSettings)
+    protected override bool ShouldGenerate(NinjadogAuthConfiguration? auth)
     {
-        var auth = ninjadogSettings.Config.Auth;
-        if (auth is null || !auth.GenerateLoginEndpoint)
-        {
-            return NinjadogContentFile.Empty;
-        }
+        return auth is not null && auth.GenerateLoginEndpoint;
+    }
 
-        var rootNamespace = ninjadogSettings.Config.RootNamespace;
-        var apiVersion = ninjadogSettings.Config.Versioning?.DefaultVersion;
+    /// <inheritdoc />
+    protected override NinjadogContentFile GenerateAuthContent(
+        NinjadogSettings settings, NinjadogAuthConfiguration auth)
+    {
+        var rootNamespace = settings.Config.RootNamespace;
+        var apiVersion = settings.Config.Versioning?.DefaultVersion;
         const string fileName = "LoginEndpoint.cs";
 
         var content =

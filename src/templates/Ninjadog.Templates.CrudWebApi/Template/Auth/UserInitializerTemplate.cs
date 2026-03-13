@@ -5,22 +5,17 @@ namespace Ninjadog.Templates.CrudWebAPI.Template.Auth;
 /// <summary>
 /// Generates the UserInitializer class that creates the Users table.
 /// </summary>
-public class UserInitializerTemplate : NinjadogTemplate
+public class UserInitializerTemplate : AuthTemplateBase
 {
     /// <inheritdoc />
     public override string Name => "UserInitializer";
 
     /// <inheritdoc />
-    public override NinjadogContentFile GenerateOne(NinjadogSettings ninjadogSettings)
+    protected override NinjadogContentFile GenerateAuthContent(
+        NinjadogSettings settings, NinjadogAuthConfiguration auth)
     {
-        var auth = ninjadogSettings.Config.Auth;
-        if (auth is null)
-        {
-            return NinjadogContentFile.Empty;
-        }
-
-        var rootNamespace = ninjadogSettings.Config.RootNamespace;
-        var provider = ninjadogSettings.Config.DatabaseProvider;
+        var rootNamespace = settings.Config.RootNamespace;
+        var provider = settings.Config.DatabaseProvider;
         const string fileName = "UserInitializer.cs";
 
         var textType = DatabaseProviderHelper.MapToDbType("String", provider);

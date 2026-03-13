@@ -3,21 +3,16 @@ namespace Ninjadog.Templates.CrudWebAPI.Template.Auth;
 /// <summary>
 /// Generates the User domain entity for authentication.
 /// </summary>
-public class UserEntityTemplate : NinjadogTemplate
+public class UserEntityTemplate : AuthTemplateBase
 {
     /// <inheritdoc />
     public override string Name => "UserEntity";
 
     /// <inheritdoc />
-    public override NinjadogContentFile GenerateOne(NinjadogSettings ninjadogSettings)
+    protected override NinjadogContentFile GenerateAuthContent(
+        NinjadogSettings settings, NinjadogAuthConfiguration auth)
     {
-        var auth = ninjadogSettings.Config.Auth;
-        if (auth is null)
-        {
-            return NinjadogContentFile.Empty;
-        }
-
-        var rootNamespace = ninjadogSettings.Config.RootNamespace;
+        var rootNamespace = settings.Config.RootNamespace;
         const string fileName = "User.cs";
 
         var content =

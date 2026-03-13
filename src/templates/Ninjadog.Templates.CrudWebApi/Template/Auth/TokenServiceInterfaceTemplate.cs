@@ -3,21 +3,16 @@ namespace Ninjadog.Templates.CrudWebAPI.Template.Auth;
 /// <summary>
 /// Generates the ITokenService interface for JWT token generation.
 /// </summary>
-public class TokenServiceInterfaceTemplate : NinjadogTemplate
+public class TokenServiceInterfaceTemplate : AuthTemplateBase
 {
     /// <inheritdoc />
     public override string Name => "TokenServiceInterface";
 
     /// <inheritdoc />
-    public override NinjadogContentFile GenerateOne(NinjadogSettings ninjadogSettings)
+    protected override NinjadogContentFile GenerateAuthContent(
+        NinjadogSettings settings, NinjadogAuthConfiguration auth)
     {
-        var auth = ninjadogSettings.Config.Auth;
-        if (auth is null)
-        {
-            return NinjadogContentFile.Empty;
-        }
-
-        var rootNamespace = ninjadogSettings.Config.RootNamespace;
+        var rootNamespace = settings.Config.RootNamespace;
         const string fileName = "ITokenService.cs";
 
         var content =

@@ -6,21 +6,16 @@ namespace Ninjadog.Templates.CrudWebAPI.Template.Auth;
 /// <summary>
 /// Generates AuthExtensions.cs with AddJwtAuthentication() and AddAuthorizationPolicies() extension methods.
 /// </summary>
-public class AuthExtensionsTemplate : NinjadogTemplate
+public class AuthExtensionsTemplate : AuthTemplateBase
 {
     /// <inheritdoc />
     public override string Name => "AuthExtensions";
 
     /// <inheritdoc />
-    public override NinjadogContentFile GenerateOne(NinjadogSettings ninjadogSettings)
+    protected override NinjadogContentFile GenerateAuthContent(
+        NinjadogSettings settings, NinjadogAuthConfiguration auth)
     {
-        var auth = ninjadogSettings.Config.Auth;
-        if (auth is null)
-        {
-            return NinjadogContentFile.Empty;
-        }
-
-        var rootNamespace = ninjadogSettings.Config.RootNamespace;
+        var rootNamespace = settings.Config.RootNamespace;
         const string fileName = "AuthExtensions.cs";
 
         var content =

@@ -3,21 +3,16 @@ namespace Ninjadog.Templates.CrudWebAPI.Template.Auth;
 /// <summary>
 /// Generates the LoginResponse record.
 /// </summary>
-public class LoginResponseTemplate : NinjadogTemplate
+public class LoginResponseTemplate : AuthTemplateBase
 {
     /// <inheritdoc />
     public override string Name => "LoginResponse";
 
     /// <inheritdoc />
-    public override NinjadogContentFile GenerateOne(NinjadogSettings ninjadogSettings)
+    protected override NinjadogContentFile GenerateAuthContent(
+        NinjadogSettings settings, NinjadogAuthConfiguration auth)
     {
-        var auth = ninjadogSettings.Config.Auth;
-        if (auth is null)
-        {
-            return NinjadogContentFile.Empty;
-        }
-
-        var rootNamespace = ninjadogSettings.Config.RootNamespace;
+        var rootNamespace = settings.Config.RootNamespace;
         const string fileName = "LoginResponse.cs";
 
         var content =
