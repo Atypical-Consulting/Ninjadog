@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Net;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
@@ -18,12 +20,27 @@ namespace Ninjadog.CLI.Commands;
 internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
 {
     private const string ConfigFileName = "ninjadog.json";
+    private const int MaxPortRetries = 10;
 
     /// <inheritdoc />
     public override async Task<int> ExecuteAsync(CommandContext context, UiCommandSettings settings, CancellationToken cancellationToken)
     {
         var configPath = Path.Combine(Directory.GetCurrentDirectory(), ConfigFileName);
-        var url = $"http://localhost:{settings.Port}";
+        var port = FindAvailablePort(settings.Port);
+
+        if (port < 0)
+        {
+            MarkupLine($"[red]Could not find an available port (tried {settings.Port}–{settings.Port + MaxPortRetries - 1}).[/]");
+            MarkupLine("[grey]Hint: stop the other process or specify a different port with --port.[/]");
+            return 1;
+        }
+
+        var url = $"http://localhost:{port}";
+
+        if (port != settings.Port)
+        {
+            MarkupLine($"[yellow]Port {settings.Port} is already in use, using port {port} instead.[/]");
+        }
 
         MarkupLine($"[green]Starting Ninjadog Config Builder on[/] [blue]{url}[/]");
         MarkupLine("[grey]Press Ctrl+C to stop the server.[/]");
@@ -183,6 +200,39 @@ internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
         await app.StartAsync(cancellationToken);
         await app.WaitForShutdownAsync(cancellationToken);
         return 0;
+    }
+
+    /// <summary>
+    /// Finds an available port starting from <paramref name="preferredPort"/>,
+    /// trying up to <see cref="MaxPortRetries"/> consecutive ports.
+    /// Returns -1 if none are available.
+    /// </summary>
+    private static int FindAvailablePort(int preferredPort)
+    {
+        for (var i = 0; i < MaxPortRetries; i++)
+        {
+            var candidate = preferredPort + i;
+            if (IsPortAvailable(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        return -1;
+    }
+
+    private static bool IsPortAvailable(int port)
+    {
+        try
+        {
+            using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            socket.Bind(new IPEndPoint(IPAddress.Loopback, port));
+            return true;
+        }
+        catch (SocketException)
+        {
+            return false;
+        }
     }
 
     private static void OpenBrowser(string url)
