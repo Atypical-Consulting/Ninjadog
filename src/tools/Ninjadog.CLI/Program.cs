@@ -50,7 +50,8 @@ app.Configure(config =>
         .WithDescription("Initializes a new Ninjadog project.")
         .WithExample(["init"])
         .WithExample(["init", "--use-case", "TodoApp"])
-        .WithExample(["init", "-u", "RestaurantBooking"]);
+        .WithExample(["init", "-u", "RestaurantBooking"])
+        .WithExample(["init", "--from-prompt", "A blog with users, posts, and comments"]);
 
     config.AddCommand<BuildCommand>("build")
         .WithDescription("Builds and compiles the project.")

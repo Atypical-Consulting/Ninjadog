@@ -109,6 +109,34 @@ export async function getSchema() {
   return res.json();
 }
 
+export interface AiChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export interface AiGenerationResult {
+  success: boolean;
+  json?: string;
+  error?: string;
+  validation?: {
+    isValid: boolean;
+    diagnostics: Array<{ path: string; message: string; severity: string }>;
+  };
+}
+
+export async function generate(messages: AiChatMessage[]): Promise<AiGenerationResult> {
+  const res = await request('/api/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as { error?: string }).error || `POST /api/generate failed: ${res.status}`);
+  }
+  return res.json();
+}
+
 export async function getDirectories(path?: string) {
   const res = await request(`/api/directories?path=${encodeURIComponent(path || '.')}`);
   if (!res.ok) throw new Error(`GET /api/directories failed: ${res.status}`);

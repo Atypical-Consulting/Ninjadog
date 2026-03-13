@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useConfigStore } from '../store/config-store';
+import { useChatStore } from '../store/chat-store';
 import { useUiStore } from '../store/ui-store';
 
 export function useKeyboardShortcuts() {
@@ -10,6 +11,7 @@ export function useKeyboardShortcuts() {
   const showToast = useUiStore((s) => s.showToast);
   const toggleShortcuts = useUiStore((s) => s.toggleShortcuts);
   const closeAllOverlays = useUiStore((s) => s.closeAllOverlays);
+  const toggleChat = useChatStore((s) => s.toggle);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -43,6 +45,12 @@ export function useKeyboardShortcuts() {
         return;
       }
 
+      if (mod && e.shiftKey && e.key === 'A') {
+        e.preventDefault();
+        toggleChat();
+        return;
+      }
+
       if (mod && e.key === 'b') {
         e.preventDefault();
         buildConfig()
@@ -65,5 +73,5 @@ export function useKeyboardShortcuts() {
 
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [saveConfig, buildConfig, undo, redo, showToast, toggleShortcuts, closeAllOverlays]);
+  }, [saveConfig, buildConfig, undo, redo, showToast, toggleShortcuts, closeAllOverlays, toggleChat]);
 }

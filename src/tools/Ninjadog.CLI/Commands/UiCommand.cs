@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Ninjadog.CLI.AI;
 using Ninjadog.Settings.Schema;
 using Ninjadog.Settings.Validation;
 
@@ -103,8 +104,7 @@ internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
         // API: Write config
         app.MapPost("/api/config", async (HttpContext ctx) =>
         {
-            using var reader = new StreamReader(ctx.Request.Body);
-            var json = await reader.ReadToEndAsync(ctx.RequestAborted);
+            var json = await ReadBodyAsync(ctx);
 
             // Validate JSON is parseable
             try
@@ -123,8 +123,7 @@ internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
         // API: Validate config
         app.MapPost("/api/validate", async (HttpContext ctx) =>
         {
-            using var reader = new StreamReader(ctx.Request.Body);
-            var json = await reader.ReadToEndAsync(ctx.RequestAborted);
+            var json = await ReadBodyAsync(ctx);
 
             var result = NinjadogConfigValidator.Validate(json);
             return Results.Json(result);
@@ -146,6 +145,50 @@ internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
         {
             var schemaJson = SchemaProvider.GetSchemaText();
             return Results.Content(schemaJson, "application/json");
+        });
+
+        // API: Generate config from natural language using AI
+        app.MapPost("/api/generate", async (HttpContext ctx) =>
+        {
+            var body = await ReadBodyAsync(ctx);
+
+            List<ChatMessage> messages;
+            try
+            {
+                using var doc = JsonDocument.Parse(body);
+                var messagesArray = doc.RootElement.GetProperty("messages");
+                messages = [.. messagesArray.EnumerateArray()
+                    .Select(m => new ChatMessage(
+                        m.GetProperty("role").GetString()!,
+                        m.GetProperty("content").GetString()!))];
+            }
+            catch (Exception ex)
+            {
+                return Results.Json(
+                    new { success = false, error = $"Invalid request: {ex.Message}" },
+                    statusCode: 400);
+            }
+
+            var result = await ConfigGenerator.GenerateAsync(messages, ctx.RequestAborted);
+
+            return Results.Json(new
+            {
+                result.Success,
+                result.Json,
+                result.Error,
+                Validation = result.Validation is not null
+                    ? new
+                    {
+                        result.Validation.IsValid,
+                        Diagnostics = result.Validation.Diagnostics.Select(d => new
+                        {
+                            d.Path,
+                            d.Message,
+                            Severity = d.Severity.ToString().ToLowerInvariant()
+                        })
+                    }
+                    : null
+            });
         });
 
         // API: List directories for folder picker
@@ -256,5 +299,11 @@ internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
         {
             // Swallow -- user can open the URL manually.
         }
+    }
+
+    private static async Task<string> ReadBodyAsync(HttpContext ctx)
+    {
+        using var reader = new StreamReader(ctx.Request.Body);
+        return await reader.ReadToEndAsync(ctx.RequestAborted);
     }
 }

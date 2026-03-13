@@ -7,6 +7,7 @@ const SHORTCUTS = [
   { keys: ['Ctrl', 'Y'], desc: 'Redo' },
   { keys: ['Ctrl', 'E'], desc: 'Add entity' },
   { keys: ['1', '\u2013', '4'], desc: 'Switch tabs' },
+  { keys: ['Ctrl', 'Shift', 'A'], desc: 'AI Assistant' },
   { keys: ['?'], desc: 'Show this overlay' },
 ];
 
