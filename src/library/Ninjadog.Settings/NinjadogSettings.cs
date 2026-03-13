@@ -290,15 +290,19 @@ public abstract record NinjadogSettings(
             ? Path.Combine(basePath, csvPath)
             : csvPath;
 
-        if (!File.Exists(resolvedPath))
+        string[] lines;
+        try
         {
-            throw new JsonException($"Seed data CSV file not found: '{resolvedPath}'.");
+            lines = File.ReadAllLines(resolvedPath);
+        }
+        catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException)
+        {
+            throw new InvalidOperationException($"Seed data CSV file not found: '{resolvedPath}'.", ex);
         }
 
-        var lines = File.ReadAllLines(resolvedPath);
-        if (lines.Length < 2)
+        if (lines.Length == 0)
         {
-            throw new JsonException($"Seed data CSV file '{csvPath}' must contain a header row and at least one data row.");
+            throw new InvalidOperationException($"Seed data CSV file '{csvPath}' is empty.");
         }
 
         var headers = ParseCsvLine(lines[0]);
@@ -315,7 +319,7 @@ public abstract record NinjadogSettings(
             var values = ParseCsvLine(line);
             if (values.Length != headers.Length)
             {
-                throw new JsonException($"Seed data CSV file '{csvPath}' row {i + 1} has {values.Length} fields but header has {headers.Length}.");
+                throw new InvalidOperationException($"Seed data CSV file '{csvPath}' row {i + 1} has {values.Length} fields but header has {headers.Length}.");
             }
 
             var row = new Dictionary<string, object>();

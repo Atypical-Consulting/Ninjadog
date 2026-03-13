@@ -450,7 +450,7 @@ public class NinjadogInitialSettingsTests
             }
             """;
 
-        var ex = Assert.Throws<JsonException>(() =>
+        var ex = Assert.Throws<InvalidOperationException>(() =>
             NinjadogSettings.FromJsonString(json, "/tmp/test-ninjadog"));
 
         Assert.Contains("not found", ex.Message);
