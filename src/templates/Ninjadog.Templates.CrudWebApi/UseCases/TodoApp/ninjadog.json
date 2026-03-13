@@ -60,7 +60,8 @@
         "Icon": {
           "type": "string"
         }
-      }
+      },
+      "seedData": "todo-categories.csv"
     }
   }
 }

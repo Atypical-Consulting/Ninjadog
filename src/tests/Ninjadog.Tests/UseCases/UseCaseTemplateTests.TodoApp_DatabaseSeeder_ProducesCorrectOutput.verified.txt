@@ -1,0 +1,40 @@
+﻿//------------------------------------------------------------------------------
+// This code was powered by the Ninjadog Engine
+//
+// Developed by: Atypical Consulting SRL - Philippe Matray
+// Generated on: [SCRUBBED]
+// Version     : [SCRUBBED]
+//
+// This file is part of a custom software solution crafted to meet your
+// specific needs. For optimal performance and compatibility, modifications
+// should be coordinated with Ninjadog support services.
+//------------------------------------------------------------------------------
+
+using Dapper;
+
+namespace TodoApp.CrudWebApi.Database;
+
+public partial class DatabaseSeeder(IDbConnectionFactory connectionFactory)
+{
+    public async Task SeedAsync()
+    {
+        using var connection = await connectionFactory.CreateConnectionAsync();
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO TodoCategories (Id, Name, Color, Icon) VALUES (@Id, @Name, @Color, @Icon)",
+            new { Id = "550e8400-e29b-41d4-a716-446655440001", Name = "Work", Color = "#4A90D9", Icon = "briefcase" });
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO TodoCategories (Id, Name, Color, Icon) VALUES (@Id, @Name, @Color, @Icon)",
+            new { Id = "550e8400-e29b-41d4-a716-446655440002", Name = "Personal", Color = "#7B68EE", Icon = "user" });
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO TodoCategories (Id, Name, Color, Icon) VALUES (@Id, @Name, @Color, @Icon)",
+            new { Id = "550e8400-e29b-41d4-a716-446655440003", Name = "Shopping", Color = "#50C878", Icon = "cart" });
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO TodoCategories (Id, Name, Color, Icon) VALUES (@Id, @Name, @Color, @Icon)",
+            new { Id = "550e8400-e29b-41d4-a716-446655440004", Name = "Health", Color = "#FF6B6B", Icon = "heart" });
+
+    }
+}

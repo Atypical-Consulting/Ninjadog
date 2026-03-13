@@ -32,12 +32,13 @@ Use cases are predefined domain models defined as `ninjadog.json` files. They li
 
 ## Architecture
 
-Each use case is simply a `ninjadog.json` file that is embedded as a resource and loaded at runtime via `UseCaseSettings`:
+Each use case is a `ninjadog.json` file (plus optional CSV seed data files) that is embedded as a resource and loaded at runtime via `UseCaseSettings`:
 
 ```
 UseCases/
 └── {Name}/
-    └── ninjadog.json    -- the complete domain model
+    ├── ninjadog.json        -- the complete domain model
+    └── *.csv                -- optional CSV seed data files
 ```
 
 The `UseCaseSettings` class provides static methods to load each use case:
@@ -104,11 +105,28 @@ A simple task management application with three entities and two relationships.
         "Name": { "type": "string" },
         "Color": { "type": "string" },
         "Icon": { "type": "string" }
-      }
+      },
+      "seedData": "todo-categories.csv"
     }
   }
 }
 ```
+
+### CSV Seed Data
+
+The `TodoCategory` entity references a CSV file for seed data, demonstrating how to manage seed data externally:
+
+**`todo-categories.csv`:**
+
+```csv
+Id,Name,Color,Icon
+550e8400-e29b-41d4-a716-446655440001,Work,#4A90D9,briefcase
+550e8400-e29b-41d4-a716-446655440002,Personal,#7B68EE,user
+550e8400-e29b-41d4-a716-446655440003,Shopping,#50C878,cart
+550e8400-e29b-41d4-a716-446655440004,Health,#FF6B6B,heart
+```
+
+This generates a `DatabaseSeeder` class that inserts the four default categories on startup.
 
 ### What Gets Generated
 
@@ -123,6 +141,7 @@ Running all templates against TodoApp produces:
 - **12 mappers** -- Domain ↔ DTO ↔ API contract conversions
 - **6 validators** -- FluentValidation rules for Create/Update requests
 - **1 database initializer** -- CREATE TABLE statements for all entities
+- **1 database seeder** -- Inserts seed data for TodoCategory from CSV
 - **1 Program.cs** -- Application entry point with DI wiring
 - **Docker files** -- Dockerfile, docker-compose, .dockerignore
 
@@ -155,6 +174,16 @@ A comprehensive restaurant management system with 12 entities, demonstrating how
 {: .note }
 > The `Table` entity uses an `Int32` primary key (`TableNumber`) instead of a Guid, demonstrating that Ninjadog supports different key types with automatic route constraint resolution (`{tableNumber:int}` vs `{id:guid}`).
 
+### CSV Seed Data
+
+Three entities use CSV seed data files to pre-populate lookup tables:
+
+- **`tables.csv`** -- 6 table configurations (window seats, booths, patio, etc.)
+- **`ingredient-types.csv`** -- 6 ingredient categories (Vegetable, Fruit, Meat, Dairy, Spice, Grain)
+- **`staff-roles.csv`** -- 6 staff roles (Chef, Sous Chef, Waiter, Host, Manager, Bartender)
+
+This demonstrates CSV seed data at scale -- the generated `DatabaseSeeder` inserts 18 rows across 3 tables on startup.
+
 ### Scale
 
 RestaurantBooking generates **over 100 files** from a single configuration, including:
@@ -164,6 +193,7 @@ RestaurantBooking generates **over 100 files** from a single configuration, incl
 - 48 mappers
 - 24 validators
 - Database initializer with 12 CREATE TABLE statements
+- Database seeder with 18 seed rows from 3 CSV files
 
 ---
 

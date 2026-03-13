@@ -16,7 +16,11 @@
 
   <ItemGroup>
     <EmbeddedResource Include="UseCases\TodoApp\ninjadog.json" LogicalName="UseCases.TodoApp.ninjadog.json" />
+    <EmbeddedResource Include="UseCases\TodoApp\todo-categories.csv" LogicalName="UseCases.TodoApp.todo-categories.csv" />
     <EmbeddedResource Include="UseCases\RestaurantBooking\ninjadog.json" LogicalName="UseCases.RestaurantBooking.ninjadog.json" />
+    <EmbeddedResource Include="UseCases\RestaurantBooking\tables.csv" LogicalName="UseCases.RestaurantBooking.tables.csv" />
+    <EmbeddedResource Include="UseCases\RestaurantBooking\ingredient-types.csv" LogicalName="UseCases.RestaurantBooking.ingredient-types.csv" />
+    <EmbeddedResource Include="UseCases\RestaurantBooking\staff-roles.csv" LogicalName="UseCases.RestaurantBooking.staff-roles.csv" />
   </ItemGroup>
 
 </Project>

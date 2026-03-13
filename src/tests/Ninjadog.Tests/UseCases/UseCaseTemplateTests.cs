@@ -120,6 +120,64 @@ public class UseCaseTemplateTests
     }
 
     [Fact]
+    public Task TodoApp_DatabaseSeeder_ProducesCorrectOutput()
+    {
+        var settings = UseCaseSettings.TodoApp();
+        var template = _templates.First(t => t.Name == "DatabaseSeeder");
+        var result = template.GenerateOne(settings);
+        return Verify(result.Content);
+    }
+
+    [Fact]
+    public Task RestaurantBooking_DatabaseSeeder_ProducesCorrectOutput()
+    {
+        var settings = UseCaseSettings.RestaurantBooking();
+        var template = _templates.First(t => t.Name == "DatabaseSeeder");
+        var result = template.GenerateOne(settings);
+        return Verify(result.Content);
+    }
+
+    [Fact]
+    public void TodoApp_TodoCategory_HasCsvSeedData()
+    {
+        var settings = UseCaseSettings.TodoApp();
+        var todoCategory = settings.Entities["TodoCategory"];
+        todoCategory.SeedData.ShouldNotBeNull();
+        todoCategory.SeedData.Count.ShouldBe(4);
+        todoCategory.SeedData[0]["Name"].ShouldBe("Work");
+    }
+
+    [Fact]
+    public void RestaurantBooking_Table_HasCsvSeedData()
+    {
+        var settings = UseCaseSettings.RestaurantBooking();
+        var table = settings.Entities["Table"];
+        table.SeedData.ShouldNotBeNull();
+        table.SeedData.Count.ShouldBe(6);
+        table.SeedData[0]["TableDetails"].ShouldBe("Window seat for 2");
+    }
+
+    [Fact]
+    public void RestaurantBooking_IngredientType_HasCsvSeedData()
+    {
+        var settings = UseCaseSettings.RestaurantBooking();
+        var ingredientType = settings.Entities["IngredientType"];
+        ingredientType.SeedData.ShouldNotBeNull();
+        ingredientType.SeedData.Count.ShouldBe(6);
+        ingredientType.SeedData[0]["IngredientTypeDescription"].ShouldBe("Vegetable");
+    }
+
+    [Fact]
+    public void RestaurantBooking_StaffRole_HasCsvSeedData()
+    {
+        var settings = UseCaseSettings.RestaurantBooking();
+        var staffRole = settings.Entities["StaffRole"];
+        staffRole.SeedData.ShouldNotBeNull();
+        staffRole.SeedData.Count.ShouldBe(6);
+        staffRole.SeedData[0]["StaffRoleDescription"].ShouldBe("Chef");
+    }
+
+    [Fact]
     public Task RestaurantBooking_GetByParentEndpoint_ProducesNestedEndpoints()
     {
         var settings = UseCaseSettings.RestaurantBooking();

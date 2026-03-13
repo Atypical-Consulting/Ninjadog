@@ -1,0 +1,96 @@
+﻿//------------------------------------------------------------------------------
+// This code was powered by the Ninjadog Engine
+//
+// Developed by: Atypical Consulting SRL - Philippe Matray
+// Generated on: [SCRUBBED]
+// Version     : [SCRUBBED]
+//
+// This file is part of a custom software solution crafted to meet your
+// specific needs. For optimal performance and compatibility, modifications
+// should be coordinated with Ninjadog support services.
+//------------------------------------------------------------------------------
+
+using Dapper;
+
+namespace RestaurantBooking.CrudWebApi.Database;
+
+public partial class DatabaseSeeder(IDbConnectionFactory connectionFactory)
+{
+    public async Task SeedAsync()
+    {
+        using var connection = await connectionFactory.CreateConnectionAsync();
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO Tables (TableNumber, TableDetails) VALUES (@TableNumber, @TableDetails)",
+            new { TableNumber = 1, TableDetails = "Window seat for 2" });
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO Tables (TableNumber, TableDetails) VALUES (@TableNumber, @TableDetails)",
+            new { TableNumber = 2, TableDetails = "Corner booth for 4" });
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO Tables (TableNumber, TableDetails) VALUES (@TableNumber, @TableDetails)",
+            new { TableNumber = 3, TableDetails = "Center table for 6" });
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO Tables (TableNumber, TableDetails) VALUES (@TableNumber, @TableDetails)",
+            new { TableNumber = 4, TableDetails = "Patio table for 2" });
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO Tables (TableNumber, TableDetails) VALUES (@TableNumber, @TableDetails)",
+            new { TableNumber = 5, TableDetails = "Private dining for 8" });
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO Tables (TableNumber, TableDetails) VALUES (@TableNumber, @TableDetails)",
+            new { TableNumber = 6, TableDetails = "Bar counter seat for 1" });
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO IngredientTypes (IngredientTypeCode, IngredientTypeDescription) VALUES (@IngredientTypeCode, @IngredientTypeDescription)",
+            new { IngredientTypeCode = "550e8400-e29b-41d4-a716-446655440101", IngredientTypeDescription = "Vegetable" });
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO IngredientTypes (IngredientTypeCode, IngredientTypeDescription) VALUES (@IngredientTypeCode, @IngredientTypeDescription)",
+            new { IngredientTypeCode = "550e8400-e29b-41d4-a716-446655440102", IngredientTypeDescription = "Fruit" });
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO IngredientTypes (IngredientTypeCode, IngredientTypeDescription) VALUES (@IngredientTypeCode, @IngredientTypeDescription)",
+            new { IngredientTypeCode = "550e8400-e29b-41d4-a716-446655440103", IngredientTypeDescription = "Meat" });
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO IngredientTypes (IngredientTypeCode, IngredientTypeDescription) VALUES (@IngredientTypeCode, @IngredientTypeDescription)",
+            new { IngredientTypeCode = "550e8400-e29b-41d4-a716-446655440104", IngredientTypeDescription = "Dairy" });
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO IngredientTypes (IngredientTypeCode, IngredientTypeDescription) VALUES (@IngredientTypeCode, @IngredientTypeDescription)",
+            new { IngredientTypeCode = "550e8400-e29b-41d4-a716-446655440105", IngredientTypeDescription = "Spice" });
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO IngredientTypes (IngredientTypeCode, IngredientTypeDescription) VALUES (@IngredientTypeCode, @IngredientTypeDescription)",
+            new { IngredientTypeCode = "550e8400-e29b-41d4-a716-446655440106", IngredientTypeDescription = "Grain" });
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO StaffRoles (StaffRoleCode, StaffRoleDescription) VALUES (@StaffRoleCode, @StaffRoleDescription)",
+            new { StaffRoleCode = "550e8400-e29b-41d4-a716-446655440201", StaffRoleDescription = "Chef" });
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO StaffRoles (StaffRoleCode, StaffRoleDescription) VALUES (@StaffRoleCode, @StaffRoleDescription)",
+            new { StaffRoleCode = "550e8400-e29b-41d4-a716-446655440202", StaffRoleDescription = "Sous Chef" });
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO StaffRoles (StaffRoleCode, StaffRoleDescription) VALUES (@StaffRoleCode, @StaffRoleDescription)",
+            new { StaffRoleCode = "550e8400-e29b-41d4-a716-446655440203", StaffRoleDescription = "Waiter" });
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO StaffRoles (StaffRoleCode, StaffRoleDescription) VALUES (@StaffRoleCode, @StaffRoleDescription)",
+            new { StaffRoleCode = "550e8400-e29b-41d4-a716-446655440204", StaffRoleDescription = "Host" });
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO StaffRoles (StaffRoleCode, StaffRoleDescription) VALUES (@StaffRoleCode, @StaffRoleDescription)",
+            new { StaffRoleCode = "550e8400-e29b-41d4-a716-446655440205", StaffRoleDescription = "Manager" });
+
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO StaffRoles (StaffRoleCode, StaffRoleDescription) VALUES (@StaffRoleCode, @StaffRoleDescription)",
+            new { StaffRoleCode = "550e8400-e29b-41d4-a716-446655440206", StaffRoleDescription = "Bartender" });
+
+    }
+}

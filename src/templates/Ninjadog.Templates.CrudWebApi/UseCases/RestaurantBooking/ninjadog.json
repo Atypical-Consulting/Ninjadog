@@ -62,7 +62,8 @@
         "TableDetails": {
           "type": "string"
         }
-      }
+      },
+      "seedData": "tables.csv"
     },
     "Order": {
       "properties": {
@@ -145,7 +146,8 @@
         "IngredientTypeDescription": {
           "type": "string"
         }
-      }
+      },
+      "seedData": "ingredient-types.csv"
     },
     "Staff": {
       "properties": {
@@ -170,7 +172,8 @@
         "StaffRoleDescription": {
           "type": "string"
         }
-      }
+      },
+      "seedData": "staff-roles.csv"
     }
   }
 }

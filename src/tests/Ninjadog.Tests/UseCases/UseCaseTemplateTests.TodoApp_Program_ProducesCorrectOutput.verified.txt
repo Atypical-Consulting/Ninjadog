@@ -42,6 +42,10 @@ try
         .InitializeAsync()
         .ConfigureAwait(false);
 
+    await app.Services
+        .GetRequiredService<DatabaseSeeder>()
+        .SeedAsync()
+        .ConfigureAwait(false);
     app.Run();
 }
 catch (Exception ex)

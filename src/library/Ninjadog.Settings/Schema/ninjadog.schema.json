@@ -273,13 +273,22 @@
         },
         "seedData": {
           "title": "Seed Data",
-          "description": "Initial data rows to insert when the database is initialized. Each object must match the entity's property names.",
-          "type": "array",
-          "items": {
-            "type": "object",
-            "minProperties": 1
-          },
-          "minItems": 1
+          "description": "Initial data rows to insert when the database is initialized. Can be an inline JSON array of objects (each matching the entity's property names) or a relative path to a CSV file.",
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "minProperties": 1
+              },
+              "minItems": 1
+            },
+            {
+              "type": "string",
+              "pattern": "\\.csv$",
+              "description": "Relative path to a CSV file. The first row must be a header matching entity property names."
+            }
+          ]
         }
       },
       "additionalProperties": false
