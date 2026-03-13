@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Ninjadog.Settings;
 using Ninjadog.Settings.Entities.Properties;
 using Ninjadog.Settings.Extensions;
@@ -388,5 +389,103 @@ public class NinjadogInitialSettingsTests
         Assert.Null(settings.Entities["TodoItem"].Relationships);
         Assert.Null(settings.Entities["TodoItem"].SeedData);
         Assert.Null(settings.Enums);
+    }
+
+    [Fact]
+    public void FromJsonString_WithCsvSeedData_ParsesCsvFile()
+    {
+        var testDataDir = Path.Combine(AppContext.BaseDirectory, "TestData");
+        const string json = """
+            {
+              "config": {
+                "name": "TestApp",
+                "version": "1.0.0",
+                "description": "Test",
+                "rootNamespace": "TestApp.Api"
+              },
+              "entities": {
+                "Person": {
+                  "properties": {
+                    "id": { "type": "Guid", "isKey": true },
+                    "firstName": { "type": "string" },
+                    "lastName": { "type": "string" }
+                  },
+                  "seedData": "persons.csv"
+                }
+              }
+            }
+            """;
+
+        var settings = NinjadogSettings.FromJsonString(json, testDataDir);
+
+        Assert.NotNull(settings.Entities["Person"].SeedData);
+        Assert.Equal(2, settings.Entities["Person"].SeedData!.Count);
+        Assert.Equal("3cb66bf9-587a-4340-90ef-b51d9f749b73", settings.Entities["Person"].SeedData![0]["id"]);
+        Assert.Equal("Philippe", settings.Entities["Person"].SeedData![0]["firstName"]);
+        Assert.Equal("Matray", settings.Entities["Person"].SeedData![0]["lastName"]);
+        Assert.Equal("6db681d1-fbdd-452b-9c82-f402266c0cb7", settings.Entities["Person"].SeedData![1]["id"]);
+        Assert.Equal("Laure", settings.Entities["Person"].SeedData![1]["firstName"]);
+        Assert.Equal("D'Este", settings.Entities["Person"].SeedData![1]["lastName"]);
+    }
+
+    [Fact]
+    public void FromJsonString_WithCsvSeedData_MissingFile_ThrowsJsonException()
+    {
+        const string json = """
+            {
+              "config": {
+                "name": "TestApp",
+                "version": "1.0.0",
+                "description": "Test",
+                "rootNamespace": "TestApp.Api"
+              },
+              "entities": {
+                "Person": {
+                  "properties": {
+                    "id": { "type": "Guid", "isKey": true }
+                  },
+                  "seedData": "nonexistent.csv"
+                }
+              }
+            }
+            """;
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            NinjadogSettings.FromJsonString(json, "/tmp/test-ninjadog"));
+
+        Assert.Contains("not found", ex.Message);
+    }
+
+    [Fact]
+    public void FromJsonString_WithInlineSeedData_StillWorks()
+    {
+        const string json = """
+            {
+              "config": {
+                "name": "TestApp",
+                "version": "1.0.0",
+                "description": "Test",
+                "rootNamespace": "TestApp.Api"
+              },
+              "entities": {
+                "Person": {
+                  "properties": {
+                    "id": { "type": "Guid", "isKey": true },
+                    "firstName": { "type": "string" }
+                  },
+                  "seedData": [
+                    { "id": "abc-123", "firstName": "Alice" }
+                  ]
+                }
+              }
+            }
+            """;
+
+        var settings = NinjadogSettings.FromJsonString(json);
+
+        Assert.NotNull(settings.Entities["Person"].SeedData);
+        Assert.Single(settings.Entities["Person"].SeedData!);
+        Assert.Equal("abc-123", settings.Entities["Person"].SeedData![0]["id"]);
+        Assert.Equal("Alice", settings.Entities["Person"].SeedData![0]["firstName"]);
     }
 }

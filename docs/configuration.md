@@ -387,7 +387,9 @@ Each enum produces a separate `.cs` file under the `Domain` namespace. Enum-type
 
 ## Seed Data
 
-Entities can include an optional `seedData` array to populate tables with initial rows at startup.
+Entities can include an optional `seedData` to populate tables with initial rows at startup. You can provide seed data either as an **inline JSON array** or as a **path to a CSV file**.
+
+### Inline JSON Array
 
 ```json
 {
@@ -405,7 +407,34 @@ Entities can include an optional `seedData` array to populate tables with initia
 }
 ```
 
-Each object in the array must include the key property and any non-nullable properties. The generated `DatabaseSeeder` class runs INSERT statements at startup, immediately after `DatabaseInitializer.InitializeAsync()`.
+### CSV File Reference
+
+Instead of embedding rows in JSON, you can point to a CSV file. The path is relative to the `ninjadog.json` file location.
+
+```json
+{
+  "Category": {
+    "properties": {
+      "Id": { "type": "Guid", "isKey": true },
+      "Name": { "type": "string" },
+      "IsActive": { "type": "bool" }
+    },
+    "seedData": "data/categories.csv"
+  }
+}
+```
+
+Where `data/categories.csv` contains:
+
+```csv
+Id,Name,IsActive
+550e8400-e29b-41d4-a716-446655440001,Electronics,true
+550e8400-e29b-41d4-a716-446655440002,Books,true
+```
+
+The CSV file must have a header row with column names matching the entity property names. Values are automatically parsed as strings, integers, decimals, or booleans. Quoted fields (RFC 4180) are supported for values containing commas or quotes.
+
+Each row must include the key property and any non-nullable properties. The generated `DatabaseSeeder` class runs INSERT statements at startup, immediately after `DatabaseInitializer.InitializeAsync()`.
 
 {: .note }
 > The `DatabaseSeeder` is only generated when at least one entity defines `seedData`. See [Seed Data Generator](/Ninjadog/generators/seed-data) for details on the generated code.

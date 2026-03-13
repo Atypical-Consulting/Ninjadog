@@ -42,9 +42,10 @@ public abstract record NinjadogSettings(
     /// Deserializes a JSON string into a <see cref="NinjadogSettings"/> instance.
     /// </summary>
     /// <param name="json">The JSON string to deserialize.</param>
+    /// <param name="basePath">Optional base directory path for resolving relative file references (e.g., CSV seed data files).</param>
     /// <returns>A <see cref="NinjadogSettings"/> instance loaded from the JSON string.</returns>
     /// <exception cref="JsonException">Thrown when the JSON is invalid or cannot be deserialized.</exception>
-    public static NinjadogSettings FromJsonString(string json)
+    public static NinjadogSettings FromJsonString(string json, string? basePath = null)
     {
         var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
@@ -163,25 +164,37 @@ public abstract record NinjadogSettings(
                 }
 
                 List<Dictionary<string, object>>? seedData = null;
-                if (TryGetOptionalArray(entityProp.Value, "seedData", out var seedElement))
+                if (TryGetOptionalProperty(entityProp.Value, "seedData", out var seedProperty))
                 {
-                    seedData = [];
-                    foreach (var seedItem in seedElement.EnumerateArray())
+                    if (seedProperty.ValueKind == JsonValueKind.String)
                     {
-                        var row = new Dictionary<string, object>();
-                        foreach (var field in seedItem.EnumerateObject())
+                        var csvPath = seedProperty.GetString()!;
+                        seedData = ParseCsvSeedData(csvPath, basePath);
+                    }
+                    else if (seedProperty.ValueKind == JsonValueKind.Array)
+                    {
+                        seedData = [];
+                        foreach (var seedItem in seedProperty.EnumerateArray())
                         {
-                            row[field.Name] = field.Value.ValueKind switch
+                            var row = new Dictionary<string, object>();
+                            foreach (var field in seedItem.EnumerateObject())
                             {
-                                JsonValueKind.String => field.Value.GetString()!,
-                                JsonValueKind.Number => field.Value.TryGetInt32(out var intVal) ? intVal : field.Value.GetDecimal(),
-                                JsonValueKind.True => true,
-                                JsonValueKind.False => false,
-                                JsonValueKind.Undefined or JsonValueKind.Object or JsonValueKind.Array or JsonValueKind.Null or _ => field.Value.GetRawText(),
-                            };
-                        }
+                                row[field.Name] = field.Value.ValueKind switch
+                                {
+                                    JsonValueKind.String => field.Value.GetString()!,
+                                    JsonValueKind.Number => field.Value.TryGetInt32(out var intVal) ? intVal : field.Value.GetDecimal(),
+                                    JsonValueKind.True => true,
+                                    JsonValueKind.False => false,
+                                    JsonValueKind.Undefined or JsonValueKind.Object or JsonValueKind.Array or JsonValueKind.Null or _ => field.Value.GetRawText(),
+                                };
+                            }
 
-                        seedData.Add(row);
+                            seedData.Add(row);
+                        }
+                    }
+                    else
+                    {
+                        throw new JsonException("Expected 'seedData' to be a JSON array or a string path to a CSV file.");
                     }
                 }
 
@@ -262,14 +275,6 @@ public abstract record NinjadogSettings(
                 : true);
     }
 
-    private static bool TryGetOptionalArray(JsonElement element, string propertyName, out JsonElement property)
-    {
-        return TryGetOptionalProperty(element, propertyName, out property)
-            && (property.ValueKind != JsonValueKind.Array
-                ? throw new JsonException($"Expected '{propertyName}' to be a JSON array.")
-                : true);
-    }
-
     private static bool TryGetOptionalProperty(JsonElement element, string propertyName, out JsonElement property)
     {
         property = default;
@@ -278,4 +283,113 @@ public abstract record NinjadogSettings(
             && element.TryGetProperty(propertyName, out property)
             && property.ValueKind is not JsonValueKind.Null and not JsonValueKind.Undefined;
     }
+
+    private static List<Dictionary<string, object>> ParseCsvSeedData(string csvPath, string? basePath)
+    {
+        var resolvedPath = basePath is not null
+            ? Path.Combine(basePath, csvPath)
+            : csvPath;
+
+        string[] lines;
+        try
+        {
+            lines = File.ReadAllLines(resolvedPath);
+        }
+        catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException)
+        {
+            throw new InvalidOperationException($"Seed data CSV file not found: '{resolvedPath}'.", ex);
+        }
+
+        if (lines.Length == 0)
+        {
+            throw new InvalidOperationException($"Seed data CSV file '{csvPath}' is empty.");
+        }
+
+        var headers = ParseCsvLine(lines[0]);
+        var seedData = new List<Dictionary<string, object>>();
+
+        for (var i = 1; i < lines.Length; i++)
+        {
+            var line = lines[i].Trim();
+            if (string.IsNullOrEmpty(line))
+            {
+                continue;
+            }
+
+            var values = ParseCsvLine(line);
+            if (values.Length != headers.Length)
+            {
+                throw new InvalidOperationException($"Seed data CSV file '{csvPath}' row {i + 1} has {values.Length} fields but header has {headers.Length}.");
+            }
+
+            var row = new Dictionary<string, object>();
+            for (var j = 0; j < headers.Length; j++)
+            {
+                row[headers[j]] = ParseCsvValue(values[j]);
+            }
+
+            seedData.Add(row);
+        }
+
+        return seedData;
+    }
+
+    private static string[] ParseCsvLine(string line)
+    {
+        var fields = new List<string>();
+        var current = new System.Text.StringBuilder();
+        var inQuotes = false;
+
+        for (var i = 0; i < line.Length; i++)
+        {
+            var c = line[i];
+
+            if (inQuotes)
+            {
+                if (c == '"')
+                {
+                    if (i + 1 < line.Length && line[i + 1] == '"')
+                    {
+                        current.Append('"');
+                        i++;
+                    }
+                    else
+                    {
+                        inQuotes = false;
+                    }
+                }
+                else
+                {
+                    current.Append(c);
+                }
+            }
+            else
+            {
+                if (c == '"')
+                {
+                    inQuotes = true;
+                }
+                else if (c == ',')
+                {
+                    fields.Add(current.ToString().Trim());
+                    current.Clear();
+                }
+                else
+                {
+                    current.Append(c);
+                }
+            }
+        }
+
+        fields.Add(current.ToString().Trim());
+
+        return [.. fields];
+    }
+
+    private static object ParseCsvValue(string value) =>
+        string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) ? true :
+        string.Equals(value, "false", StringComparison.OrdinalIgnoreCase) ? false :
+        int.TryParse(value, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var intVal) ? intVal :
+        decimal.TryParse(value, System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture, out var decVal) ? (object)decVal :
+        value;
 }

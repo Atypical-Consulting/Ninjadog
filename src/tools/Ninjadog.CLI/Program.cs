@@ -23,7 +23,7 @@ if (Ninjadog.CLI.CliInvocation.RequiresProjectSettings(args))
     if (File.Exists(settingsFilePath))
     {
         var json = File.ReadAllText(settingsFilePath);
-        var settings = NinjadogSettings.FromJsonString(json);
+        var settings = NinjadogSettings.FromJsonString(json, Path.GetDirectoryName(settingsFilePath));
         registrations.AddSingleton(settings);
     }
     else

@@ -25,7 +25,7 @@ internal sealed class ValidateCommand
             .Start($"Validating [cyan]{filePath.EscapeMarkup()}[/]...", _ =>
             {
                 var jsonContent = File.ReadAllText(filePath);
-                return NinjadogConfigValidator.Validate(jsonContent);
+                return NinjadogConfigValidator.Validate(jsonContent, Path.GetDirectoryName(Path.GetFullPath(filePath)));
             });
 
         WriteLine();

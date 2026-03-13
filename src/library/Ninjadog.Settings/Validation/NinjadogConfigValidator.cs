@@ -11,8 +11,9 @@ public static class NinjadogConfigValidator
     /// then parsing and running semantic checks.
     /// </summary>
     /// <param name="json">The raw JSON string to validate.</param>
+    /// <param name="basePath">Optional base directory path for resolving relative file references (e.g., CSV seed data files).</param>
     /// <returns>A <see cref="SchemaValidationResult"/> containing all diagnostics.</returns>
-    public static SchemaValidationResult Validate(string json)
+    public static SchemaValidationResult Validate(string json, string? basePath = null)
     {
         // Step 1: Schema validation
         var schemaResult = SchemaValidator.Validate(json);
@@ -25,7 +26,7 @@ public static class NinjadogConfigValidator
         NinjadogSettings settings;
         try
         {
-            settings = NinjadogSettings.FromJsonString(json);
+            settings = NinjadogSettings.FromJsonString(json, basePath);
         }
         catch (Exception ex)
         {
