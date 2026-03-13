@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\library\Ninjadog.Engine.Infrastructure\Ninjadog.Engine.Infrastructure.csproj" />
     <ProjectReference Include="..\..\library\Ninjadog.Engine\Ninjadog.Engine.csproj" />
+    <ProjectReference Include="..\..\library\Ninjadog.Evolution\Ninjadog.Evolution.csproj" />
     <ProjectReference Include="..\..\templates\Ninjadog.Templates.CrudWebApi\Ninjadog.Templates.CrudWebApi.csproj" />
   </ItemGroup>
 

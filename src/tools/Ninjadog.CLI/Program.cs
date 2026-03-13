@@ -67,6 +67,12 @@ app.Configure(config =>
         .WithExample(["validate", "--file", "path/to/ninjadog.json"])
         .WithExample(["validate", "--strict"]);
 
+    config.AddCommand<EvolveCommand>("evolve")
+        .WithDescription("Detects schema changes and generates SQL migrations.")
+        .WithExample(["evolve"])
+        .WithExample(["evolve", "--dry-run"])
+        .WithExample(["evolve", "--name", "add-priority-field"]);
+
     config.AddCommand<UpdateCommand>("update")
         .WithDescription("Updates the ninjadog.schema.json file to the latest version.")
         .WithExample(["update"]);

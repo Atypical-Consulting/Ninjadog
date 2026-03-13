@@ -1,0 +1,5 @@
+﻿CREATE TABLE IF NOT EXISTS Categories (
+    Id CHAR(36) PRIMARY KEY,
+    Name TEXT,
+    Color TEXT
+);

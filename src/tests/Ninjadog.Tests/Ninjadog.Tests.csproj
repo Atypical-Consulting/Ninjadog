@@ -15,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="../../tools/Ninjadog.CLI/Ninjadog.CLI.csproj" />
     <ProjectReference Include="../../templates/Ninjadog.Templates.CrudWebApi/Ninjadog.Templates.CrudWebApi.csproj" />
+    <ProjectReference Include="..\..\library\Ninjadog.Evolution\Ninjadog.Evolution.csproj" />
   </ItemGroup>
 
 </Project>

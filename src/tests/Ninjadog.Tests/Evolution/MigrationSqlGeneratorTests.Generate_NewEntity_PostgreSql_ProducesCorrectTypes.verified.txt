@@ -1,0 +1,5 @@
+﻿CREATE TABLE IF NOT EXISTS Categories (
+    Id UUID PRIMARY KEY,
+    Name TEXT,
+    Color TEXT
+);

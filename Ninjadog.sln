@@ -30,6 +30,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ninjadog.Engine.Infrastruct
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ninjadog.Tests.E2E", "src\tests\Ninjadog.Tests.E2E\Ninjadog.Tests.E2E.csproj", "{A992A004-63CF-466D-8B6E-1FEF9A51A288}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ninjadog.Evolution", "src\library\Ninjadog.Evolution\Ninjadog.Evolution.csproj", "{1F7FE94F-7915-441C-9321-3484086AD27E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -160,6 +162,18 @@ Global
 		{A992A004-63CF-466D-8B6E-1FEF9A51A288}.Release|x64.Build.0 = Release|Any CPU
 		{A992A004-63CF-466D-8B6E-1FEF9A51A288}.Release|x86.ActiveCfg = Release|Any CPU
 		{A992A004-63CF-466D-8B6E-1FEF9A51A288}.Release|x86.Build.0 = Release|Any CPU
+		{1F7FE94F-7915-441C-9321-3484086AD27E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F7FE94F-7915-441C-9321-3484086AD27E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F7FE94F-7915-441C-9321-3484086AD27E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1F7FE94F-7915-441C-9321-3484086AD27E}.Debug|x64.Build.0 = Debug|Any CPU
+		{1F7FE94F-7915-441C-9321-3484086AD27E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1F7FE94F-7915-441C-9321-3484086AD27E}.Debug|x86.Build.0 = Debug|Any CPU
+		{1F7FE94F-7915-441C-9321-3484086AD27E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F7FE94F-7915-441C-9321-3484086AD27E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F7FE94F-7915-441C-9321-3484086AD27E}.Release|x64.ActiveCfg = Release|Any CPU
+		{1F7FE94F-7915-441C-9321-3484086AD27E}.Release|x64.Build.0 = Release|Any CPU
+		{1F7FE94F-7915-441C-9321-3484086AD27E}.Release|x86.ActiveCfg = Release|Any CPU
+		{1F7FE94F-7915-441C-9321-3484086AD27E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -175,5 +189,6 @@ Global
 		{74998673-75BA-4F89-8453-FBF71D589DAB} = {43446F05-6DEE-4EA7-AF81-A865BF739C08}
 		{860DD52A-1133-4F15-9D23-DD336657C7A9} = {43446F05-6DEE-4EA7-AF81-A865BF739C08}
 		{A992A004-63CF-466D-8B6E-1FEF9A51A288} = {E4D768EA-BAB7-4CF8-9189-4BC93AD46D14}
+		{1F7FE94F-7915-441C-9321-3484086AD27E} = {43446F05-6DEE-4EA7-AF81-A865BF739C08}
 	EndGlobalSection
 EndGlobal

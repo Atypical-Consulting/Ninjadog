@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ninjadog.Helpers\Ninjadog.Helpers.csproj" />
+    <ProjectReference Include="..\Ninjadog.Settings\Ninjadog.Settings.csproj" />
+  </ItemGroup>
+
+</Project>
