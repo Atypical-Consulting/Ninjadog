@@ -4,40 +4,41 @@ namespace Ninjadog.Templates.CrudWebAPI.Template.Summaries;
 /// This template generates the summary for the get endpoint of a given entity.
 /// </summary>
 public sealed class GetSummaryTemplate
-    : NinjadogTemplate
+    : SummaryTemplateBase
 {
     /// <inheritdoc />
     public override string Name => "GetSummary";
 
     /// <inheritdoc />
-    public override NinjadogContentFile GenerateOneByEntity(
-        NinjadogEntityWithKey entity, string rootNamespace)
+    protected override string GetSummaryClassName(StringTokens st)
     {
-        var st = entity.StringTokens;
-        var ns = $"{rootNamespace}.Summaries";
-        var fileName = $"{st.ClassGetModelSummary}.cs";
+        return st.ClassGetModelSummary;
+    }
 
-        var content =
-            $$"""
+    /// <inheritdoc />
+    protected override string GetEndpointClassName(StringTokens st)
+    {
+        return st.ClassGetModelEndpoint;
+    }
 
-              using {{rootNamespace}}.Contracts.Responses;
-              using {{rootNamespace}}.Endpoints;
-              using FastEndpoints;
+    /// <inheritdoc />
+    protected override string GetSummaryText(StringTokens st)
+    {
+        return $"Returns a single {st.ModelHumanized} by id";
+    }
 
-              {{WriteFileScopedNamespace(ns)}}
+    /// <inheritdoc />
+    protected override string GenerateResponseLines(StringTokens st)
+    {
+        return $$"""
+                         Response<{{st.ClassModelResponse}}>(200, "Successfully found and returned the {{st.ModelHumanized}}");
+                         Response(404, "The {{st.ModelHumanized}} does not exist in the system");
+                 """;
+    }
 
-              public partial class {{st.ClassGetModelSummary}} : Summary<{{st.ClassGetModelEndpoint}}>
-              {
-                  public {{st.ClassGetModelSummary}}()
-                  {
-                      Summary = "Returns a single {{st.ModelHumanized}} by id";
-                      Description = "Returns a single {{st.ModelHumanized}} by id";
-                      Response<{{st.ClassModelResponse}}>(200, "Successfully found and returned the {{st.ModelHumanized}}");
-                      Response(404, "The {{st.ModelHumanized}} does not exist in the system");
-                  }
-              }
-              """;
-
-        return CreateNinjadogContentFile(fileName, content);
+    /// <inheritdoc />
+    protected override string GenerateUsings(string rootNamespace)
+    {
+        return $"using {rootNamespace}.Contracts.Responses;";
     }
 }

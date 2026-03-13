@@ -4,39 +4,35 @@ namespace Ninjadog.Templates.CrudWebAPI.Template.Summaries;
 /// This template generates the summary for the delete endpoint of a given entity.
 /// </summary>
 public sealed class DeleteSummaryTemplate
-    : NinjadogTemplate
+    : SummaryTemplateBase
 {
     /// <inheritdoc />
     public override string Name => "DeleteSummary";
 
     /// <inheritdoc />
-    public override NinjadogContentFile GenerateOneByEntity(
-        NinjadogEntityWithKey entity, string rootNamespace)
+    protected override string GetSummaryClassName(StringTokens st)
     {
-        var st = entity.StringTokens;
-        var ns = $"{rootNamespace}.Summaries";
-        var fileName = $"{st.ClassDeleteModelSummary}.cs";
+        return st.ClassDeleteModelSummary;
+    }
 
-        var content =
-            $$"""
+    /// <inheritdoc />
+    protected override string GetEndpointClassName(StringTokens st)
+    {
+        return st.ClassDeleteModelEndpoint;
+    }
 
-              using {{rootNamespace}}.Endpoints;
-              using FastEndpoints;
+    /// <inheritdoc />
+    protected override string GetSummaryText(StringTokens st)
+    {
+        return $"Delete a {st.ModelHumanized} in the system";
+    }
 
-              {{WriteFileScopedNamespace(ns)}}
-
-              public partial class {{st.ClassDeleteModelSummary}} : Summary<{{st.ClassDeleteModelEndpoint}}>
-              {
-                  public {{st.ClassDeleteModelSummary}}()
-                  {
-                      Summary = "Delete a {{st.ModelHumanized}} in the system";
-                      Description = "Delete a {{st.ModelHumanized}} in the system";
-                      Response(204, "The {{st.ModelHumanized}} was deleted successfully");
-                      Response(404, "The {{st.ModelHumanized}} was not found in the system");
-                  }
-              }
-              """;
-
-        return CreateNinjadogContentFile(fileName, content);
+    /// <inheritdoc />
+    protected override string GenerateResponseLines(StringTokens st)
+    {
+        return $$"""
+                         Response(204, "The {{st.ModelHumanized}} was deleted successfully");
+                         Response(404, "The {{st.ModelHumanized}} was not found in the system");
+                 """;
     }
 }

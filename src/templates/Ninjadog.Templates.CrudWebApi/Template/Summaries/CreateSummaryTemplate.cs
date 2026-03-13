@@ -4,41 +4,44 @@ namespace Ninjadog.Templates.CrudWebAPI.Template.Summaries;
 /// This template generates the summary for the create endpoint of a given entity.
 /// </summary>
 public sealed class CreateSummaryTemplate
-    : NinjadogTemplate
+    : SummaryTemplateBase
 {
     /// <inheritdoc />
     public override string Name => "CreateSummary";
 
     /// <inheritdoc />
-    public override NinjadogContentFile GenerateOneByEntity(
-        NinjadogEntityWithKey entity, string rootNamespace)
+    protected override string GetSummaryClassName(StringTokens st)
     {
-        var st = entity.StringTokens;
-        var ns = $"{rootNamespace}.Summaries";
-        var fileName = $"{st.ClassCreateModelSummary}.cs";
+        return st.ClassCreateModelSummary;
+    }
 
-        var content =
-            $$"""
+    /// <inheritdoc />
+    protected override string GetEndpointClassName(StringTokens st)
+    {
+        return st.ClassCreateModelEndpoint;
+    }
 
-              using Microsoft.AspNetCore.Mvc;
-              using {{rootNamespace}}.Contracts.Responses;
-              using {{rootNamespace}}.Endpoints;
-              using FastEndpoints;
+    /// <inheritdoc />
+    protected override string GetSummaryText(StringTokens st)
+    {
+        return $"Creates a new {st.ModelHumanized} in the system";
+    }
 
-              {{WriteFileScopedNamespace(ns)}}
+    /// <inheritdoc />
+    protected override string GenerateResponseLines(StringTokens st)
+    {
+        return $$"""
+                         Response<{{st.ClassModelResponse}}>(201, "{{st.ModelHumanized}} was successfully created");
+                         Response<Microsoft.AspNetCore.Mvc.ProblemDetails>(400, "The request did not pass validation checks");
+                 """;
+    }
 
-              public partial class {{st.ClassCreateModelSummary}} : Summary<{{st.ClassCreateModelEndpoint}}>
-              {
-                  public {{st.ClassCreateModelSummary}}()
-                  {
-                      Summary = "Creates a new {{st.ModelHumanized}} in the system";
-                      Description = "Creates a new {{st.ModelHumanized}} in the system";
-                      Response<{{st.ClassModelResponse}}>(201, "{{st.ModelHumanized}} was successfully created");
-                      Response<Microsoft.AspNetCore.Mvc.ProblemDetails>(400, "The request did not pass validation checks");
-                  }
-              }
-              """;
-
-        return CreateNinjadogContentFile(fileName, content);
+    /// <inheritdoc />
+    protected override string GenerateUsings(string rootNamespace)
+    {
+        return $"""
+                using Microsoft.AspNetCore.Mvc;
+                using {rootNamespace}.Contracts.Responses;
+                """;
     }
 }

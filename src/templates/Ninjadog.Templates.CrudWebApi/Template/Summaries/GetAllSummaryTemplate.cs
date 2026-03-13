@@ -4,41 +4,50 @@ namespace Ninjadog.Templates.CrudWebAPI.Template.Summaries;
 /// This template generates the summary for the get all endpoint of a given entity.
 /// </summary>
 public sealed class GetAllSummaryTemplate
-    : NinjadogTemplate
+    : SummaryTemplateBase
 {
     /// <inheritdoc />
     public override string Name => "GetAllSummary";
 
     /// <inheritdoc />
-    public override NinjadogContentFile GenerateOneByEntity(
-        NinjadogEntityWithKey entity, string rootNamespace)
+    protected override string GetSummaryClassName(StringTokens st)
     {
-        var st = entity.StringTokens;
-        var ns = $"{rootNamespace}.Summaries";
-        var fileName = $"{st.ClassGetAllModelsSummary}.cs";
+        return st.ClassGetAllModelsSummary;
+    }
 
-        var content =
-            $$"""
+    /// <inheritdoc />
+    protected override string GetEndpointClassName(StringTokens st)
+    {
+        return st.ClassGetAllModelsEndpoint;
+    }
 
-              using {{rootNamespace}}.Contracts.Responses;
-              using {{rootNamespace}}.Endpoints;
-              using FastEndpoints;
+    /// <inheritdoc />
+    protected override string GetSummaryText(StringTokens st)
+    {
+        return $"Returns all the {st.ModelsHumanized} in the system";
+    }
 
-              {{WriteFileScopedNamespace(ns)}}
+    /// <inheritdoc />
+    protected override string GenerateDescriptionAssignment(StringTokens st)
+    {
+        return $"""
+                Description = "Returns all the {st.ModelsHumanized} in the system. "
+                            + "Supports pagination (page, pageSize), filtering by property values, "
+                            + "and sorting (sortBy, sortDir=asc|desc).";
+                """;
+    }
 
-              public partial class {{st.ClassGetAllModelsSummary}} : Summary<{{st.ClassGetAllModelsEndpoint}}>
-              {
-                  public {{st.ClassGetAllModelsSummary}}()
-                  {
-                      Summary = "Returns all the {{st.ModelsHumanized}} in the system";
-                      Description = "Returns all the {{st.ModelsHumanized}} in the system. "
-                          + "Supports pagination (page, pageSize), filtering by property values, "
-                          + "and sorting (sortBy, sortDir=asc|desc).";
-                      Response<{{st.ClassGetAllModelsResponse}}>(200, "All {{st.ModelsHumanized}} in the system are returned");
-                  }
-              }
-              """;
+    /// <inheritdoc />
+    protected override string GenerateResponseLines(StringTokens st)
+    {
+        return $$"""
+                         Response<{{st.ClassGetAllModelsResponse}}>(200, "All {{st.ModelsHumanized}} in the system are returned");
+                 """;
+    }
 
-        return CreateNinjadogContentFile(fileName, content);
+    /// <inheritdoc />
+    protected override string GenerateUsings(string rootNamespace)
+    {
+        return $"using {rootNamespace}.Contracts.Responses;";
     }
 }

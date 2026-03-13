@@ -4,41 +4,44 @@ namespace Ninjadog.Templates.CrudWebAPI.Template.Summaries;
 /// This template generates the summary for the update endpoint of a given entity.
 /// </summary>
 public sealed class UpdateSummaryTemplate
-    : NinjadogTemplate
+    : SummaryTemplateBase
 {
     /// <inheritdoc />
     public override string Name => "UpdateSummary";
 
-    /// <inheritdoc/>
-    public override NinjadogContentFile GenerateOneByEntity(
-        NinjadogEntityWithKey entity, string rootNamespace)
+    /// <inheritdoc />
+    protected override string GetSummaryClassName(StringTokens st)
     {
-        var st = entity.StringTokens;
-        var ns = $"{rootNamespace}.Summaries";
-        var fileName = $"{st.ClassUpdateModelSummary}.cs";
+        return st.ClassUpdateModelSummary;
+    }
 
-        var content =
-            $$"""
+    /// <inheritdoc />
+    protected override string GetEndpointClassName(StringTokens st)
+    {
+        return st.ClassUpdateModelEndpoint;
+    }
 
-              using Microsoft.AspNetCore.Mvc;
-              using {{rootNamespace}}.Contracts.Responses;
-              using {{rootNamespace}}.Endpoints;
-              using FastEndpoints;
+    /// <inheritdoc />
+    protected override string GetSummaryText(StringTokens st)
+    {
+        return $"Updates an existing {st.ModelHumanized} in the system";
+    }
 
-              {{WriteFileScopedNamespace(ns)}}
+    /// <inheritdoc />
+    protected override string GenerateResponseLines(StringTokens st)
+    {
+        return $$"""
+                         Response<{{st.ClassModelResponse}}>(201, "{{st.ModelHumanized}} was successfully updated");
+                         Response<Microsoft.AspNetCore.Mvc.ProblemDetails>(400, "The request did not pass validation checks");
+                 """;
+    }
 
-              public partial class {{st.ClassUpdateModelSummary}} : Summary<{{st.ClassUpdateModelEndpoint}}>
-              {
-                  public {{st.ClassUpdateModelSummary}}()
-                  {
-                      Summary = "Updates an existing {{st.ModelHumanized}} in the system";
-                      Description = "Updates an existing {{st.ModelHumanized}} in the system";
-                      Response<{{st.ClassModelResponse}}>(201, "{{st.ModelHumanized}} was successfully updated");
-                      Response<Microsoft.AspNetCore.Mvc.ProblemDetails>(400, "The request did not pass validation checks");
-                  }
-              }
-              """;
-
-        return CreateNinjadogContentFile(fileName, content);
+    /// <inheritdoc />
+    protected override string GenerateUsings(string rootNamespace)
+    {
+        return $"""
+                using Microsoft.AspNetCore.Mvc;
+                using {rootNamespace}.Contracts.Responses;
+                """;
     }
 }
