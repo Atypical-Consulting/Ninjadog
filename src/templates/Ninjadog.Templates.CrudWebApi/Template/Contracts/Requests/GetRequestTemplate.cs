@@ -1,37 +1,23 @@
-﻿namespace Ninjadog.Templates.CrudWebAPI.Template.Contracts.Requests;
+namespace Ninjadog.Templates.CrudWebAPI.Template.Contracts.Requests;
 
 /// <summary>
 /// This template generates the Get request for a given entity.
 /// </summary>
 public sealed class GetRequestTemplate
-    : NinjadogTemplate
+    : KeyOnlyRequestTemplateBase
 {
     /// <inheritdoc />
     public override string Name => "GetRequest";
 
     /// <inheritdoc />
-    public override NinjadogContentFile GenerateOneByEntity(
-        NinjadogEntityWithKey entity, string rootNamespace)
+    protected override string GetClassName(StringTokens st)
     {
-        var st = entity.StringTokens;
-        var ns = $"{rootNamespace}.Contracts.Requests";
-        var fileName = $"{st.ClassGetModelRequest}.cs";
-        var entityKey = entity.Properties.GetEntityKey();
+        return st.ClassGetModelRequest;
+    }
 
-        var content =
-            $$"""
-
-              {{WriteFileScopedNamespace(ns)}}
-
-              /// <summary>
-              ///     Request to get a {{st.Model}}.
-              /// </summary>
-              public partial class {{st.ClassGetModelRequest}}
-              {
-                  public {{entityKey.Type}} {{entityKey.PascalKey}} { get; init; }
-              }
-              """;
-
-        return CreateNinjadogContentFile(fileName, content);
+    /// <inheritdoc />
+    protected override string GetActionVerb()
+    {
+        return "get";
     }
 }
