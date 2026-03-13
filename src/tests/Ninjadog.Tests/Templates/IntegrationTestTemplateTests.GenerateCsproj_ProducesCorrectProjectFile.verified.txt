@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TestApp\TestApp.csproj" />
+    <ProjectReference Include="..\TestApp.CrudWebAPI\TestApp.CrudWebAPI.csproj" />
   </ItemGroup>
 
 </Project>

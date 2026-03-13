@@ -45,12 +45,21 @@ public class NinjadogAppService : INinjadogAppService
     /// <inheritdoc />
     public string ProjectPath { get; }
 
+    private string TestProjectPath
+        => Path.Combine(AppDirectory, "src", $"{AppName}.IntegrationTests");
+
     /// <inheritdoc />
     public virtual async Task CreateAppAsync(bool deleteIfExists = true)
     {
         if (deleteIfExists && Directory.Exists(ProjectPath))
         {
             Directory.Delete(ProjectPath, true);
+        }
+
+        // Also clean the integration test project directory if it exists
+        if (deleteIfExists && Directory.Exists(TestProjectPath))
+        {
+            Directory.Delete(TestProjectPath, true);
         }
 
         await NewNinjadogSettingsFileAsync();
@@ -61,9 +70,6 @@ public class NinjadogAppService : INinjadogAppService
         await NewProjectFileAsync();
         await AddProjectToSolutionAsync();
         await InstallNuGetPackages();
-
-        // var dotnetVersion = cliDotnetService.Version();
-        // var buildResult = cliDotnetService.Build(appDirectory);
     }
 
     /// <inheritdoc />
@@ -75,9 +81,17 @@ public class NinjadogAppService : INinjadogAppService
     /// <inheritdoc />
     public virtual async Task NewNinjadogSettingsFileAsync()
     {
-        var jsonString = _settings.ToJsonString();
         var filePath = Path.Combine(AppDirectory, NinjadogSettingsFile);
-        _fileService.CreateFile(filePath, jsonString);
+
+        // If ninjadog.json already exists in the output directory (e.g. outputPath is "."),
+        // preserve the original file to avoid data loss from re-serialization which can
+        // strip fields like $schema, softDelete, auditing, etc.
+        if (!File.Exists(filePath))
+        {
+            var jsonString = _settings.ToJsonString();
+            _fileService.CreateFile(filePath, jsonString);
+        }
+
         await Task.CompletedTask;
     }
 
@@ -121,9 +135,27 @@ public class NinjadogAppService : INinjadogAppService
     /// <inheritdoc />
     public virtual async Task AddFileToProjectAsync(NinjadogContentFile contentFile)
     {
-        var path = contentFile.Category is not null
-            ? Path.Combine(ProjectPath, contentFile.Category, contentFile.FileName)
-            : Path.Combine(ProjectPath, contentFile.FileName);
+        string path;
+
+        if (contentFile.Category == IntegrationTestsCategory)
+        {
+            // Integration test files go in a sibling project directory, not inside the main project
+            path = Path.Combine(TestProjectPath, contentFile.FileName);
+
+            // When writing the test .csproj, also add it to the solution
+            if (contentFile.FileName.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
+            {
+                _fileService.CreateFile(path, contentFile.Content);
+                await _dotnet.ExecuteAddProjectToSolutionAsync(AppDirectory, TestProjectPath);
+                return;
+            }
+        }
+        else
+        {
+            path = contentFile.Category is not null
+                ? Path.Combine(ProjectPath, contentFile.Category, contentFile.FileName)
+                : Path.Combine(ProjectPath, contentFile.FileName);
+        }
 
         _fileService.CreateFile(path, contentFile.Content);
         await Task.CompletedTask;

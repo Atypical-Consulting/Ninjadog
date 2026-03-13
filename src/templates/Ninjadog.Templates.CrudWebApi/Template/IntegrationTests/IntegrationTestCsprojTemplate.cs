@@ -35,7 +35,7 @@ public sealed class IntegrationTestCsprojTemplate : NinjadogTemplate
                 </ItemGroup>
 
                 <ItemGroup>
-                  <ProjectReference Include="..\{{projectName}}\{{projectName}}.csproj" />
+                  <ProjectReference Include="..\{{projectName}}.CrudWebAPI\{{projectName}}.CrudWebAPI.csproj" />
                 </ItemGroup>
 
               </Project>

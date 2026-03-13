@@ -21,6 +21,12 @@ public static class InfrastructureConstants
     public const string NinjadogSettingsFile = "ninjadog.json";
 
     /// <summary>
+    /// The category name used by integration test templates.
+    /// Files with this category are placed in a separate test project directory.
+    /// </summary>
+    public const string IntegrationTestsCategory = "IntegrationTests";
+
+    /// <summary>
     /// Gets the base folder path for storing Ninjadog projects and configurations,
     /// typically located within the user's profile directory.
     /// </summary>
