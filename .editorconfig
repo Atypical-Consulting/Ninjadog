@@ -99,6 +99,10 @@ dotnet_code_quality_unused_parameters = non_public:suggestion
 # Suppress noisy warnings for fluent APIs and partial switch patterns
 dotnet_diagnostic.IDE0058.severity = none
 dotnet_diagnostic.IDE0010.severity = none
+dotnet_diagnostic.IDE0072.severity = none
+
+# IDE0046 conflicts with IDE0022 (block body preference) when methods use early-return guards
+dotnet_diagnostic.IDE0046.severity = suggestion
 
 # Expression-level preferences
 dotnet_style_object_initializer = true:suggestion

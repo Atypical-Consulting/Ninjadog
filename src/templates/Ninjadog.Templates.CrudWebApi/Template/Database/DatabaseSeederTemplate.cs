@@ -53,7 +53,7 @@ public sealed class DatabaseSeederTemplate : NinjadogTemplate
             var keyPropertyName = entity.Properties
                 .FirstOrDefault(x => x.Value.IsKey).Key;
 
-            foreach (var row in entity.SeedData)
+            foreach (var row in entity.SeedData ?? [])
             {
                 var columns = string.Join(", ", row.Keys);
                 var paramNames = string.Join(", ", row.Keys.Select(k => $"@{k}"));

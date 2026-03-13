@@ -33,7 +33,7 @@ public sealed record NinjadogEntityWithKey(
 
         if (excludeAutoKey)
         {
-            props = props.Where(p => !(p.IsKey && p.Type == "Guid")).ToList();
+            props = [.. props.Where(p => !(p.IsKey && p.Type == "Guid"))];
         }
 
         var properties = props

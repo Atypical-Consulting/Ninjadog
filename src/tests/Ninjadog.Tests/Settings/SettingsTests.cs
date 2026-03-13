@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Ninjadog.Settings;
 using Ninjadog.Settings.Entities.Properties;
 using Ninjadog.Settings.Extensions;

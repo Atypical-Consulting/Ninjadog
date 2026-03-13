@@ -12,15 +12,21 @@ namespace Ninjadog.Tests.UseCases;
 /// </summary>
 public class UseCaseTemplateTests
 {
+#pragma warning disable IDE0028 // CrudTemplates populates items in its constructor
     private readonly CrudTemplates _templates = new();
+#pragma warning restore IDE0028
 
     [Fact]
     public void TodoApp_AllTemplates_ProduceValidOutput()
-        => ValidateAllTemplatesProduceValidOutput(new TodoAppSettings());
+    {
+        ValidateAllTemplatesProduceValidOutput(new TodoAppSettings());
+    }
 
     [Fact]
     public void RestaurantBooking_AllTemplates_ProduceValidOutput()
-        => ValidateAllTemplatesProduceValidOutput(new RestaurantBookingSettings());
+    {
+        ValidateAllTemplatesProduceValidOutput(new RestaurantBookingSettings());
+    }
 
     [Fact]
     public void TodoApp_Entities_HaveExpectedCount()

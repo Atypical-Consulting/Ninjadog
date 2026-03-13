@@ -1,6 +1,7 @@
 <Project>
   <!-- Code Analysis -->
   <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <AnalysisLevel>8.0-recommended</AnalysisLevel>

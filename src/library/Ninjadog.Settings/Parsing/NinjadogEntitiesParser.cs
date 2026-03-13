@@ -80,7 +80,7 @@ internal static class NinjadogEntitiesParser
             {
                 JsonValueKind.String => CsvSeedDataParser.ParseCsvFile(seedProperty.GetString()!, basePath),
                 JsonValueKind.Array => ParseSeedDataArray(seedProperty),
-                _ => throw new JsonException("Expected 'seedData' to be a JSON array or a string path to a CSV file.")
+                _ => throw new JsonException("Expected 'seedData' to be a JSON array or a string path to a CSV file."),
             };
     }
 
