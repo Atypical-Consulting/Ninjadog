@@ -58,7 +58,7 @@ public sealed class GetAllEndpointTemplate
                   public override async Task HandleAsync(CancellationToken ct)
                   {
                       var page = int.TryParse(HttpContext.Request.Query["page"], out var p) && p > 0 ? p : 1;
-                      var pageSize = int.TryParse(HttpContext.Request.Query["pageSize"], out var ps) && ps > 0 ? ps : 10;
+                      var pageSize = int.TryParse(HttpContext.Request.Query["pageSize"], out var ps) && ps > 0 ? Math.Min(ps, 100) : 10;
 
                       // Parse filters from query parameters matching entity properties
                       var filters = new Dictionary<string, string>();

@@ -66,9 +66,6 @@ public sealed class DomainToDtoMapperTemplate
 
             switch (realType)
             {
-                case "Guid":
-                    sb.Append(".ToString()");
-                    break;
                 case "DateOnly":
                     sb.Append(".ToDateTime(TimeOnly.MinValue)");
                     break;

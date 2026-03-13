@@ -36,7 +36,7 @@ public partial class OrderRepository(IDbConnectionFactory connectionFactory)
 
         return await connection.QuerySingleOrDefaultAsync<OrderDto>(
             "SELECT * FROM Orders WHERE OrderId = @OrderId LIMIT 1",
-            new { OrderId = id.ToString() });
+            new { OrderId = id });
     }
 
     public async Task<IEnumerable<OrderDto>> GetAllAsync(
@@ -99,7 +99,7 @@ public partial class OrderRepository(IDbConnectionFactory connectionFactory)
 
         var result = await connection.ExecuteAsync(
             @"DELETE FROM Orders WHERE OrderId = @OrderId",
-            new { OrderId = id.ToString() });
+            new { OrderId = id });
 
         return result > 0;
     }

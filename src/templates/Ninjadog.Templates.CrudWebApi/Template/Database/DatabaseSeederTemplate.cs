@@ -61,11 +61,16 @@ public sealed class DatabaseSeederTemplate : NinjadogTemplate
             foreach (var row in entity.SeedData)
             {
                 var columns = string.Join(", ", row.Keys);
-                var values = string.Join(", ", row.Values.Select(FormatSqlValue));
-                var sql = GenerateIdempotentInsert(provider, st.Models, columns, values, keyPropertyName, row);
+                var paramNames = string.Join(", ", row.Keys.Select(k => $"@{k}"));
+                var sql = GenerateIdempotentInsert(provider, st.Models, columns, paramNames, keyPropertyName);
+                var paramObject = GenerateAnonymousObject(row);
 
                 sb.AppendLine()
-                    .AppendLine($"await connection.ExecuteAsync(\"{sql}\");");
+                    .AppendLine($"await connection.ExecuteAsync(")
+                    .IncrementIndent()
+                    .AppendLine($"\"{sql}\",")
+                    .AppendLine($"{paramObject});")
+                    .DecrementIndent();
             }
         }
 
@@ -76,30 +81,29 @@ public sealed class DatabaseSeederTemplate : NinjadogTemplate
         string provider,
         string tableName,
         string columns,
-        string values,
-        string keyPropertyName,
-        Dictionary<string, object> row)
+        string paramNames,
+        string keyPropertyName)
     {
-        switch (provider)
+        return provider switch
         {
-            case "postgresql":
-                return $"INSERT INTO {tableName} ({columns}) VALUES ({values}) ON CONFLICT DO NOTHING";
-
-            case "sqlserver":
-                var keyValue = row.TryGetValue(keyPropertyName, out var kv) ? FormatSqlValue(kv) : "NULL";
-                return $"IF NOT EXISTS (SELECT 1 FROM {tableName} WHERE {keyPropertyName} = {keyValue}) INSERT INTO {tableName} ({columns}) VALUES ({values})";
-
-            default:
-                return $"INSERT OR IGNORE INTO {tableName} ({columns}) VALUES ({values})";
-        }
+            "postgresql" => $"INSERT INTO {tableName} ({columns}) VALUES ({paramNames}) ON CONFLICT DO NOTHING",
+            "sqlserver" => $"IF NOT EXISTS (SELECT 1 FROM {tableName} WHERE {keyPropertyName} = @{keyPropertyName}) INSERT INTO {tableName} ({columns}) VALUES ({paramNames})",
+            _ => $"INSERT OR IGNORE INTO {tableName} ({columns}) VALUES ({paramNames})"
+        };
     }
 
-    private static string FormatSqlValue(object value)
+    private static string GenerateAnonymousObject(Dictionary<string, object> row)
+    {
+        var properties = row.Select(kvp => $"{kvp.Key} = {FormatCSharpValue(kvp.Value)}");
+        return $"new {{ {string.Join(", ", properties)} }}";
+    }
+
+    private static string FormatCSharpValue(object value)
     {
         return value switch
         {
-            string s => $"'{s.Replace("'", "''")}'",
-            bool b => b ? "1" : "0",
+            string s => $"\"{s.Replace("\\", "\\\\").Replace("\"", "\\\"")}\"",
+            bool b => b ? "true" : "false",
             _ => value.ToString()!
         };
     }

@@ -22,7 +22,7 @@ public static class DomainToDtoMapper
     {
         return new TodoItemDto
         {
-            Id = todoItem.Id.ToString(),
+            Id = todoItem.Id,
             Title = todoItem.Title,
             Description = todoItem.Description,
             IsCompleted = todoItem.IsCompleted,

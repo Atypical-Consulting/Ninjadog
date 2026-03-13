@@ -21,8 +21,6 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
-    const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
-
     var builder = WebApplication.CreateSlimBuilder(args);
     var services = builder.Services;
     var config = builder.Configuration;
@@ -34,14 +32,6 @@ try
     {
         options.SerializerOptions.TypeInfoResolverChain.Insert(0, TestApp.Api.AppJsonSerializerContext.Default);
     });
-    services.AddCors(options =>
-    {
-        options.AddPolicy(name: myAllowSpecificOrigins,
-            policy =>
-            {
-                policy.WithOrigins("https://localhost:7270");
-            });
-    });
 
     services.AddNinjadog(config);
 
@@ -49,7 +39,6 @@ try
 
     app.UseMiddleware<RequestCorrelationMiddleware>();
     app.UseSerilogRequestLogging();
-    app.UseCors(myAllowSpecificOrigins);
     app.UseNinjadog();
 
     await app.Services

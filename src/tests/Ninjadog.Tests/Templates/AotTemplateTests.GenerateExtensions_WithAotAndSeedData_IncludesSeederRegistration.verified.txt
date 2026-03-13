@@ -41,10 +41,10 @@ public static class NinjadogExtensions
         services.AddSingleton<IDbConnectionFactory>(_ => new SqliteConnectionFactory(connectionString));
         services.AddSingleton<DatabaseInitializer>();
         services.AddSingleton<DatabaseSeeder>();
-        services.AddSingleton<ITodoItemRepository, TodoItemRepository>();
-        services.AddSingleton<ITodoItemService, TodoItemService>();
-        services.AddSingleton<ICategoryRepository, CategoryRepository>();
-        services.AddSingleton<ICategoryService, CategoryService>();
+        services.AddScoped<ITodoItemRepository, TodoItemRepository>();
+        services.AddScoped<ITodoItemService, TodoItemService>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<ICategoryService, CategoryService>();
 
         return services;
     }

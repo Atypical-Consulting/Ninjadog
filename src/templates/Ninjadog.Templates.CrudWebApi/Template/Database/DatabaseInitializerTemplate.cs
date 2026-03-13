@@ -76,14 +76,15 @@ public sealed class DatabaseInitializerTemplate
             var p = nonKeyProperties[i];
             var isLast = i == nonKeyProperties.Count - 1;
             var needsComma = !isLast || softDelete || auditing || fkConstraints.Count > 0;
+            var nullConstraint = p.Value.Required ? " NOT NULL" : string.Empty;
 
             if (needsComma)
             {
-                stringBuilder.AppendLine($"{p.Key} {MapToDbType(p.Value.Type, provider, enumNames)} NOT NULL,");
+                stringBuilder.AppendLine($"{p.Key} {MapToDbType(p.Value.Type, provider, enumNames)}{nullConstraint},");
             }
             else
             {
-                stringBuilder.Append($"{p.Key} {MapToDbType(p.Value.Type, provider, enumNames)} NOT NULL)");
+                stringBuilder.Append($"{p.Key} {MapToDbType(p.Value.Type, provider, enumNames)}{nullConstraint})");
             }
         }
 

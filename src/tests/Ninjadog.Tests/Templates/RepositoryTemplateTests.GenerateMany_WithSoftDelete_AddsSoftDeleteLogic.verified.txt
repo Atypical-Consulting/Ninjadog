@@ -37,7 +37,7 @@ public partial class TodoItemRepository(IDbConnectionFactory connectionFactory)
 
         return await connection.QuerySingleOrDefaultAsync<TodoItemDto>(
             "SELECT * FROM TodoItems WHERE Id = @Id AND IsDeleted = 0 LIMIT 1",
-            new { Id = id.ToString() });
+            new { Id = id });
     }
 
     public async Task<IEnumerable<TodoItemDto>> GetAllAsync(
@@ -100,7 +100,7 @@ public partial class TodoItemRepository(IDbConnectionFactory connectionFactory)
 
         var result = await connection.ExecuteAsync(
             @"UPDATE TodoItems SET IsDeleted = 1, DeletedAt = datetime('now') WHERE Id = @Id",
-            new { Id = id.ToString() });
+            new { Id = id });
 
         return result > 0;
     }

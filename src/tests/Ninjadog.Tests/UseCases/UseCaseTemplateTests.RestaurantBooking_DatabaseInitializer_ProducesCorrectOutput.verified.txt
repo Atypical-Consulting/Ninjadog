@@ -22,60 +22,60 @@ public partial class DatabaseInitializer(IDbConnectionFactory connectionFactory)
         
         await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS Customers (
             CustomerId CHAR(36) PRIMARY KEY,
-            CustomerFirstName TEXT NOT NULL,
-            CustomerSurname TEXT NOT NULL,
-            PhoneNumber TEXT NOT NULL,
-            CellphoneNumber TEXT NOT NULL,
-            EmailAddress TEXT NOT NULL,
-            OtherCustomerDetails TEXT NOT NULL)");
+            CustomerFirstName TEXT,
+            CustomerSurname TEXT,
+            PhoneNumber TEXT,
+            CellphoneNumber TEXT,
+            EmailAddress TEXT,
+            OtherCustomerDetails TEXT)");
 
         await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS Bookings (
             BookingId CHAR(36) PRIMARY KEY,
-            DateOfBooking TEXT NOT NULL,
-            NumberInParty INTEGER NOT NULL)");
+            DateOfBooking TEXT,
+            NumberInParty INTEGER)");
 
         await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS Tables (
             TableNumber INTEGER PRIMARY KEY,
-            TableDetails TEXT NOT NULL)");
+            TableDetails TEXT)");
 
         await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS Orders (
             OrderId CHAR(36) PRIMARY KEY,
-            OrderDateTime TEXT NOT NULL)");
+            OrderDateTime TEXT)");
 
         await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS OrderMenuItems (
             OrderMenuItemId CHAR(36) PRIMARY KEY,
-            OrderMenuItemQuantity INTEGER NOT NULL,
-            OrderMenuItemComments TEXT NOT NULL)");
+            OrderMenuItemQuantity INTEGER,
+            OrderMenuItemComments TEXT)");
 
         await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS Menus (
             MenuId CHAR(36) PRIMARY KEY,
-            MenuDate TEXT NOT NULL)");
+            MenuDate TEXT)");
 
         await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS MenuItems (
             MenuItemId CHAR(36) PRIMARY KEY,
-            MenuItemDescription TEXT NOT NULL,
-            MenuItemPrice REAL NOT NULL)");
+            MenuItemDescription TEXT,
+            MenuItemPrice REAL)");
 
         await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS MenuItemIngredients (
             MenuItemIngredientId CHAR(36) PRIMARY KEY,
-            ItemQuantity INTEGER NOT NULL)");
+            ItemQuantity INTEGER)");
 
         await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS Ingredients (
             IngredientId CHAR(36) PRIMARY KEY,
-            IngredientName TEXT NOT NULL)");
+            IngredientName TEXT)");
 
         await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS IngredientTypes (
             IngredientTypeCode CHAR(36) PRIMARY KEY,
-            IngredientTypeDescription TEXT NOT NULL)");
+            IngredientTypeDescription TEXT)");
 
         await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS Staffs (
             StaffId CHAR(36) PRIMARY KEY,
-            StaffFirstName TEXT NOT NULL,
-            StaffLastName TEXT NOT NULL)");
+            StaffFirstName TEXT,
+            StaffLastName TEXT)");
 
         await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS StaffRoles (
             StaffRoleCode CHAR(36) PRIMARY KEY,
-            StaffRoleDescription TEXT NOT NULL)");
+            StaffRoleDescription TEXT)");
 
     }
 }

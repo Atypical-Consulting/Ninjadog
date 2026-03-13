@@ -27,7 +27,7 @@ public sealed class CreateRequestTemplate
               /// </summary>
               public partial class {{st.ClassCreateModelRequest}}
               {
-              {{entity.GenerateMemberProperties()}}
+              {{entity.GenerateMemberProperties(excludeAutoKey: true)}}
               }
               """;
 

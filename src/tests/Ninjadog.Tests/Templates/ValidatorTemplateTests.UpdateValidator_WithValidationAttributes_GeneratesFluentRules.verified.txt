@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 // This code was powered by the Ninjadog Engine
 //
 // Developed by: Atypical Consulting SRL - Philippe Matray
@@ -21,12 +21,12 @@ public partial class UpdateContactRequestValidator : Validator<UpdateContactRequ
     public UpdateContactRequestValidator()
     {
         RuleFor(x => x.Name)
-            .NotEmpty()
+            .NotEmpty().WithMessage("Name is required!")
             .MaximumLength(100)
             .MinimumLength(2);
 
         RuleFor(x => x.Email)
-            .NotEmpty()
+            .NotEmpty().WithMessage("Email is required!")
             .Matches("^[^@]+@[^@]+\.[^@]+$");
 
         RuleFor(x => x.Age)
@@ -34,7 +34,6 @@ public partial class UpdateContactRequestValidator : Validator<UpdateContactRequ
             .LessThanOrEqualTo(150);
 
         RuleFor(x => x.Bio)
-            .NotEmpty()
             .MaximumLength(500);
 
     }

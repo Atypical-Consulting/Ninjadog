@@ -22,8 +22,6 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
-    const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
-
     var builder = WebApplication.CreateBuilder(args);
     var services = builder.Services;
     var config = builder.Configuration;
@@ -31,14 +29,6 @@ try
     builder.Host.UseSerilog((context, loggerConfig) =>
         loggerConfig.ReadFrom.Configuration(context.Configuration));
 
-    services.AddCors(options =>
-    {
-        options.AddPolicy(name: myAllowSpecificOrigins,
-            policy =>
-            {
-                policy.WithOrigins("https://localhost:7270");
-            });
-    });
 
     services.AddJwtAuthentication(config);
     services.AddAuthorizationPolicies();
@@ -49,7 +39,6 @@ try
 
     app.UseMiddleware<RequestCorrelationMiddleware>();
     app.UseSerilogRequestLogging();
-    app.UseCors(myAllowSpecificOrigins);
     app.UseAuthentication();
     app.UseAuthorization();
     app.UseNinjadog();

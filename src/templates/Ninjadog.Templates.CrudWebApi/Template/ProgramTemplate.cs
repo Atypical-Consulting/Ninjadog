@@ -37,23 +37,13 @@ public class ProgramTemplate : NinjadogTemplate
 
               try
               {
-                  const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
-
-                  var builder = {{builderCall}};
+              {{GenerateCorsConstant(cors)}}    var builder = {{builderCall}};
                   var services = builder.Services;
                   var config = builder.Configuration;
 
                   builder.Host.UseSerilog((context, loggerConfig) =>
                       loggerConfig.ReadFrom.Configuration(context.Configuration));
-              {{GenerateAotJsonOptions(aot, rootNamespace)}}
-                  services.AddCors(options =>
-                  {
-                      options.AddPolicy(name: myAllowSpecificOrigins,
-                          policy =>
-                          {
-                              {{GenerateCorsPolicy(cors)}}
-                          });
-                  });
+              {{GenerateAotJsonOptions(aot, rootNamespace)}}{{GenerateCorsServiceRegistration(cors)}}
               {{GenerateAuthServiceRegistration(auth)}}{{GenerateRateLimitServiceRegistration(rateLimit)}}
                   services.AddNinjadog(config);
 
@@ -61,8 +51,7 @@ public class ProgramTemplate : NinjadogTemplate
 
                   app.UseMiddleware<RequestCorrelationMiddleware>();
                   app.UseSerilogRequestLogging();
-                  app.UseCors(myAllowSpecificOrigins);
-              {{GenerateRateLimitMiddleware(rateLimit)}}{{GenerateAuthMiddleware(auth)}}    app.UseNinjadog();
+              {{GenerateCorsMiddleware(cors)}}{{GenerateRateLimitMiddleware(rateLimit)}}{{GenerateAuthMiddleware(auth)}}    app.UseNinjadog();
 
                   await app.Services
                       .GetRequiredService<DatabaseInitializer>()
@@ -84,36 +73,60 @@ public class ProgramTemplate : NinjadogTemplate
         return CreateNinjadogContentFile(fileName, content);
     }
 
-    /// <summary>
-    /// Generates the CORS policy body based on the provided configuration.
-    /// When no configuration is provided, falls back to allowing localhost:7270.
-    /// </summary>
-    /// <param name="cors">The optional CORS configuration.</param>
-    /// <returns>The CORS policy builder chain as a string.</returns>
-    private static string GenerateCorsPolicy(NinjadogCorsConfiguration? cors)
+    private static string GenerateCorsConstant(NinjadogCorsConfiguration? cors)
     {
-        var origins = cors?.Origins ?? ["https://localhost:7270"];
-        var originsStr = string.Join(", ", origins.Select(o => $"\"{o}\""));
+        return cors is null
+            ? string.Empty
+            : """
+                  const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
-        // The first line is positioned by the {{...}} interpolation in the template.
-        // Continuation lines need 10 spaces to align with the first line's position.
-        const string continuation = "\n          ";
+              """;
+    }
 
-        var result = $"policy.WithOrigins({originsStr})";
+    private static string GenerateCorsServiceRegistration(NinjadogCorsConfiguration? cors)
+    {
+        if (cors is null)
+        {
+            return string.Empty;
+        }
 
-        if (cors?.Methods is { Length: > 0 })
+        var originsStr = string.Join(", ", cors.Origins.Select(o => $"\"{o}\""));
+
+        var policyBuilder = $"policy.WithOrigins({originsStr})";
+
+        if (cors.Methods is { Length: > 0 })
         {
             var methodsStr = string.Join(", ", cors.Methods.Select(m => $"\"{m}\""));
-            result += $"{continuation}    .WithMethods({methodsStr})";
+            policyBuilder += $"\n                  .WithMethods({methodsStr})";
         }
 
-        if (cors?.Headers is { Length: > 0 })
+        if (cors.Headers is { Length: > 0 })
         {
             var headersStr = string.Join(", ", cors.Headers.Select(h => $"\"{h}\""));
-            result += $"{continuation}    .WithHeaders({headersStr})";
+            policyBuilder += $"\n                  .WithHeaders({headersStr})";
         }
 
-        return result + ";";
+        return $$"""
+
+                  services.AddCors(options =>
+                  {
+                      options.AddPolicy(name: myAllowSpecificOrigins,
+                          policy =>
+                          {
+                              {{policyBuilder}};
+                          });
+                  });
+              """;
+    }
+
+    private static string GenerateCorsMiddleware(NinjadogCorsConfiguration? cors)
+    {
+        return cors is null
+            ? string.Empty
+            : """
+                  app.UseCors(myAllowSpecificOrigins);
+
+              """;
     }
 
     private static string GenerateAotJsonOptions(bool aot, string rootNamespace)

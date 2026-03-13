@@ -14,7 +14,7 @@ namespace TestApp.Api.Contracts.Data;
 
 public partial class TodoItemDto
 {
-    public string Id { get; init; } = default!;
+    public Guid Id { get; init; }
 
     public String Title { get; init; }
 

@@ -20,9 +20,13 @@ public partial class DatabaseSeeder(IDbConnectionFactory connectionFactory)
     {
         using var connection = await connectionFactory.CreateConnectionAsync();
 
-        await connection.ExecuteAsync("INSERT OR IGNORE INTO Categories (Id, Name, IsActive) VALUES ('550e8400-e29b-41d4-a716-446655440001', 'Default Category', 1)");
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO Categories (Id, Name, IsActive) VALUES (@Id, @Name, @IsActive)",
+            new { Id = "550e8400-e29b-41d4-a716-446655440001", Name = "Default Category", IsActive = true });
 
-        await connection.ExecuteAsync("INSERT OR IGNORE INTO Categories (Id, Name, IsActive) VALUES ('550e8400-e29b-41d4-a716-446655440002', 'Archive', 0)");
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO Categories (Id, Name, IsActive) VALUES (@Id, @Name, @IsActive)",
+            new { Id = "550e8400-e29b-41d4-a716-446655440002", Name = "Archive", IsActive = false });
 
     }
 }

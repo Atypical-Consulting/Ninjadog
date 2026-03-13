@@ -22,12 +22,12 @@ public partial class DatabaseInitializer(IDbConnectionFactory connectionFactory)
         
         await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS TodoItems (
             Id CHAR(36) PRIMARY KEY,
-            Title TEXT NOT NULL,
-            Description TEXT NOT NULL,
-            IsCompleted INTEGER NOT NULL,
-            DueDate TEXT NOT NULL,
-            Priority INTEGER NOT NULL,
-            Cost REAL NOT NULL)");
+            Title TEXT,
+            Description TEXT,
+            IsCompleted INTEGER,
+            DueDate TEXT,
+            Priority INTEGER,
+            Cost REAL)");
 
     }
 }

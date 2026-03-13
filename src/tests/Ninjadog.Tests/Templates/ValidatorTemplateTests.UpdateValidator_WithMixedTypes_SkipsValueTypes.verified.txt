@@ -20,11 +20,6 @@ public partial class UpdateTodoItemRequestValidator : Validator<UpdateTodoItemRe
 {
     public UpdateTodoItemRequestValidator()
     {
-        RuleFor(x => x.Title).NotEmpty();
-
-        RuleFor(x => x.Description).NotEmpty();
-
-        RuleFor(x => x.DueDate).NotEmpty();
 
     }
 }

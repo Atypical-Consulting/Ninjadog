@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 // This code was powered by the Ninjadog Engine
 //
 // Developed by: Atypical Consulting SRL - Philippe Matray
@@ -34,7 +34,6 @@ public partial class CreateContactRequestValidator : Validator<CreateContactRequ
             .LessThanOrEqualTo(150);
 
         RuleFor(x => x.Bio)
-            .NotEmpty().WithMessage("Bio is required!")
             .MaximumLength(500);
 
     }

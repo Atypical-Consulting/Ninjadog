@@ -22,13 +22,13 @@ public partial class DatabaseInitializer(IDbConnectionFactory connectionFactory)
         
         await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS Authors (
             Id CHAR(36) PRIMARY KEY,
-            Name TEXT NOT NULL)");
+            Name TEXT)");
 
         await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS Posts (
             Id CHAR(36) PRIMARY KEY,
-            Title TEXT NOT NULL,
-            Content TEXT NOT NULL,
-            AuthorId CHAR(36) NOT NULL,
+            Title TEXT,
+            Content TEXT,
+            AuthorId CHAR(36),
             FOREIGN KEY (AuthorId) REFERENCES Authors(Id))");
 
     }

@@ -20,13 +20,6 @@ public partial class CreateCategoryRequestValidator : Validator<CreateCategoryRe
 {
     public CreateCategoryRequestValidator()
     {
-        RuleFor(x => x.Name)
-            .NotEmpty()
-            .WithMessage("Name is required!");
-
-        RuleFor(x => x.Color)
-            .NotEmpty()
-            .WithMessage("Color is required!");
 
     }
 }

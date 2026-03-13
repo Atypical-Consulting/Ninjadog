@@ -64,7 +64,7 @@ public sealed class RepositoryTemplate
 
                       return await connection.QuerySingleOrDefaultAsync<{{st.ClassModelDto}}>(
                           "{{GenerateSqlSelectOneQuery(entity, _softDelete, _provider)}}",
-                          new { {{entityKey.Key}} = id.ToString() });
+                          new { {{entityKey.Key}} = id });
                   }
 
                   public async Task<IEnumerable<{{st.ClassModelDto}}>> GetAllAsync(
@@ -112,7 +112,7 @@ public sealed class RepositoryTemplate
 
                       var result = await connection.ExecuteAsync(
                           @"{{GenerateSqlDeleteQuery(entity, _softDelete, _provider)}}",
-                          new { {{entityKey.Key}} = id.ToString() });
+                          new { {{entityKey.Key}} = id });
 
                       return result > 0;
                   }

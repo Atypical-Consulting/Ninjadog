@@ -22,19 +22,19 @@ public partial class DatabaseInitializer(IDbConnectionFactory connectionFactory)
         
         await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS TodoLists (
             Id CHAR(36) PRIMARY KEY,
-            Title TEXT NOT NULL)");
+            Title TEXT)");
 
         await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS TodoItems (
             Id CHAR(36) PRIMARY KEY,
-            Description TEXT NOT NULL,
-            IsCompleted INTEGER NOT NULL,
-            DueDate TEXT NOT NULL)");
+            Description TEXT,
+            IsCompleted INTEGER,
+            DueDate TEXT)");
 
         await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS TodoCategories (
             Id CHAR(36) PRIMARY KEY,
-            Name TEXT NOT NULL,
-            Color TEXT NOT NULL,
-            Icon TEXT NOT NULL)");
+            Name TEXT,
+            Color TEXT,
+            Icon TEXT)");
 
     }
 }

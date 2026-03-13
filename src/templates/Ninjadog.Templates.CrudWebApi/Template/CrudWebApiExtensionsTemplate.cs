@@ -182,14 +182,14 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
         if (hasAuth)
         {
             sb.AppendLine("services.AddSingleton<ITokenService, TokenService>();")
-                .AppendLine("services.AddSingleton<IUserRepository, UserRepository>();")
+                .AppendLine("services.AddScoped<IUserRepository, UserRepository>();")
                 .AppendLine("services.AddSingleton<UserInitializer>();");
         }
 
         foreach (var st in entities.Select(model => model.StringTokens))
         {
-            sb.AppendLine($"services.AddSingleton<{st.InterfaceModelRepository}, {st.ClassModelRepository}>();")
-                .AppendLine($"services.AddSingleton<{st.InterfaceModelService}, {st.ClassModelService}>();");
+            sb.AppendLine($"services.AddScoped<{st.InterfaceModelRepository}, {st.ClassModelRepository}>();")
+                .AppendLine($"services.AddScoped<{st.InterfaceModelService}, {st.ClassModelService}>();");
         }
 
         return sb.ToString();

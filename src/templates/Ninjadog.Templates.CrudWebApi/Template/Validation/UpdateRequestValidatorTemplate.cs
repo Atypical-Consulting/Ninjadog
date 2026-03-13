@@ -80,17 +80,17 @@ public sealed class UpdateRequestValidatorTemplate
 
             if (!isValueType && !hasValidationAttrs)
             {
-                // Existing behavior for non-value-type properties without validation attributes
-                sb.AppendLine($"RuleFor(x => x.{propertyName}).NotEmpty();");
+                // Non-value-type properties without Required flag: skip validation
+                continue;
             }
-            else
+
             {
                 // Generate rules based on validation attributes
                 var rules = new List<string>();
 
-                if (propertyValue.Required || !isValueType)
+                if (propertyValue.Required)
                 {
-                    rules.Add(".NotEmpty()");
+                    rules.Add($".NotEmpty().WithMessage(\"{propertyName} is required!\")");
                 }
 
                 if (propertyValue.MaxLength.HasValue)

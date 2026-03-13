@@ -25,11 +25,18 @@ public sealed record NinjadogEntityWithKey(
     /// Generates the member properties for the entity.
     /// This method produces C# code for each property within the entity, formatted as member definitions.
     /// </summary>
+    /// <param name="excludeAutoKey">When true, excludes key properties with auto-generated types (e.g., Guid).</param>
     /// <returns>A <see cref="string"/> containing the C# code for all member properties of the entity.</returns>
-    public string GenerateMemberProperties()
+    public string GenerateMemberProperties(bool excludeAutoKey = false)
     {
-        var properties = Properties
-            .FromKeys()
+        var props = Properties.FromKeys();
+
+        if (excludeAutoKey)
+        {
+            props = props.Where(p => !(p.IsKey && p.Type == "Guid")).ToList();
+        }
+
+        var properties = props
             .Select(p => p.GenerateMemberProperty())
             .Aggregate((x, y) => $"{x}\n{y}");
 
