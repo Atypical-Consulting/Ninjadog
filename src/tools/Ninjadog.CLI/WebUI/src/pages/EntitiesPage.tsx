@@ -472,8 +472,8 @@ function EntityCard({
                     <td className="text-center">
                       <input type="checkbox" className="field-checkbox" checked={!!props[p].required} onChange={(e) => onPropChange(p, 'required', e.target.checked)} />
                     </td>
-                    <td><input className="field-input py-1 text-xs w-16" type="number" defaultValue={props[p].maxLength ?? ''} onFocus={onPropFocus} onBlur={(e) => onPropChange(p, 'maxLength', e.target.value)} /></td>
-                    <td><input className="field-input py-1 text-xs w-16" type="number" defaultValue={props[p].minLength ?? ''} onFocus={onPropFocus} onBlur={(e) => onPropChange(p, 'minLength', e.target.value)} /></td>
+                    <td><input className="field-input py-1 text-xs w-16" type="number" min={0} defaultValue={props[p].maxLength ?? ''} onFocus={onPropFocus} onBlur={(e) => onPropChange(p, 'maxLength', e.target.value)} /></td>
+                    <td><input className="field-input py-1 text-xs w-16" type="number" min={0} defaultValue={props[p].minLength ?? ''} onFocus={onPropFocus} onBlur={(e) => onPropChange(p, 'minLength', e.target.value)} /></td>
                     <td><input className="field-input py-1 text-xs w-16" type="number" defaultValue={props[p].min ?? ''} onFocus={onPropFocus} onBlur={(e) => onPropChange(p, 'min', e.target.value)} /></td>
                     <td><input className="field-input py-1 text-xs w-16" type="number" defaultValue={props[p].max ?? ''} onFocus={onPropFocus} onBlur={(e) => onPropChange(p, 'max', e.target.value)} /></td>
                     <td><input className="field-input py-1 text-xs w-20" defaultValue={props[p].pattern || ''} onFocus={onPropFocus} onBlur={(e) => onPropChange(p, 'pattern', e.target.value)} /></td>

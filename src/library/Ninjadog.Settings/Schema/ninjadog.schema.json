@@ -113,6 +113,11 @@
           "description": "The database provider to use. Flat alternative to database.provider.",
           "enum": ["sqlite", "postgresql", "sqlserver"],
           "default": "sqlite"
+        },
+        "aot": {
+          "type": "boolean",
+          "description": "Enable Native AOT publishing support. Flat alternative to features.aot.",
+          "default": false
         }
       },
       "additionalProperties": false

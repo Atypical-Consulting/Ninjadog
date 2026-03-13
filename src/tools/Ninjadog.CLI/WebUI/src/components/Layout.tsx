@@ -47,7 +47,7 @@ export default function Layout() {
           onMouseDown={handleMouseDown}
         />
 
-        <div id="json-panel" className={!showRight ? 'hidden' : ''} style={{ width: viewMode === 'json' ? '100%' : `${panelWidth}px` }}>
+        <div id="json-panel" className={`flex flex-col${!showRight ? ' hidden' : ''}`} style={{ width: viewMode === 'json' ? '100%' : `${panelWidth}px` }}>
           <JsonPanel width={viewMode === 'json' ? '100%' : `${panelWidth}px`} />
         </div>
       </div>
