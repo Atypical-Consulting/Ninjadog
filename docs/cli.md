@@ -64,10 +64,23 @@ ninjadog init
 | `--default` | Skip prompts and use default values. |
 | `--name <name>` | Set the project name (skips the name prompt). |
 | `--namespace <ns>` | Set the root namespace (skips the namespace prompt). |
+| `--template <name>` | Template to use (e.g. `CrudWebAPI`). Skips the template prompt. |
+| `--use-case <name>` | Use case to scaffold (`TodoApp`, `RestaurantBooking`, or `Custom`). Skips the use case prompt. |
 
-#### Interactive prompts
+#### Template and use case selection
 
-When you run `ninjadog init`, the CLI asks for the following project settings:
+When you run `ninjadog init` interactively, the CLI first asks you to choose a **template** and a **use case**:
+
+| Prompt | Choices | Description |
+|---|---|---|
+| **Template** | `CrudWebAPI` | The code generation template to use. Currently only CrudWebAPI is available. |
+| **Use case** | `TodoApp`, `RestaurantBooking`, `Custom` | A pre-built use case with entities already defined, or `Custom` to define your own entities interactively. |
+
+Selecting `TodoApp` or `RestaurantBooking` creates a fully configured `ninjadog.json` with pre-defined entities, relationships, and seed data. Selecting `Custom` continues with the interactive prompts below.
+
+#### Interactive prompts (Custom use case)
+
+When you select the `Custom` use case, the CLI asks for the following project settings:
 
 | Prompt | Default | Description |
 |---|---|---|
@@ -116,9 +129,18 @@ This creates a `ninjadog.json` in the current directory:
 }
 ```
 
-**Examples (non-interactive):**
+**Examples:**
 
 ```bash
+# Interactive mode (prompts for template and use case)
+ninjadog init
+
+# Scaffold TodoApp use case directly
+ninjadog init --use-case TodoApp
+
+# Scaffold RestaurantBooking use case
+ninjadog init -u RestaurantBooking
+
 # Non-interactive with defaults
 ninjadog init --default
 
