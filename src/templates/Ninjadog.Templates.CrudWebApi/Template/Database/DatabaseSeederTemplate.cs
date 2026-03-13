@@ -50,11 +50,6 @@ public sealed class DatabaseSeederTemplate : NinjadogTemplate
         foreach (var entity in entities)
         {
             var st = entity.StringTokens;
-            if (entity.SeedData == null)
-            {
-                continue;
-            }
-
             var keyPropertyName = entity.Properties
                 .FirstOrDefault(x => x.Value.IsKey).Key;
 
@@ -62,7 +57,7 @@ public sealed class DatabaseSeederTemplate : NinjadogTemplate
             {
                 var columns = string.Join(", ", row.Keys);
                 var paramNames = string.Join(", ", row.Keys.Select(k => $"@{k}"));
-                var sql = GenerateIdempotentInsert(provider, st.Models, columns, paramNames, keyPropertyName);
+                var sql = DatabaseProviderHelper.GetIdempotentInsert(provider, st.Models, columns, paramNames, keyPropertyName);
                 var paramObject = GenerateAnonymousObject(row);
 
                 sb.AppendLine()
@@ -75,21 +70,6 @@ public sealed class DatabaseSeederTemplate : NinjadogTemplate
         }
 
         return sb.ToString();
-    }
-
-    private static string GenerateIdempotentInsert(
-        string provider,
-        string tableName,
-        string columns,
-        string paramNames,
-        string keyPropertyName)
-    {
-        return provider switch
-        {
-            "postgresql" => $"INSERT INTO {tableName} ({columns}) VALUES ({paramNames}) ON CONFLICT DO NOTHING",
-            "sqlserver" => $"IF NOT EXISTS (SELECT 1 FROM {tableName} WHERE {keyPropertyName} = @{keyPropertyName}) INSERT INTO {tableName} ({columns}) VALUES ({paramNames})",
-            _ => $"INSERT OR IGNORE INTO {tableName} ({columns}) VALUES ({paramNames})"
-        };
     }
 
     private static string GenerateAnonymousObject(Dictionary<string, object> row)

@@ -17,12 +17,7 @@ public sealed class DbConnectionFactoryTemplate
         var ns = $"{rootNamespace}.Database";
         const string fileName = "DbConnectionFactory.cs";
 
-        var (usingDirective, className, connectionType) = provider switch
-        {
-            "postgresql" => ("using Npgsql;", "NpgsqlConnectionFactory", "NpgsqlConnection"),
-            "sqlserver" => ("using Microsoft.Data.SqlClient;", "SqlServerConnectionFactory", "SqlConnection"),
-            _ => ("using Microsoft.Data.Sqlite;", "SqliteConnectionFactory", "SqliteConnection")
-        };
+        var (usingDirective, className, connectionType) = DatabaseProviderHelper.GetConnectionFactoryDetails(provider);
 
         var content =
             $$"""

@@ -47,57 +47,17 @@ public sealed class SeededEntitiesCollection : NinjadogEntities
 public sealed record SeededSettings()
     : NinjadogSettings(new TestConfiguration(), new SeededEntitiesCollection());
 
-public sealed record SoftDeleteConfiguration()
-    : NinjadogConfiguration(
-        Name: "TestApp",
-        Version: "1.0.0",
-        Description: "Test application",
-        RootNamespace: "TestApp.Api",
-        OutputPath: "output",
-        SaveGeneratedFiles: false,
-        SoftDelete: true);
-
 public sealed record SoftDeleteSettings()
-    : NinjadogSettings(new SoftDeleteConfiguration(), new TestEntitiesCollection());
-
-public sealed record AuditConfiguration()
-    : NinjadogConfiguration(
-        Name: "TestApp",
-        Version: "1.0.0",
-        Description: "Test application",
-        RootNamespace: "TestApp.Api",
-        OutputPath: "output",
-        SaveGeneratedFiles: false,
-        Auditing: true);
+    : NinjadogSettings(new TestConfiguration() with { SoftDelete = true }, new TestEntitiesCollection());
 
 public sealed record AuditSettings()
-    : NinjadogSettings(new AuditConfiguration(), new TestEntitiesCollection());
-
-public sealed record PostgresConfiguration()
-    : NinjadogConfiguration(
-        Name: "TestApp",
-        Version: "1.0.0",
-        Description: "Test application",
-        RootNamespace: "TestApp.Api",
-        OutputPath: "output",
-        SaveGeneratedFiles: false,
-        DatabaseProvider: "postgresql");
+    : NinjadogSettings(new TestConfiguration() with { Auditing = true }, new TestEntitiesCollection());
 
 public sealed record PostgresSettings()
-    : NinjadogSettings(new PostgresConfiguration(), new TestEntitiesCollection());
-
-public sealed record SqlServerConfiguration()
-    : NinjadogConfiguration(
-        Name: "TestApp",
-        Version: "1.0.0",
-        Description: "Test application",
-        RootNamespace: "TestApp.Api",
-        OutputPath: "output",
-        SaveGeneratedFiles: false,
-        DatabaseProvider: "sqlserver");
+    : NinjadogSettings(new TestConfiguration() with { DatabaseProvider = "postgresql" }, new TestEntitiesCollection());
 
 public sealed record SqlServerSettings()
-    : NinjadogSettings(new SqlServerConfiguration(), new TestEntitiesCollection());
+    : NinjadogSettings(new TestConfiguration() with { DatabaseProvider = "sqlserver" }, new TestEntitiesCollection());
 
 public sealed class RelationshipEntitiesCollection : NinjadogEntities
 {
@@ -113,18 +73,8 @@ public sealed class RelationshipEntitiesCollection : NinjadogEntities
 public sealed record RelationshipSettings()
     : NinjadogSettings(new TestConfiguration(), new RelationshipEntitiesCollection());
 
-public sealed record AotConfiguration()
-    : NinjadogConfiguration(
-        Name: "TestApp",
-        Version: "1.0.0",
-        Description: "Test application",
-        RootNamespace: "TestApp.Api",
-        OutputPath: "output",
-        SaveGeneratedFiles: false,
-        Aot: true);
-
 public sealed record AotSettings()
-    : NinjadogSettings(new AotConfiguration(), new TestEntitiesCollection());
+    : NinjadogSettings(new TestConfiguration() with { Aot = true }, new TestEntitiesCollection());
 
 public sealed class AotSeededEntitiesCollection : NinjadogEntities
 {
@@ -138,72 +88,21 @@ public sealed class AotSeededEntitiesCollection : NinjadogEntities
 }
 
 public sealed record AotSeededSettings()
-    : NinjadogSettings(new AotConfiguration(), new AotSeededEntitiesCollection());
-
-public sealed record RateLimitConfiguration()
-    : NinjadogConfiguration(
-        Name: "TestApp",
-        Version: "1.0.0",
-        Description: "Test application",
-        RootNamespace: "TestApp.Api",
-        OutputPath: "output",
-        SaveGeneratedFiles: false,
-        RateLimit: new NinjadogRateLimitConfiguration());
+    : NinjadogSettings(new TestConfiguration() with { Aot = true }, new AotSeededEntitiesCollection());
 
 public sealed record RateLimitSettings()
-    : NinjadogSettings(new RateLimitConfiguration(), new TestEntitiesCollection());
-
-public sealed record CustomRateLimitConfiguration()
-    : NinjadogConfiguration(
-        Name: "TestApp",
-        Version: "1.0.0",
-        Description: "Test application",
-        RootNamespace: "TestApp.Api",
-        OutputPath: "output",
-        SaveGeneratedFiles: false,
-        RateLimit: new NinjadogRateLimitConfiguration(
-            PermitLimit: 50,
-            WindowSeconds: 30,
-            SegmentsPerWindow: 3));
+    : NinjadogSettings(new TestConfiguration() with { RateLimit = new NinjadogRateLimitConfiguration() }, new TestEntitiesCollection());
 
 public sealed record CustomRateLimitSettings()
-    : NinjadogSettings(new CustomRateLimitConfiguration(), new TestEntitiesCollection());
-
-public sealed record VersioningConfiguration()
-    : NinjadogConfiguration(
-        Name: "TestApp",
-        Version: "1.0.0",
-        Description: "Test application",
-        RootNamespace: "TestApp.Api",
-        OutputPath: "output",
-        SaveGeneratedFiles: false,
-        Versioning: new NinjadogVersioningConfiguration());
+    : NinjadogSettings(
+        new TestConfiguration() with { RateLimit = new NinjadogRateLimitConfiguration(PermitLimit: 50, WindowSeconds: 30, SegmentsPerWindow: 3) },
+        new TestEntitiesCollection());
 
 public sealed record VersioningSettings()
-    : NinjadogSettings(new VersioningConfiguration(), new TestEntitiesCollection());
-
-public sealed record HeaderVersioningConfiguration()
-    : NinjadogConfiguration(
-        Name: "TestApp",
-        Version: "1.0.0",
-        Description: "Test application",
-        RootNamespace: "TestApp.Api",
-        OutputPath: "output",
-        SaveGeneratedFiles: false,
-        Versioning: new NinjadogVersioningConfiguration(Strategy: "HeaderBased"));
+    : NinjadogSettings(new TestConfiguration() with { Versioning = new NinjadogVersioningConfiguration() }, new TestEntitiesCollection());
 
 public sealed record HeaderVersioningSettings()
-    : NinjadogSettings(new HeaderVersioningConfiguration(), new TestEntitiesCollection());
-
-public sealed record AuthConfiguration()
-    : NinjadogConfiguration(
-        Name: "TestApp",
-        Version: "1.0.0",
-        Description: "Test application",
-        RootNamespace: "TestApp.Api",
-        OutputPath: "output",
-        SaveGeneratedFiles: false,
-        Auth: new NinjadogAuthConfiguration(Roles: ["Admin", "User"]));
+    : NinjadogSettings(new TestConfiguration() with { Versioning = new NinjadogVersioningConfiguration(Strategy: "HeaderBased") }, new TestEntitiesCollection());
 
 public sealed record AuthSettings()
-    : NinjadogSettings(new AuthConfiguration(), new TestEntitiesCollection());
+    : NinjadogSettings(new TestConfiguration() with { Auth = new NinjadogAuthConfiguration(Roles: ["Admin", "User"]) }, new TestEntitiesCollection());

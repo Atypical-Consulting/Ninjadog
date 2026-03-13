@@ -175,58 +175,6 @@ public sealed class DatabaseInitializerTemplate
 
     private static string MapToDbType(string typeName, string provider, HashSet<string>? enumNames = null)
     {
-        return enumNames?.Contains(typeName) == true
-            ? "INTEGER"
-            : provider switch
-            {
-                "postgresql" => MapToPostgresType(typeName),
-                "sqlserver" => MapToSqlServerType(typeName),
-                _ => MapToSqliteType(typeName)
-            };
-    }
-
-    private static string MapToSqliteType(string typeName)
-    {
-        return typeName switch
-        {
-            "String" => "TEXT",
-            "Int32" => "INTEGER",
-            "Boolean" => "INTEGER",
-            "Decimal" => "REAL",
-            "DateTime" => "TEXT",
-            "DateOnly" => "TEXT",
-            "Guid" => "CHAR(36)",
-            _ => "TEXT"
-        };
-    }
-
-    private static string MapToPostgresType(string typeName)
-    {
-        return typeName switch
-        {
-            "String" => "TEXT",
-            "Int32" => "INTEGER",
-            "Boolean" => "BOOLEAN",
-            "Decimal" => "NUMERIC",
-            "DateTime" => "TIMESTAMP",
-            "DateOnly" => "DATE",
-            "Guid" => "UUID",
-            _ => "TEXT"
-        };
-    }
-
-    private static string MapToSqlServerType(string typeName)
-    {
-        return typeName switch
-        {
-            "String" => "NVARCHAR(MAX)",
-            "Int32" => "INT",
-            "Boolean" => "BIT",
-            "Decimal" => "DECIMAL(18,2)",
-            "DateTime" => "DATETIME2",
-            "DateOnly" => "DATE",
-            "Guid" => "UNIQUEIDENTIFIER",
-            _ => "NVARCHAR(MAX)"
-        };
+        return DatabaseProviderHelper.MapToDbType(typeName, provider, enumNames);
     }
 }

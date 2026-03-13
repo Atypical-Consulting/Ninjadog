@@ -42,54 +42,7 @@ public sealed class ApiContractToDomainMapperTemplate
     private static string GenerateToModelFromCreateMethods(NinjadogEntityWithKey entity)
     {
         var st = entity.StringTokens;
-        var modelProperties = entity.Properties.FromKeys();
-
-        IndentedStringBuilder sb = new(3);
-
-        for (var i = 0; i < modelProperties.Count; i++)
-        {
-            var isLastItem = i == modelProperties.Count - 1;
-            var p = modelProperties[i];
-            var baseTypeName = p.Type;
-            var isValueOf = baseTypeName is "ValueOf";
-            var valueOfArgument = p.Type ?? string.Empty;
-
-            sb.Append($"{p.Key} = ");
-
-            if (isValueOf)
-            {
-                sb.Append($"{p.Type}.From(");
-            }
-
-            var realType = isValueOf
-                ? valueOfArgument
-                : p.Type;
-
-            switch (realType)
-            {
-                case "Guid":
-                    sb.Append("Guid.NewGuid()");
-                    break;
-                case "DateOnly":
-                    sb.Append($"DateOnly.FromDateTime(request.{p.Key})");
-                    break;
-                default:
-                    sb.Append($"request.{p.Key}");
-                    break;
-            }
-
-            if (isValueOf)
-            {
-                sb.Append(")");
-            }
-
-            if (!isLastItem)
-            {
-                sb.AppendLine(",");
-            }
-        }
-
-        var properties = sb.ToString().TrimStart();
+        var properties = PropertyMappingGenerator.GenerateToDomainMappings(entity, "request", 3, generateAutoKey: true);
 
         return $$"""
 
@@ -106,51 +59,7 @@ public sealed class ApiContractToDomainMapperTemplate
     private static string GenerateToModelFromUpdateMethods(NinjadogEntityWithKey entity)
     {
         var st = entity.StringTokens;
-        var modelProperties = entity.Properties.FromKeys();
-
-        IndentedStringBuilder sb = new(3);
-
-        for (var i = 0; i < modelProperties.Count; i++)
-        {
-            var isLastItem = i == modelProperties.Count - 1;
-            var p = modelProperties[i];
-            var baseTypeName = p.Type;
-            var isValueOf = baseTypeName is "ValueOf";
-            var valueOfArgument = p.Type ?? string.Empty;
-
-            sb.Append($"{p.Key} = ");
-
-            if (isValueOf)
-            {
-                sb.Append($"{p.Type}.From(");
-            }
-
-            var realType = isValueOf
-                ? valueOfArgument
-                : p.Type;
-
-            switch (realType)
-            {
-                case "DateOnly":
-                    sb.Append($"DateOnly.FromDateTime(request.{p.Key})");
-                    break;
-                default:
-                    sb.Append($"request.{p.Key}");
-                    break;
-            }
-
-            if (isValueOf)
-            {
-                sb.Append(")");
-            }
-
-            if (!isLastItem)
-            {
-                sb.AppendLine(",");
-            }
-        }
-
-        var properties = sb.ToString().TrimStart();
+        var properties = PropertyMappingGenerator.GenerateToDomainMappings(entity, "request", 3, generateAutoKey: false);
 
         return
             $$"""

@@ -39,51 +39,7 @@ public sealed class DtoToDomainMapperTemplate : NinjadogTemplate
     private static string GenerateToModelMethods(NinjadogEntityWithKey entity)
     {
         var st = entity.StringTokens;
-        var modelProperties = entity.Properties.FromKeys();
-
-        IndentedStringBuilder sb = new(3);
-
-        for (var i = 0; i < modelProperties.Count; i++)
-        {
-            var isLastItem = i == modelProperties.Count - 1;
-            var p = modelProperties[i];
-            var baseTypeName = p.Type;
-            var isValueOf = baseTypeName is "ValueOf";
-            var valueOfArgument = p.Type ?? string.Empty;
-
-            sb.Append($"{p.Key} = ");
-
-            if (isValueOf)
-            {
-                sb.Append($"{p.Type}.From(");
-            }
-
-            var realType = isValueOf
-                ? valueOfArgument
-                : p.Type;
-
-            switch (realType)
-            {
-                case "DateOnly":
-                    sb.Append($"DateOnly.FromDateTime({st.VarModelDto}.{p.Key})");
-                    break;
-                default:
-                    sb.Append($"{st.VarModelDto}.{p.Key}");
-                    break;
-            }
-
-            if (isValueOf)
-            {
-                sb.Append(")");
-            }
-
-            if (!isLastItem)
-            {
-                sb.AppendLine(",");
-            }
-        }
-
-        var properties = sb.ToString().TrimStart();
+        var properties = PropertyMappingGenerator.GenerateToDomainMappings(entity, st.VarModelDto, 3, generateAutoKey: false);
 
         return $$"""
 

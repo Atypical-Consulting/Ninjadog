@@ -1,3 +1,5 @@
+using Ninjadog.Templates.CrudWebAPI.Template.Database;
+
 namespace Ninjadog.Templates.CrudWebAPI.Template;
 
 /// <summary>
@@ -277,11 +279,6 @@ public class CrudWebApiExtensionsTemplate : NinjadogTemplate
 
     private static string GetFactoryClassName(string provider)
     {
-        return provider switch
-        {
-            "postgresql" => "NpgsqlConnectionFactory",
-            "sqlserver" => "SqlServerConnectionFactory",
-            _ => "SqliteConnectionFactory"
-        };
+        return DatabaseProviderHelper.GetConnectionFactoryDetails(provider).ClassName;
     }
 }
