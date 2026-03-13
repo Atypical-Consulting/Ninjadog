@@ -48,7 +48,7 @@ public sealed class DeleteEndpointTemplate
 
                   public override async Task HandleAsync({{st.ClassDeleteModelRequest}} req, CancellationToken ct)
                   {
-                      var deleted = await {{st.VarModelService}}.DeleteAsync(req.{{entityKey.Key}});
+                      var deleted = await {{st.VarModelService}}.DeleteAsync(req.{{entityKey.PascalKey}});
                       if (!deleted)
                       {
                           await Send.NotFoundAsync(ct);

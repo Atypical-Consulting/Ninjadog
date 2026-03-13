@@ -49,7 +49,7 @@ public sealed class GetEndpointTemplate
 
                   public override async Task HandleAsync({{st.ClassGetModelRequest}} req, CancellationToken ct)
                   {
-                      var {{st.VarModel}} = await {{st.VarModelService}}.GetAsync(req.{{entityKey.Key}});
+                      var {{st.VarModel}} = await {{st.VarModelService}}.GetAsync(req.{{entityKey.PascalKey}});
 
                       if ({{st.VarModel}} is null)
                       {

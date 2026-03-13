@@ -56,7 +56,7 @@ public sealed class CreateEndpointTemplate
 
                       var {{st.VarModelResponse}} = {{st.VarModel}}.{{st.MethodToModelResponse}}();
                       await Send.CreatedAtAsync<{{st.ClassGetModelEndpoint}}>(
-                          new { Id = {{st.VarModel}}.{{entityKey.Key}} }, {{st.VarModelResponse}}, generateAbsoluteUrl: true, cancellation: ct);
+                          new { Id = {{st.VarModel}}.{{entityKey.PascalKey}} }, {{st.VarModelResponse}}, generateAbsoluteUrl: true, cancellation: ct);
                   }
               }
               """;

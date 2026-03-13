@@ -55,9 +55,11 @@ internal static class ValidationRuleGenerator
             // Generate rules based on validation attributes
             var rules = new List<string>();
 
+            var pascalName = propertyName.UppercaseFirst();
+
             if (propertyValue.Required)
             {
-                rules.Add($".NotEmpty().WithMessage(\"{propertyName} is required!\")");
+                rules.Add($".NotEmpty().WithMessage(\"{pascalName} is required!\")");
             }
 
             if (propertyValue.MaxLength.HasValue)
@@ -86,7 +88,7 @@ internal static class ValidationRuleGenerator
             }
 
             sb
-                .AppendLine($"RuleFor(x => x.{propertyName})")
+                .AppendLine($"RuleFor(x => x.{pascalName})")
                 .IncrementIndent();
 
             for (var i = 0; i < rules.Count; i++)

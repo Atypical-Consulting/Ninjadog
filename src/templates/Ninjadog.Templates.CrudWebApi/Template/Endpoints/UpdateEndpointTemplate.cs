@@ -50,7 +50,7 @@ public sealed class UpdateEndpointTemplate
 
                   public override async Task HandleAsync({{st.ClassUpdateModelRequest}} req, CancellationToken ct)
                   {
-                      var {{st.VarExistingModel}} = await {{st.VarModelService}}.GetAsync(req.{{entityKey.Key}});
+                      var {{st.VarExistingModel}} = await {{st.VarModelService}}.GetAsync(req.{{entityKey.PascalKey}});
 
                       if ({{st.VarExistingModel}} is null)
                       {

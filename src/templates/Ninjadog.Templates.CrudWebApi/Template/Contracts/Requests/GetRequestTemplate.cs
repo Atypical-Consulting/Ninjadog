@@ -32,7 +32,7 @@ public sealed class GetRequestTemplate
               /// </summary>
               public partial class {{st.ClassGetModelRequest}}
               {
-                  public {{entityKey.Type}} {{entityKey.Key}} { get; init; }
+                  public {{entityKey.Type}} {{entityKey.PascalKey}} { get; init; }
               }
               """;
 

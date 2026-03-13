@@ -28,7 +28,7 @@ public sealed class DeleteRequestTemplate
               /// </summary>
               public partial class {{st.ClassDeleteModelRequest}}
               {
-                  public {{entityKey.Type}} {{entityKey.Key}} { get; init; }
+                  public {{entityKey.Type}} {{entityKey.PascalKey}} { get; init; }
               }
               """;
 

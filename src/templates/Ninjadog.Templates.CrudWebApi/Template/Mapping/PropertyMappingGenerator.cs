@@ -30,7 +30,7 @@ internal static class PropertyMappingGenerator
             var isValueOf = p.Type is "ValueOf";
             var valueOfArgument = p.Type ?? string.Empty;
 
-            sb.Append($"{p.Key} = ");
+            sb.Append($"{p.PascalKey} = ");
 
             if (isValueOf)
             {
@@ -45,10 +45,10 @@ internal static class PropertyMappingGenerator
                     sb.Append("Guid.NewGuid()");
                     break;
                 case "DateOnly":
-                    sb.Append($"DateOnly.FromDateTime({sourcePrefix}.{p.Key})");
+                    sb.Append($"DateOnly.FromDateTime({sourcePrefix}.{p.PascalKey})");
                     break;
                 default:
-                    sb.Append($"{sourcePrefix}.{p.Key}");
+                    sb.Append($"{sourcePrefix}.{p.PascalKey}");
                     break;
             }
 
@@ -88,7 +88,7 @@ internal static class PropertyMappingGenerator
             var isValueOf = p.Type is "ValueOf";
             var valueOfArgument = p.Type ?? string.Empty;
 
-            sb.Append($"{p.Key} = {sourcePrefix}.{p.Key}");
+            sb.Append($"{p.PascalKey} = {sourcePrefix}.{p.PascalKey}");
 
             var realType = p.Type;
 

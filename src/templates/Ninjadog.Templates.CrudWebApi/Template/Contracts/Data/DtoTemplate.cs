@@ -51,7 +51,7 @@ public sealed class DtoTemplate : NinjadogTemplate
         };
 
         IndentedStringBuilder sb = new(1);
-        sb.Append($"public {dtoType} {p.Key} {{ get; init; }}");
+        sb.Append($"public {dtoType} {p.PascalKey} {{ get; init; }}");
 
         if (dtoType == "string")
         {

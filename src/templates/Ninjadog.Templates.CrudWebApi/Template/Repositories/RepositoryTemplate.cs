@@ -66,7 +66,7 @@ public sealed class RepositoryTemplate
 
                       return await connection.QuerySingleOrDefaultAsync<{{st.ClassModelDto}}>(
                           "{{GenerateSqlSelectOneQuery(entity, _softDelete, _provider)}}",
-                          new { {{entityKey.Key}} = id });
+                          new { {{entityKey.PascalKey}} = id });
                   }
 
                   public async Task<IEnumerable<{{st.ClassModelDto}}>> GetAllAsync(
@@ -114,7 +114,7 @@ public sealed class RepositoryTemplate
 
                       var result = await connection.ExecuteAsync(
                           @"{{GenerateSqlDeleteQuery(entity, _softDelete, _provider)}}",
-                          new { {{entityKey.Key}} = id });
+                          new { {{entityKey.PascalKey}} = id });
 
                       return result > 0;
                   }
@@ -170,7 +170,7 @@ public sealed class RepositoryTemplate
     {
         var columns = entity.Properties
             .Where(p => !p.Value.IsKey)
-            .Select(p => $"\"{p.Key}\"");
+            .Select(p => $"\"{p.Key.UppercaseFirst()}\"");
         return string.Join(", ", columns);
     }
 
@@ -179,8 +179,8 @@ public sealed class RepositoryTemplate
         var st = entity.StringTokens;
         var properties = entity.Properties;
 
-        var columns = properties.Keys.ToList();
-        var values = properties.Keys.Select(k => $"@{k}").ToList();
+        var columns = properties.Keys.Select(k => k.UppercaseFirst()).ToList();
+        var values = properties.Keys.Select(k => $"@{k.UppercaseFirst()}").ToList();
 
         if (auditing)
         {
@@ -209,7 +209,7 @@ public sealed class RepositoryTemplate
         var softDeleteFilter = softDelete ? " AND IsDeleted = 0" : string.Empty;
         var limit = provider == "sqlserver" ? string.Empty : " LIMIT 1";
         var top = provider == "sqlserver" ? "TOP 1 " : string.Empty;
-        return $"SELECT {top}* FROM {st.Models} WHERE {entityKey.Key} = @{entityKey.Key}{softDeleteFilter}{limit}";
+        return $"SELECT {top}* FROM {st.Models} WHERE {entityKey.PascalKey} = @{entityKey.PascalKey}{softDeleteFilter}{limit}";
     }
 
     private static List<string> GenerateFilterableQueryLines(string baseQuery, bool softDelete)
@@ -283,7 +283,7 @@ public sealed class RepositoryTemplate
 
         var updateClauses = properties
             .Where(p => !p.Value.IsKey)
-            .Select(p => $"{p.Key} = @{p.Key}")
+            .Select(p => $"{p.Key.UppercaseFirst()} = @{p.Key.UppercaseFirst()}")
             .ToList();
 
         if (auditing)
@@ -293,7 +293,7 @@ public sealed class RepositoryTemplate
 
         return stringBuilder
             .Append(string.Join(", ", updateClauses))
-            .Append($" WHERE {entityKey.Key} = @{entityKey.Key}")
+            .Append($" WHERE {entityKey.PascalKey} = @{entityKey.PascalKey}")
             .ToString();
     }
 
@@ -302,7 +302,7 @@ public sealed class RepositoryTemplate
         var st = entity.StringTokens;
         var entityKey = entity.Properties.GetEntityKey();
         return softDelete
-            ? $"UPDATE {st.Models} SET IsDeleted = 1, DeletedAt = {DatabaseProviderHelper.GetNowFunction(provider)} WHERE {entityKey.Key} = @{entityKey.Key}"
-            : $"DELETE FROM {st.Models} WHERE {entityKey.Key} = @{entityKey.Key}";
+            ? $"UPDATE {st.Models} SET IsDeleted = 1, DeletedAt = {DatabaseProviderHelper.GetNowFunction(provider)} WHERE {entityKey.PascalKey} = @{entityKey.PascalKey}"
+            : $"DELETE FROM {st.Models} WHERE {entityKey.PascalKey} = @{entityKey.PascalKey}";
     }
 }

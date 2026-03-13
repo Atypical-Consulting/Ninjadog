@@ -51,12 +51,12 @@ public sealed class DatabaseSeederTemplate : NinjadogTemplate
         {
             var st = entity.StringTokens;
             var keyPropertyName = entity.Properties
-                .FirstOrDefault(x => x.Value.IsKey).Key;
+                .FirstOrDefault(x => x.Value.IsKey).Key.UppercaseFirst();
 
             foreach (var row in entity.SeedData ?? [])
             {
-                var columns = string.Join(", ", row.Keys);
-                var paramNames = string.Join(", ", row.Keys.Select(k => $"@{k}"));
+                var columns = string.Join(", ", row.Keys.Select(k => k.UppercaseFirst()));
+                var paramNames = string.Join(", ", row.Keys.Select(k => $"@{k.UppercaseFirst()}"));
                 var sql = DatabaseProviderHelper.GetIdempotentInsert(provider, st.Models, columns, paramNames, keyPropertyName);
                 var paramObject = GenerateAnonymousObject(row);
 
@@ -74,7 +74,7 @@ public sealed class DatabaseSeederTemplate : NinjadogTemplate
 
     private static string GenerateAnonymousObject(Dictionary<string, object> row)
     {
-        var properties = row.Select(kvp => $"{kvp.Key} = {FormatCSharpValue(kvp.Value)}");
+        var properties = row.Select(kvp => $"{kvp.Key.UppercaseFirst()} = {FormatCSharpValue(kvp.Value)}");
         return $"new {{ {string.Join(", ", properties)} }}";
     }
 

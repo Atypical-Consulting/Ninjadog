@@ -172,6 +172,22 @@ public static partial class Inflector
     }
 
     /// <summary>
+    /// Uppercases only the first letter of a string, preserving the rest as-is.
+    /// Suitable for converting camelCase to PascalCase (e.g., "firstName" → "FirstName").
+    /// </summary>
+    /// <param name="word">The string to convert.</param>
+    /// <returns>The string with its first letter uppercased.</returns>
+    public static string UppercaseFirst(this string word)
+    {
+        if (string.IsNullOrEmpty(word))
+        {
+            return word;
+        }
+
+        return char.ToUpperInvariant(word[0]) + word[1..];
+    }
+
+    /// <summary>
     /// Converts the first letter of a word to lowercase.
     /// </summary>
     /// <param name="word">The word to be uncapitalized.</param>

@@ -28,7 +28,7 @@ public sealed class GetAllEndpointTemplate
 
         var filterableProperties = entity.Properties
             .Where(p => !p.Value.IsKey)
-            .Select(p => p.Key)
+            .Select(p => p.Key.UppercaseFirst())
             .ToList();
 
         var content =

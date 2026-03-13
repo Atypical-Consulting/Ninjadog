@@ -12,6 +12,11 @@ public sealed record NinjadogEntityPropertyWithKey(
     : NinjadogEntityProperty(Property)
 {
     /// <summary>
+    /// Gets the PascalCase version of the key, suitable for C# property names and SQL column names.
+    /// </summary>
+    public string PascalKey => Key.UppercaseFirst();
+
+    /// <summary>
     /// Generates the member property definition for the associated entity property.
     /// This method produces the C# code representation of the property, including its type and accessors.
     /// </summary>
@@ -34,7 +39,7 @@ public sealed record NinjadogEntityPropertyWithKey(
         // };
         IndentedStringBuilder sb = new(1);
 
-        sb.Append($"public {Type} {Key} {{ get; init; }}");
+        sb.Append($"public {Type} {PascalKey} {{ get; init; }}");
 
         if (Type == "string")
         {

@@ -65,7 +65,7 @@ public sealed class DatabaseInitializerTemplate
         stringBuilder
             .AppendLine($"CREATE TABLE IF NOT EXISTS {st.Models} (")
             .IncrementIndent().IncrementIndent().IncrementIndent()
-            .AppendLine($"{entityKey.Key} {MapToDbType(entityKey.Type, provider, enumNames)} PRIMARY KEY,");
+            .AppendLine($"{entityKey.PascalKey} {MapToDbType(entityKey.Type, provider, enumNames)} PRIMARY KEY,");
 
         var nonKeyProperties = entity.Properties
             .Where(p => !p.Value.IsKey)
@@ -80,11 +80,11 @@ public sealed class DatabaseInitializerTemplate
 
             if (needsComma)
             {
-                stringBuilder.AppendLine($"{p.Key} {MapToDbType(p.Value.Type, provider, enumNames)}{nullConstraint},");
+                stringBuilder.AppendLine($"{p.Key.UppercaseFirst()} {MapToDbType(p.Value.Type, provider, enumNames)}{nullConstraint},");
             }
             else
             {
-                stringBuilder.Append($"{p.Key} {MapToDbType(p.Value.Type, provider, enumNames)}{nullConstraint})");
+                stringBuilder.Append($"{p.Key.UppercaseFirst()} {MapToDbType(p.Value.Type, provider, enumNames)}{nullConstraint})");
             }
         }
 
@@ -165,7 +165,7 @@ public sealed class DatabaseInitializerTemplate
 
                 if (entity.Properties.ContainsKey(fkColumnName))
                 {
-                    constraints.Add((fkColumnName, potentialParent.StringTokens.Models, parentPk.Key));
+                    constraints.Add((fkColumnName.UppercaseFirst(), potentialParent.StringTokens.Models, parentPk.PascalKey));
                 }
             }
         }
