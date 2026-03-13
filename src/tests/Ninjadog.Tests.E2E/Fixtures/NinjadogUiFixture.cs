@@ -42,7 +42,7 @@ public sealed class NinjadogUiFixture : IAsyncLifetime
 
         var embeddedProvider = new EmbeddedFileProvider(
             typeof(Ninjadog.CLI.Commands.UiCommandSettings).Assembly,
-            "Ninjadog.CLI.WebUI");
+            "Ninjadog.CLI.WebUI.dist");
 
         _app.UseStaticFiles(new StaticFileOptions
         {
@@ -50,8 +50,15 @@ public sealed class NinjadogUiFixture : IAsyncLifetime
             RequestPath = string.Empty
         });
 
-        _app.MapGet("/", async ctx =>
+        // SPA catch-all: serve index.html for any non-API GET request
+        _app.MapFallback(async ctx =>
         {
+            if (ctx.Request.Method != "GET" || ctx.Request.Path.StartsWithSegments("/api"))
+            {
+                ctx.Response.StatusCode = 404;
+                return;
+            }
+
             var file = embeddedProvider.GetFileInfo("index.html");
             if (!file.Exists)
             {

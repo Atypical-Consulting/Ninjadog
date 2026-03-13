@@ -161,14 +161,26 @@ public sealed class ApiEndpointTests(NinjadogUiFixture server, PlaywrightFixture
     [Fact]
     public async Task StaticFiles_CssIsServed()
     {
-        var response = await _client.GetAsync("/css/app.css");
+        // Get index.html first to discover the hashed CSS filename
+        var indexResponse = await _client.GetAsync("/");
+        var html = await indexResponse.Content.ReadAsStringAsync();
+        var cssMatch = System.Text.RegularExpressions.Regex.Match(html, @"href=""\.?(/assets/index-[^""]+\.css)""");
+        cssMatch.Success.ShouldBeTrue("index.html should reference a CSS asset");
+
+        var response = await _client.GetAsync(cssMatch.Groups[1].Value);
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
     [Fact]
     public async Task StaticFiles_JsIsServed()
     {
-        var response = await _client.GetAsync("/js/app.js");
+        // Get index.html first to discover the hashed JS filename
+        var indexResponse = await _client.GetAsync("/");
+        var html = await indexResponse.Content.ReadAsStringAsync();
+        var jsMatch = System.Text.RegularExpressions.Regex.Match(html, @"src=""\.?(/assets/index-[^""]+\.js)""");
+        jsMatch.Success.ShouldBeTrue("index.html should reference a JS asset");
+
+        var response = await _client.GetAsync(jsMatch.Groups[1].Value);
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 }

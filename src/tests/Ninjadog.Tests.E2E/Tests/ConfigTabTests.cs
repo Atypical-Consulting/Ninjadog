@@ -165,7 +165,11 @@ public sealed class ConfigTabTests(NinjadogUiFixture server, PlaywrightFixture p
         var saved = Server.ReadSavedConfig();
         saved.ShouldNotBeNull();
         using var doc = JsonDocument.Parse(saved);
-        doc.RootElement.GetProperty("config").TryGetProperty("features", out _).ShouldBeFalse();
+        // After unchecking, either config has no features or config itself is absent (empty object is stripped)
+        if (doc.RootElement.TryGetProperty("config", out var configEl))
+        {
+            configEl.TryGetProperty("features", out _).ShouldBeFalse();
+        }
     }
 
     [Fact]

@@ -30,7 +30,7 @@ public abstract class UiTestBase(NinjadogUiFixture server, PlaywrightFixture pw)
     protected async Task NavigateToUiAsync()
     {
         await Page.GotoAsync(Server.BaseUrl);
-        // Wait for the app to initialize (tabs are rendered)
+        // Wait for the React app to initialize (tabs are rendered)
         await Page.WaitForSelectorAsync(".tab-btn[data-tab='config']");
         // Give Monaco a moment to load (CDN-dependent, may timeout in offline)
         await Page.WaitForTimeoutAsync(500);

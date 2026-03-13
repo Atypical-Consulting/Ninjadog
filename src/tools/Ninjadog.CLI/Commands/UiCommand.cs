@@ -36,10 +36,10 @@ internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
 
         var app = builder.Build();
 
-        // Serve embedded static files
+        // Serve embedded static files (Vite build output in WebUI/dist)
         var embeddedProvider = new EmbeddedFileProvider(
             typeof(UiCommand).Assembly,
-            "Ninjadog.CLI.WebUI");
+            "Ninjadog.CLI.WebUI.dist");
 
         app.UseStaticFiles(new StaticFileOptions
         {
@@ -47,9 +47,17 @@ internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
             RequestPath = string.Empty
         });
 
-        // Serve index.html at root
-        app.MapGet("/", async ctx =>
+        // SPA catch-all: serve index.html for any non-API GET request
+        // This enables client-side routing (React Router) to work with clean URLs
+        app.MapFallback(async ctx =>
         {
+            // Only serve index.html for GET requests that aren't API calls
+            if (ctx.Request.Method != "GET" || ctx.Request.Path.StartsWithSegments("/api"))
+            {
+                ctx.Response.StatusCode = 404;
+                return;
+            }
+
             var file = embeddedProvider.GetFileInfo("index.html");
             if (!file.Exists)
             {

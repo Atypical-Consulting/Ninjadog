@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="WebUI\**\*" />
+    <EmbeddedResource Include="WebUI\dist\**\*" />
   </ItemGroup>
 
 </Project>
