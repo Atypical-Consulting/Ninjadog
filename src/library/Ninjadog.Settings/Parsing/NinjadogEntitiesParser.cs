@@ -14,7 +14,8 @@ internal static class NinjadogEntitiesParser
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DictionaryKeyPolicy = null,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        Converters = { new JsonStringEnumConverter() }
     };
 
     internal static NinjadogLoadedEntities Parse(JsonElement root, string? basePath)

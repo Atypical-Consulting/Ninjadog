@@ -3,7 +3,7 @@
   "config": {
     "name": "RestaurantBooking",
     "version": "1.0.0",
-    "description": "An application to manage restaurant bookings",
+    "description": "An application to manage restaurant bookings.",
     "rootNamespace": "RestaurantBooking.CrudWebApi"
   },
   "entities": {

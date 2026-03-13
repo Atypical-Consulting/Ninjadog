@@ -3,7 +3,7 @@
   "config": {
     "name": "TodoApp",
     "version": "1.0.0",
-    "description": "An application to manage todo lists",
+    "description": "An application to manage todo lists.",
     "rootNamespace": "TodoApp.CrudWebApi"
   },
   "entities": {

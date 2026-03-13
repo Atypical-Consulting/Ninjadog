@@ -14,4 +14,9 @@
     <AdditionalFiles Include="UseCases\RestaurantBooking\ninjadog.json" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="UseCases\TodoApp\ninjadog.json" LogicalName="UseCases.TodoApp.ninjadog.json" />
+    <EmbeddedResource Include="UseCases\RestaurantBooking\ninjadog.json" LogicalName="UseCases.RestaurantBooking.ninjadog.json" />
+  </ItemGroup>
+
 </Project>

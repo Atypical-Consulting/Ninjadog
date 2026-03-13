@@ -22,78 +22,32 @@ Ninjadog ships with built-in use cases -- complete domain models that serve as r
 
 ## Overview
 
-Use cases are predefined `NinjadogSettings` implementations that combine a **configuration**, an **entity collection**, and optionally **enums** into a ready-to-generate project. They live in the `Ninjadog.Templates.CrudWebApi` project under `UseCases/` and serve three purposes:
+Use cases are predefined domain models defined as `ninjadog.json` files. They live in the `Ninjadog.Templates.CrudWebApi` project under `UseCases/` and serve three purposes:
 
 1. **Reference implementations** -- Show how to structure entity definitions, relationships, and configuration for real-world domains.
-2. **Test fixtures** -- The full template pipeline runs against each use case in the test suite, catching regressions across all 37 generators.
-3. **Learning examples** -- Each use case includes a matching `ninjadog.json` file that demonstrates the JSON configuration format.
+2. **Test fixtures** -- The full template pipeline runs against each use case in the test suite, catching regressions across all generators.
+3. **Learning examples** -- Each use case demonstrates the JSON configuration format with a complete, working domain model.
 
 ---
 
 ## Architecture
 
-Every use case follows a consistent three-class pattern:
+Each use case is simply a `ninjadog.json` file that is embedded as a resource and loaded at runtime via `UseCaseSettings`:
 
 ```
 UseCases/
 └── {Name}/
-    ├── {Name}Configuration.cs   -- sealed record extending NinjadogConfiguration
-    ├── {Name}Entities.cs         -- sealed class extending NinjadogEntities
-    ├── {Name}Settings.cs         -- record extending NinjadogSettings (combines Config + Entities)
-    └── ninjadog.json             -- equivalent JSON configuration
+    └── ninjadog.json    -- the complete domain model
 ```
 
-### Configuration
-
-A sealed record that provides project-level settings:
+The `UseCaseSettings` class provides static methods to load each use case:
 
 ```csharp
-public sealed record TodoAppConfiguration()
-    : NinjadogConfiguration(
-        Name: "TodoApp",
-        Version: "1.0.0",
-        Description: "An application to manage todo lists.",
-        RootNamespace: "TodoApp.CrudWebApi",
-        OutputPath: "src/applications/TodoApp");
+var todoApp = UseCaseSettings.TodoApp();
+var restaurant = UseCaseSettings.RestaurantBooking();
 ```
 
-### Entities
-
-A sealed class that defines the domain model with properties and relationships:
-
-```csharp
-public sealed class TodoAppEntities : NinjadogEntities
-{
-    public TodoAppEntities()
-    {
-        // Define properties
-        NinjadogEntityProperties todoListProperties = new()
-        {
-            { "Id", new NinjadogEntityId() },
-            { "Title", new NinjadogEntityProperty<string>() },
-        };
-
-        // Define relationships
-        NinjadogEntityRelationships todoListRelationships = new()
-        {
-            { "Items", new NinjadogEntityRelationship("TodoItem", NinjadogEntityRelationshipType.OneToMany) },
-        };
-
-        Add("TodoList", new NinjadogEntity(todoListProperties, todoListRelationships));
-    }
-}
-```
-
-### Settings
-
-A single record that wires configuration and entities together:
-
-```csharp
-public record TodoAppSettings()
-    : NinjadogSettings(
-        new TodoAppConfiguration(),
-        new TodoAppEntities());
-```
+These methods parse the embedded JSON using the same `NinjadogSettings.FromJsonString()` path that the CLI uses, ensuring the use cases exercise the real parsing pipeline.
 
 ---
 
@@ -116,7 +70,7 @@ A simple task management application with three entities and two relationships.
   "config": {
     "name": "TodoApp",
     "version": "1.0.0",
-    "description": "An application to manage todo lists",
+    "description": "An application to manage todo lists.",
     "rootNamespace": "TodoApp.CrudWebApi"
   },
   "entities": {
@@ -210,54 +164,6 @@ RestaurantBooking generates **over 100 files** from a single configuration, incl
 - 48 mappers
 - 24 validators
 - Database initializer with 12 CREATE TABLE statements
-
----
-
-## Creating Your Own Use Case
-
-You can create a use case by defining three classes in your project:
-
-### 1. Define the configuration
-
-```csharp
-public sealed record MyAppConfiguration()
-    : NinjadogConfiguration(
-        Name: "MyApp",
-        Version: "1.0.0",
-        Description: "My custom application.",
-        RootNamespace: "MyApp.Api",
-        OutputPath: "src/MyApp");
-```
-
-### 2. Define the entities
-
-```csharp
-public sealed class MyAppEntities : NinjadogEntities
-{
-    public MyAppEntities()
-    {
-        Add("Product", new NinjadogEntity(
-            new NinjadogEntityProperties
-            {
-                { "Id", new NinjadogEntityId() },
-                { "Name", new NinjadogEntityProperty<string>() },
-                { "Price", new NinjadogEntityProperty<decimal>() },
-            }));
-    }
-}
-```
-
-### 3. Wire them together
-
-```csharp
-public record MyAppSettings()
-    : NinjadogSettings(
-        new MyAppConfiguration(),
-        new MyAppEntities());
-```
-
-{: .tip }
-> While use cases defined in C# are useful for testing and reference, most users will define their domain model in `ninjadog.json` and use the CLI to generate code. See [Getting Started](/Ninjadog/getting-started) for the standard workflow.
 
 ---
 

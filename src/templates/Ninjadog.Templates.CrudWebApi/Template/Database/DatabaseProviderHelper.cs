@@ -55,9 +55,11 @@ internal static class DatabaseProviderHelper
     /// </summary>
     internal static string MapToDbType(string typeName, string provider, HashSet<string>? enumNames = null)
     {
+        var normalized = NormalizeTypeName(typeName);
+
         return enumNames?.Contains(typeName) == true
             ? "INTEGER"
-            : (provider, typeName) switch
+            : (provider, normalized) switch
             {
                 // PostgreSQL types
                 ("postgresql", "String") => "TEXT",
@@ -91,5 +93,20 @@ internal static class DatabaseProviderHelper
                 ("sqlserver", _) => "NVARCHAR(MAX)",
                 _ => "TEXT"
             };
+    }
+
+    /// <summary>
+    /// Normalizes C# type aliases to their CLR type names.
+    /// </summary>
+    private static string NormalizeTypeName(string typeName)
+    {
+        return typeName switch
+        {
+            "string" => "String",
+            "int" => "Int32",
+            "bool" => "Boolean",
+            "decimal" => "Decimal",
+            _ => typeName
+        };
     }
 }

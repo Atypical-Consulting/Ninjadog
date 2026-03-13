@@ -1,7 +1,6 @@
 using Ninjadog.Settings;
 using Ninjadog.Templates.CrudWebAPI.Setup;
-using Ninjadog.Templates.CrudWebAPI.UseCases.RestaurantBooking;
-using Ninjadog.Templates.CrudWebAPI.UseCases.TodoApp;
+using Ninjadog.Templates.CrudWebAPI.UseCases;
 using Shouldly;
 
 namespace Ninjadog.Tests.UseCases;
@@ -19,19 +18,19 @@ public class UseCaseTemplateTests
     [Fact]
     public void TodoApp_AllTemplates_ProduceValidOutput()
     {
-        ValidateAllTemplatesProduceValidOutput(new TodoAppSettings());
+        ValidateAllTemplatesProduceValidOutput(UseCaseSettings.TodoApp());
     }
 
     [Fact]
     public void RestaurantBooking_AllTemplates_ProduceValidOutput()
     {
-        ValidateAllTemplatesProduceValidOutput(new RestaurantBookingSettings());
+        ValidateAllTemplatesProduceValidOutput(UseCaseSettings.RestaurantBooking());
     }
 
     [Fact]
     public void TodoApp_Entities_HaveExpectedCount()
     {
-        var settings = new TodoAppSettings();
+        var settings = UseCaseSettings.TodoApp();
         settings.Entities.Count.ShouldBe(3);
         settings.Entities.ShouldContainKey("TodoList");
         settings.Entities.ShouldContainKey("TodoItem");
@@ -41,7 +40,7 @@ public class UseCaseTemplateTests
     [Fact]
     public void TodoApp_TodoList_HasRelationships()
     {
-        var settings = new TodoAppSettings();
+        var settings = UseCaseSettings.TodoApp();
         var todoList = settings.Entities["TodoList"];
         todoList.Relationships.ShouldNotBeNull();
         todoList.Relationships.Count.ShouldBe(2);
@@ -52,14 +51,14 @@ public class UseCaseTemplateTests
     [Fact]
     public void RestaurantBooking_Entities_HaveExpectedCount()
     {
-        var settings = new RestaurantBookingSettings();
+        var settings = UseCaseSettings.RestaurantBooking();
         settings.Entities.Count.ShouldBe(12);
     }
 
     [Fact]
     public void RestaurantBooking_Customer_HasRelationships()
     {
-        var settings = new RestaurantBookingSettings();
+        var settings = UseCaseSettings.RestaurantBooking();
         var customer = settings.Entities["Customer"];
         customer.Relationships.ShouldNotBeNull();
         customer.Relationships.Count.ShouldBe(1);
@@ -69,7 +68,7 @@ public class UseCaseTemplateTests
     [Fact]
     public Task TodoApp_DatabaseInitializer_ProducesCorrectOutput()
     {
-        var settings = new TodoAppSettings();
+        var settings = UseCaseSettings.TodoApp();
         var template = _templates.First(t => t.Name == "DatabaseInitializer");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
@@ -78,7 +77,7 @@ public class UseCaseTemplateTests
     [Fact]
     public Task TodoApp_Program_ProducesCorrectOutput()
     {
-        var settings = new TodoAppSettings();
+        var settings = UseCaseSettings.TodoApp();
         var template = _templates.First(t => t.Name == "Program");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
@@ -87,7 +86,7 @@ public class UseCaseTemplateTests
     [Fact]
     public Task TodoApp_CrudWebApiExtensions_ProducesCorrectOutput()
     {
-        var settings = new TodoAppSettings();
+        var settings = UseCaseSettings.TodoApp();
         var template = _templates.First(t => t.Name == "CrudWebApiExtensions");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
@@ -96,7 +95,7 @@ public class UseCaseTemplateTests
     [Fact]
     public Task TodoApp_GetByParentEndpoint_ProducesNestedEndpoints()
     {
-        var settings = new TodoAppSettings();
+        var settings = UseCaseSettings.TodoApp();
         var template = _templates.First(t => t.Name == "GetByParentEndpoint");
         var results = template.GenerateMany(settings).Where(r => !r.IsEmpty).ToList();
         return Verify(results.Select(r => new { r.FileName, r.Content }));
@@ -105,7 +104,7 @@ public class UseCaseTemplateTests
     [Fact]
     public Task RestaurantBooking_DatabaseInitializer_ProducesCorrectOutput()
     {
-        var settings = new RestaurantBookingSettings();
+        var settings = UseCaseSettings.RestaurantBooking();
         var template = _templates.First(t => t.Name == "DatabaseInitializer");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
@@ -114,7 +113,7 @@ public class UseCaseTemplateTests
     [Fact]
     public Task RestaurantBooking_CrudWebApiExtensions_ProducesCorrectOutput()
     {
-        var settings = new RestaurantBookingSettings();
+        var settings = UseCaseSettings.RestaurantBooking();
         var template = _templates.First(t => t.Name == "CrudWebApiExtensions");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
@@ -123,7 +122,7 @@ public class UseCaseTemplateTests
     [Fact]
     public Task RestaurantBooking_GetByParentEndpoint_ProducesNestedEndpoints()
     {
-        var settings = new RestaurantBookingSettings();
+        var settings = UseCaseSettings.RestaurantBooking();
         var template = _templates.First(t => t.Name == "GetByParentEndpoint");
         var results = template.GenerateMany(settings).Where(r => !r.IsEmpty).ToList();
         return Verify(results.Select(r => new { r.FileName, r.Content }));
@@ -132,15 +131,15 @@ public class UseCaseTemplateTests
     [Fact]
     public void TodoApp_TemplateCount_GeneratesFiles()
     {
-        var totalFiles = CountGeneratedFiles(new TodoAppSettings());
+        var totalFiles = CountGeneratedFiles(UseCaseSettings.TodoApp());
         totalFiles.ShouldBeGreaterThan(0);
     }
 
     [Fact]
     public void RestaurantBooking_GeneratesMoreFilesThanTodoApp()
     {
-        var todoFiles = CountGeneratedFiles(new TodoAppSettings());
-        var restaurantFiles = CountGeneratedFiles(new RestaurantBookingSettings());
+        var todoFiles = CountGeneratedFiles(UseCaseSettings.TodoApp());
+        var restaurantFiles = CountGeneratedFiles(UseCaseSettings.RestaurantBooking());
 
         restaurantFiles.ShouldBeGreaterThan(
             todoFiles,
