@@ -18,7 +18,7 @@ public partial class IndexPageTemplateTests
     public Task IndexPage_MultipleEntities_ProducesCorrectOutput()
     {
         var template = new IndexPageTemplate();
-        var settings = new RelationshipSettings();
+        var settings = TestSettingsFactory.WithRelationships();
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }

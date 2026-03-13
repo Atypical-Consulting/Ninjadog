@@ -10,7 +10,7 @@ public partial class VersioningTemplateTests
     public Task GetAllEndpoint_WithVersioning_IncludesVersionCall()
     {
         var template = new GetAllEndpointTemplate();
-        var settings = new VersioningSettings();
+        var settings = TestSettingsFactory.WithVersioning();
         var results = template.GenerateMany(settings).ToList();
         return Verify(results[0].Content);
     }
@@ -19,7 +19,7 @@ public partial class VersioningTemplateTests
     public Task GetEndpoint_WithVersioning_IncludesVersionCall()
     {
         var template = new GetEndpointTemplate();
-        var settings = new VersioningSettings();
+        var settings = TestSettingsFactory.WithVersioning();
         var results = template.GenerateMany(settings).ToList();
         return Verify(results[0].Content);
     }
@@ -28,7 +28,7 @@ public partial class VersioningTemplateTests
     public Task CreateEndpoint_WithVersioning_IncludesVersionCall()
     {
         var template = new CreateEndpointTemplate();
-        var settings = new VersioningSettings();
+        var settings = TestSettingsFactory.WithVersioning();
         var results = template.GenerateMany(settings).ToList();
         return Verify(results[0].Content);
     }
@@ -37,7 +37,7 @@ public partial class VersioningTemplateTests
     public Task DeleteEndpoint_WithVersioning_IncludesVersionCall()
     {
         var template = new DeleteEndpointTemplate();
-        var settings = new VersioningSettings();
+        var settings = TestSettingsFactory.WithVersioning();
         var results = template.GenerateMany(settings).ToList();
         return Verify(results[0].Content);
     }
@@ -46,7 +46,7 @@ public partial class VersioningTemplateTests
     public Task UpdateEndpoint_WithVersioning_IncludesVersionCall()
     {
         var template = new UpdateEndpointTemplate();
-        var settings = new VersioningSettings();
+        var settings = TestSettingsFactory.WithVersioning();
         var results = template.GenerateMany(settings).ToList();
         return Verify(results[0].Content);
     }
@@ -55,7 +55,7 @@ public partial class VersioningTemplateTests
     public Task Extensions_WithUrlPathVersioning_ConfiguresVersioningInUseFastEndpoints()
     {
         var template = new CrudWebApiExtensionsTemplate();
-        var settings = new VersioningSettings();
+        var settings = TestSettingsFactory.WithVersioning();
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -64,7 +64,7 @@ public partial class VersioningTemplateTests
     public Task Extensions_WithHeaderVersioning_ConfiguresVersioningWithPrependFalse()
     {
         var template = new CrudWebApiExtensionsTemplate();
-        var settings = new HeaderVersioningSettings();
+        var settings = TestSettingsFactory.WithHeaderVersioning();
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }

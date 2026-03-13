@@ -26,7 +26,7 @@ public partial class RepositoryTemplateTests
     [Fact]
     public Task GenerateMany_WithSoftDelete_AddsSoftDeleteLogic()
     {
-        var settings = new SoftDeleteSettings();
+        var settings = TestSettingsFactory.WithSoftDelete();
         var results = _template.GenerateMany(settings).ToList();
         return Verify(results.Select(r => r.Content));
     }
@@ -34,7 +34,7 @@ public partial class RepositoryTemplateTests
     [Fact]
     public Task GenerateMany_WithAuditing_AddsAuditLogic()
     {
-        var settings = new AuditSettings();
+        var settings = TestSettingsFactory.WithAuditing();
         var results = _template.GenerateMany(settings).ToList();
         return Verify(results.Select(r => r.Content));
     }

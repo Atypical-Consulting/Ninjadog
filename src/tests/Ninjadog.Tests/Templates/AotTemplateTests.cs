@@ -10,7 +10,7 @@ public partial class AotTemplateTests
     public Task GenerateProgram_WithAot_UsesSlimBuilder()
     {
         var template = new ProgramTemplate();
-        var settings = new AotSettings();
+        var settings = TestSettingsFactory.WithAot();
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -28,7 +28,7 @@ public partial class AotTemplateTests
     public Task GenerateProgram_WithAotAndSeedData_IncludesSeederCall()
     {
         var template = new ProgramTemplate();
-        var settings = new AotSeededSettings();
+        var settings = TestSettingsFactory.WithAotSeeded();
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -37,7 +37,7 @@ public partial class AotTemplateTests
     public Task GenerateExtensions_WithAot_RemovesSwaggerAndConfiguresFastEndpoints()
     {
         var template = new CrudWebApiExtensionsTemplate();
-        var settings = new AotSettings();
+        var settings = TestSettingsFactory.WithAot();
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -55,7 +55,7 @@ public partial class AotTemplateTests
     public Task GenerateExtensions_WithAotAndSeedData_IncludesSeederRegistration()
     {
         var template = new CrudWebApiExtensionsTemplate();
-        var settings = new AotSeededSettings();
+        var settings = TestSettingsFactory.WithAotSeeded();
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -64,7 +64,7 @@ public partial class AotTemplateTests
     public Task GenerateJsonSerializerContext_WithAot_GeneratesContext()
     {
         var template = new JsonSerializerContextTemplate();
-        var settings = new AotSettings();
+        var settings = TestSettingsFactory.WithAot();
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -82,7 +82,7 @@ public partial class AotTemplateTests
     public Task GenerateJsonSerializerContext_WithAotMultipleEntities_IncludesAllTypes()
     {
         var template = new JsonSerializerContextTemplate();
-        var settings = new AotSeededSettings();
+        var settings = TestSettingsFactory.WithAotSeeded();
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -91,7 +91,7 @@ public partial class AotTemplateTests
     public Task GenerateRepository_WithAot_AddsDapperAotAttribute()
     {
         var template = new RepositoryTemplate();
-        var settings = new AotSettings();
+        var settings = TestSettingsFactory.WithAot();
         var results = template.GenerateMany(settings).ToList();
         return Verify(results.Select(r => r.Content));
     }

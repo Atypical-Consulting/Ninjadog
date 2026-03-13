@@ -27,7 +27,7 @@ public partial class DockerTemplateTests
     public Task DockerCompose_Postgres_ProducesCorrectOutput()
     {
         var template = new DockerComposeTemplate();
-        var settings = new PostgresSettings();
+        var settings = TestSettingsFactory.WithPostgres();
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -36,7 +36,7 @@ public partial class DockerTemplateTests
     public Task DockerCompose_SqlServer_ProducesCorrectOutput()
     {
         var template = new DockerComposeTemplate();
-        var settings = new SqlServerSettings();
+        var settings = TestSettingsFactory.WithSqlServer();
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }

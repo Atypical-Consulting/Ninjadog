@@ -9,7 +9,7 @@ public partial class RelationshipTemplateTests
     public Task GetByParentEndpoint_WithOneToManyRelationship_GeneratesNestedEndpoint()
     {
         var template = new GetByParentEndpointTemplate();
-        var settings = new RelationshipSettings();
+        var settings = TestSettingsFactory.WithRelationships();
         var results = template.GenerateMany(settings).ToList();
         return Verify(results.Select(r => r.Content));
     }

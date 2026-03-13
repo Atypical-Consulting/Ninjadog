@@ -4,6 +4,83 @@ using Ninjadog.Settings.Entities;
 
 namespace Ninjadog.Tests.Helpers;
 
+/// <summary>
+/// Factory methods for creating test settings with specific feature flag combinations.
+/// Use these instead of one-off record types for simple configuration variations.
+/// </summary>
+public static class TestSettingsFactory
+{
+    public static ConfiguredSettings WithSoftDelete()
+    {
+        return new ConfiguredSettings(new TestConfiguration() with { SoftDelete = true }, new TestEntitiesCollection());
+    }
+
+    public static ConfiguredSettings WithAuditing()
+    {
+        return new ConfiguredSettings(new TestConfiguration() with { Auditing = true }, new TestEntitiesCollection());
+    }
+
+    public static ConfiguredSettings WithPostgres()
+    {
+        return new ConfiguredSettings(new TestConfiguration() with { DatabaseProvider = "postgresql" }, new TestEntitiesCollection());
+    }
+
+    public static ConfiguredSettings WithSqlServer()
+    {
+        return new ConfiguredSettings(new TestConfiguration() with { DatabaseProvider = "sqlserver" }, new TestEntitiesCollection());
+    }
+
+    public static ConfiguredSettings WithRelationships()
+    {
+        return new ConfiguredSettings(new TestConfiguration(), new RelationshipEntitiesCollection());
+    }
+
+    public static ConfiguredSettings WithAot()
+    {
+        return new ConfiguredSettings(new TestConfiguration() with { Aot = true }, new TestEntitiesCollection());
+    }
+
+    public static ConfiguredSettings WithAotSeeded()
+    {
+        return new ConfiguredSettings(new TestConfiguration() with { Aot = true }, new AotSeededEntitiesCollection());
+    }
+
+    public static ConfiguredSettings WithRateLimit()
+    {
+        return new ConfiguredSettings(
+            new TestConfiguration() with { RateLimit = new NinjadogRateLimitConfiguration() },
+            new TestEntitiesCollection());
+    }
+
+    public static ConfiguredSettings WithCustomRateLimit(int permitLimit = 50, int windowSeconds = 30, int segmentsPerWindow = 3)
+    {
+        return new ConfiguredSettings(
+            new TestConfiguration() with { RateLimit = new NinjadogRateLimitConfiguration(PermitLimit: permitLimit, WindowSeconds: windowSeconds, SegmentsPerWindow: segmentsPerWindow) },
+            new TestEntitiesCollection());
+    }
+
+    public static ConfiguredSettings WithVersioning()
+    {
+        return new ConfiguredSettings(
+            new TestConfiguration() with { Versioning = new NinjadogVersioningConfiguration() },
+            new TestEntitiesCollection());
+    }
+
+    public static ConfiguredSettings WithHeaderVersioning()
+    {
+        return new ConfiguredSettings(
+            new TestConfiguration() with { Versioning = new NinjadogVersioningConfiguration(Strategy: "HeaderBased") },
+            new TestEntitiesCollection());
+    }
+
+    public static ConfiguredSettings WithAuth(params string[] roles)
+    {
+        return new ConfiguredSettings(
+            new TestConfiguration() with { Auth = new NinjadogAuthConfiguration(Roles: roles) },
+            new TestEntitiesCollection());
+    }
+}
+
 public sealed record TestConfiguration()
     : NinjadogConfiguration(
         Name: "TestApp",
@@ -21,6 +98,12 @@ public sealed class TestEntitiesCollection : NinjadogEntities
         Add(guidEntity.Key, new(guidEntity.Properties));
     }
 }
+
+/// <summary>
+/// Concrete NinjadogSettings for tests with a specific configuration and entity set.
+/// </summary>
+public sealed record ConfiguredSettings(NinjadogConfiguration Config, NinjadogEntities Entities, Dictionary<string, List<string>>? Enums = null)
+    : NinjadogSettings(Config, Entities, Enums);
 
 public sealed record TestSettings()
     : NinjadogSettings(new TestConfiguration(), new TestEntitiesCollection());
@@ -47,18 +130,6 @@ public sealed class SeededEntitiesCollection : NinjadogEntities
 public sealed record SeededSettings()
     : NinjadogSettings(new TestConfiguration(), new SeededEntitiesCollection());
 
-public sealed record SoftDeleteSettings()
-    : NinjadogSettings(new TestConfiguration() with { SoftDelete = true }, new TestEntitiesCollection());
-
-public sealed record AuditSettings()
-    : NinjadogSettings(new TestConfiguration() with { Auditing = true }, new TestEntitiesCollection());
-
-public sealed record PostgresSettings()
-    : NinjadogSettings(new TestConfiguration() with { DatabaseProvider = "postgresql" }, new TestEntitiesCollection());
-
-public sealed record SqlServerSettings()
-    : NinjadogSettings(new TestConfiguration() with { DatabaseProvider = "sqlserver" }, new TestEntitiesCollection());
-
 public sealed class RelationshipEntitiesCollection : NinjadogEntities
 {
     public RelationshipEntitiesCollection()
@@ -70,12 +141,6 @@ public sealed class RelationshipEntitiesCollection : NinjadogEntities
     }
 }
 
-public sealed record RelationshipSettings()
-    : NinjadogSettings(new TestConfiguration(), new RelationshipEntitiesCollection());
-
-public sealed record AotSettings()
-    : NinjadogSettings(new TestConfiguration() with { Aot = true }, new TestEntitiesCollection());
-
 public sealed class AotSeededEntitiesCollection : NinjadogEntities
 {
     public AotSeededEntitiesCollection()
@@ -86,23 +151,3 @@ public sealed class AotSeededEntitiesCollection : NinjadogEntities
         Add(seededEntity.Key, new(seededEntity.Properties, null, seededEntity.SeedData));
     }
 }
-
-public sealed record AotSeededSettings()
-    : NinjadogSettings(new TestConfiguration() with { Aot = true }, new AotSeededEntitiesCollection());
-
-public sealed record RateLimitSettings()
-    : NinjadogSettings(new TestConfiguration() with { RateLimit = new NinjadogRateLimitConfiguration() }, new TestEntitiesCollection());
-
-public sealed record CustomRateLimitSettings()
-    : NinjadogSettings(
-        new TestConfiguration() with { RateLimit = new NinjadogRateLimitConfiguration(PermitLimit: 50, WindowSeconds: 30, SegmentsPerWindow: 3) },
-        new TestEntitiesCollection());
-
-public sealed record VersioningSettings()
-    : NinjadogSettings(new TestConfiguration() with { Versioning = new NinjadogVersioningConfiguration() }, new TestEntitiesCollection());
-
-public sealed record HeaderVersioningSettings()
-    : NinjadogSettings(new TestConfiguration() with { Versioning = new NinjadogVersioningConfiguration(Strategy: "HeaderBased") }, new TestEntitiesCollection());
-
-public sealed record AuthSettings()
-    : NinjadogSettings(new TestConfiguration() with { Auth = new NinjadogAuthConfiguration(Roles: ["Admin", "User"]) }, new TestEntitiesCollection());

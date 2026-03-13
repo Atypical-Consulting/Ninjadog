@@ -18,7 +18,7 @@ public partial class DatabaseInitializerTemplateTests
     [Fact]
     public Task GenerateOne_WithSoftDelete_AddsSoftDeleteColumns()
     {
-        var settings = new SoftDeleteSettings();
+        var settings = TestSettingsFactory.WithSoftDelete();
         var result = _template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -26,7 +26,7 @@ public partial class DatabaseInitializerTemplateTests
     [Fact]
     public Task GenerateOne_WithAuditing_AddsAuditColumns()
     {
-        var settings = new AuditSettings();
+        var settings = TestSettingsFactory.WithAuditing();
         var result = _template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -34,7 +34,7 @@ public partial class DatabaseInitializerTemplateTests
     [Fact]
     public Task GenerateOne_WithRelationships_AddsForeignKeyConstraints()
     {
-        var settings = new RelationshipSettings();
+        var settings = TestSettingsFactory.WithRelationships();
         var result = _template.GenerateOne(settings);
         return Verify(result.Content);
     }

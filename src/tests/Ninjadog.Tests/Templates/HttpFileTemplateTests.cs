@@ -18,7 +18,7 @@ public partial class HttpFileTemplateTests
     public Task HttpFile_MultipleEntities_ProducesCorrectOutput()
     {
         var template = new HttpFileTemplate();
-        var settings = new RelationshipSettings();
+        var settings = TestSettingsFactory.WithRelationships();
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }

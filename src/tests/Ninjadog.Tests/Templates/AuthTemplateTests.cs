@@ -11,7 +11,7 @@ public partial class AuthTemplateTests
     public Task AuthExtensions_WithAuth_GeneratesJwtSetup()
     {
         var template = new AuthExtensionsTemplate();
-        var settings = new AuthSettings();
+        var settings = TestSettingsFactory.WithAuth("Admin", "User");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -29,7 +29,7 @@ public partial class AuthTemplateTests
     public Task TokenServiceInterface_WithAuth_GeneratesInterface()
     {
         var template = new TokenServiceInterfaceTemplate();
-        var settings = new AuthSettings();
+        var settings = TestSettingsFactory.WithAuth("Admin", "User");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -38,7 +38,7 @@ public partial class AuthTemplateTests
     public Task TokenService_WithAuth_GeneratesImplementation()
     {
         var template = new TokenServiceTemplate();
-        var settings = new AuthSettings();
+        var settings = TestSettingsFactory.WithAuth("Admin", "User");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -47,7 +47,7 @@ public partial class AuthTemplateTests
     public Task UserEntity_WithAuth_GeneratesUserClass()
     {
         var template = new UserEntityTemplate();
-        var settings = new AuthSettings();
+        var settings = TestSettingsFactory.WithAuth("Admin", "User");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -56,7 +56,7 @@ public partial class AuthTemplateTests
     public Task UserRepositoryInterface_WithAuth_GeneratesInterface()
     {
         var template = new UserRepositoryInterfaceTemplate();
-        var settings = new AuthSettings();
+        var settings = TestSettingsFactory.WithAuth("Admin", "User");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -65,7 +65,7 @@ public partial class AuthTemplateTests
     public Task UserRepository_WithAuth_GeneratesImplementation()
     {
         var template = new UserRepositoryTemplate();
-        var settings = new AuthSettings();
+        var settings = TestSettingsFactory.WithAuth("Admin", "User");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -74,7 +74,7 @@ public partial class AuthTemplateTests
     public Task UserInitializer_WithAuth_GeneratesTableCreation()
     {
         var template = new UserInitializerTemplate();
-        var settings = new AuthSettings();
+        var settings = TestSettingsFactory.WithAuth("Admin", "User");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -83,7 +83,7 @@ public partial class AuthTemplateTests
     public Task LoginEndpoint_WithAuth_GeneratesEndpoint()
     {
         var template = new LoginEndpointTemplate();
-        var settings = new AuthSettings();
+        var settings = TestSettingsFactory.WithAuth("Admin", "User");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -92,7 +92,7 @@ public partial class AuthTemplateTests
     public Task RegisterEndpoint_WithAuth_GeneratesEndpoint()
     {
         var template = new RegisterEndpointTemplate();
-        var settings = new AuthSettings();
+        var settings = TestSettingsFactory.WithAuth("Admin", "User");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -101,7 +101,7 @@ public partial class AuthTemplateTests
     public Task LoginRequest_WithAuth_GeneratesRecord()
     {
         var template = new LoginRequestTemplate();
-        var settings = new AuthSettings();
+        var settings = TestSettingsFactory.WithAuth("Admin", "User");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -110,7 +110,7 @@ public partial class AuthTemplateTests
     public Task LoginResponse_WithAuth_GeneratesRecord()
     {
         var template = new LoginResponseTemplate();
-        var settings = new AuthSettings();
+        var settings = TestSettingsFactory.WithAuth("Admin", "User");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -119,7 +119,7 @@ public partial class AuthTemplateTests
     public Task RegisterRequest_WithAuth_GeneratesRecord()
     {
         var template = new RegisterRequestTemplate();
-        var settings = new AuthSettings();
+        var settings = TestSettingsFactory.WithAuth("Admin", "User");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -128,7 +128,7 @@ public partial class AuthTemplateTests
     public Task RegisterResponse_WithAuth_GeneratesRecord()
     {
         var template = new RegisterResponseTemplate();
-        var settings = new AuthSettings();
+        var settings = TestSettingsFactory.WithAuth("Admin", "User");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -137,7 +137,7 @@ public partial class AuthTemplateTests
     public Task LoginRequestValidator_WithAuth_GeneratesValidator()
     {
         var template = new LoginRequestValidatorTemplate();
-        var settings = new AuthSettings();
+        var settings = TestSettingsFactory.WithAuth("Admin", "User");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -146,7 +146,7 @@ public partial class AuthTemplateTests
     public Task RegisterRequestValidator_WithAuth_GeneratesValidator()
     {
         var template = new RegisterRequestValidatorTemplate();
-        var settings = new AuthSettings();
+        var settings = TestSettingsFactory.WithAuth("Admin", "User");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -155,7 +155,7 @@ public partial class AuthTemplateTests
     public Task Program_WithAuth_IncludesAuthMiddleware()
     {
         var template = new ProgramTemplate();
-        var settings = new AuthSettings();
+        var settings = TestSettingsFactory.WithAuth("Admin", "User");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -164,7 +164,7 @@ public partial class AuthTemplateTests
     public Task AppSettings_WithAuth_IncludesJwtSection()
     {
         var template = new AppSettingsTemplate();
-        var settings = new AuthSettings();
+        var settings = TestSettingsFactory.WithAuth("Admin", "User");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -173,7 +173,7 @@ public partial class AuthTemplateTests
     public Task CrudWebApiExtensions_WithAuth_IncludesAuthServices()
     {
         var template = new CrudWebApiExtensionsTemplate();
-        var settings = new AuthSettings();
+        var settings = TestSettingsFactory.WithAuth("Admin", "User");
         var result = template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -182,7 +182,7 @@ public partial class AuthTemplateTests
     public Task CreateEndpoint_WithAuth_RemovesAllowAnonymous()
     {
         var template = new CreateEndpointTemplate();
-        var settings = new AuthSettings();
+        var settings = TestSettingsFactory.WithAuth("Admin", "User");
         var results = template.GenerateMany(settings).ToList();
         return Verify(results.First().Content);
     }
@@ -191,7 +191,7 @@ public partial class AuthTemplateTests
     public Task DeleteEndpoint_WithAuth_RemovesAllowAnonymous()
     {
         var template = new DeleteEndpointTemplate();
-        var settings = new AuthSettings();
+        var settings = TestSettingsFactory.WithAuth("Admin", "User");
         var results = template.GenerateMany(settings).ToList();
         return Verify(results.First().Content);
     }
@@ -200,7 +200,7 @@ public partial class AuthTemplateTests
     public Task UpdateEndpoint_WithAuth_RemovesAllowAnonymous()
     {
         var template = new UpdateEndpointTemplate();
-        var settings = new AuthSettings();
+        var settings = TestSettingsFactory.WithAuth("Admin", "User");
         var results = template.GenerateMany(settings).ToList();
         return Verify(results.First().Content);
     }

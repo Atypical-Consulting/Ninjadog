@@ -18,7 +18,7 @@ public partial class ProgramTemplateTests
     [Fact]
     public Task GenerateOne_WithRateLimit_AddsRateLimiter()
     {
-        var settings = new RateLimitSettings();
+        var settings = TestSettingsFactory.WithRateLimit();
         var result = _template.GenerateOne(settings);
         return Verify(result.Content);
     }
@@ -26,7 +26,7 @@ public partial class ProgramTemplateTests
     [Fact]
     public Task GenerateOne_WithCustomRateLimit_UsesCustomValues()
     {
-        var settings = new CustomRateLimitSettings();
+        var settings = TestSettingsFactory.WithCustomRateLimit();
         var result = _template.GenerateOne(settings);
         return Verify(result.Content);
     }
