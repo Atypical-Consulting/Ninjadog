@@ -7,6 +7,7 @@ const TABS = [
   { path: '/entities', label: 'Entities', badgeKey: 'entities' as const },
   { path: '/enums', label: 'Enums', badgeKey: 'enums' as const },
   { path: '/seed', label: 'Seed Data', badgeKey: 'seed' as const },
+  { path: '/evolve', label: 'Evolve' },
 ];
 
 const VIEW_MODES: { mode: ViewMode; title: string; icon: React.ReactNode }[] = [

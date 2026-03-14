@@ -31,12 +31,12 @@ public sealed class AppLoadingTests(NinjadogUiFixture server, PlaywrightFixture 
     }
 
     [Fact]
-    public async Task PageLoads_ShowsFourTabs()
+    public async Task PageLoads_ShowsFiveTabs()
     {
         await NavigateToUiAsync();
 
         var tabs = await Page.QuerySelectorAllAsync(".tab-btn");
-        tabs.Count.ShouldBe(4);
+        tabs.Count.ShouldBe(5);
 
         var tabNames = new List<string>();
         foreach (var tab in tabs)
@@ -49,6 +49,7 @@ public sealed class AppLoadingTests(NinjadogUiFixture server, PlaywrightFixture 
         tabNames[1].ShouldContain("Entities");
         tabNames[2].ShouldContain("Enums");
         tabNames[3].ShouldContain("Seed Data");
+        tabNames[4].ShouldContain("Evolve");
     }
 
     [Fact]
