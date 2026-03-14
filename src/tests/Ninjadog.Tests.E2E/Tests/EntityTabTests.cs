@@ -19,7 +19,7 @@ public sealed class EntityTabTests(NinjadogUiFixture server, PlaywrightFixture p
         await Page.ClickAsync("#btn-add-entity");
 
         // Form should appear
-        var addForm = await Page.QuerySelectorAsync("#entity-add-form:not(.hidden)");
+        var addForm = await Page.QuerySelectorAsync("#entity-add-form");
         addForm.ShouldNotBeNull();
 
         // Type name and confirm
@@ -52,15 +52,16 @@ public sealed class EntityTabTests(NinjadogUiFixture server, PlaywrightFixture p
         await SwitchTabAsync("entities");
 
         await Page.ClickAsync("#btn-add-entity");
+
+        // When form is open, the add button should not be in the DOM (conditional rendering)
         var addBtn = await Page.QuerySelectorAsync("#btn-add-entity");
-        var isHidden = await addBtn!.EvaluateAsync<bool>("el => el.classList.contains('hidden')");
-        isHidden.ShouldBeTrue();
+        addBtn.ShouldBeNull();
 
         await Page.ClickAsync("#entity-add-cancel");
 
-        // Button should be visible again
-        var isVisibleAgain = await addBtn.EvaluateAsync<bool>("el => !el.classList.contains('hidden')");
-        isVisibleAgain.ShouldBeTrue();
+        // Button should be visible again after cancel
+        var addBtnRestored = await Page.WaitForSelectorAsync("#btn-add-entity");
+        addBtnRestored.ShouldNotBeNull();
     }
 
     [Fact]

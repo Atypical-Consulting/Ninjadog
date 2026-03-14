@@ -13,9 +13,9 @@ public sealed class ViewModeTests(NinjadogUiFixture server, PlaywrightFixture pw
     {
         await NavigateToUiAsync();
 
-        var leftPanel = await Page.QuerySelectorAsync("#left-panel:not(.hidden)");
-        var jsonPanel = await Page.QuerySelectorAsync("#json-panel:not(.hidden)");
-        var resizeHandle = await Page.QuerySelectorAsync("#resize-handle:not(.hidden)");
+        var leftPanel = await Page.QuerySelectorAsync("#left-panel");
+        var jsonPanel = await Page.QuerySelectorAsync("#json-panel");
+        var resizeHandle = await Page.QuerySelectorAsync("#resize-handle");
 
         leftPanel.ShouldNotBeNull();
         jsonPanel.ShouldNotBeNull();
@@ -29,14 +29,14 @@ public sealed class ViewModeTests(NinjadogUiFixture server, PlaywrightFixture pw
 
         await Page.ClickAsync("[data-view='form']");
 
-        var leftHidden = await Page.EvalOnSelectorAsync<bool>("#left-panel", "el => el.classList.contains('hidden')");
-        leftHidden.ShouldBeFalse();
+        var leftPanel = await Page.QuerySelectorAsync("#left-panel");
+        leftPanel.ShouldNotBeNull();
 
-        var jsonHidden = await Page.EvalOnSelectorAsync<bool>("#json-panel", "el => el.classList.contains('hidden')");
-        jsonHidden.ShouldBeTrue();
+        var jsonPanel = await Page.QuerySelectorAsync("#json-panel");
+        jsonPanel.ShouldBeNull();
 
-        var handleHidden = await Page.EvalOnSelectorAsync<bool>("#resize-handle", "el => el.classList.contains('hidden')");
-        handleHidden.ShouldBeTrue();
+        var resizeHandle = await Page.QuerySelectorAsync("#resize-handle");
+        resizeHandle.ShouldBeNull();
     }
 
     [Fact]
@@ -46,11 +46,11 @@ public sealed class ViewModeTests(NinjadogUiFixture server, PlaywrightFixture pw
 
         await Page.ClickAsync("[data-view='json']");
 
-        var leftHidden = await Page.EvalOnSelectorAsync<bool>("#left-panel", "el => el.classList.contains('hidden')");
-        leftHidden.ShouldBeTrue();
+        var leftPanel = await Page.QuerySelectorAsync("#left-panel");
+        leftPanel.ShouldBeNull();
 
-        var jsonHidden = await Page.EvalOnSelectorAsync<bool>("#json-panel", "el => el.classList.contains('hidden')");
-        jsonHidden.ShouldBeFalse();
+        var jsonPanel = await Page.QuerySelectorAsync("#json-panel");
+        jsonPanel.ShouldNotBeNull();
     }
 
     [Fact]
@@ -75,14 +75,14 @@ public sealed class ViewModeTests(NinjadogUiFixture server, PlaywrightFixture pw
         // Back to split
         await Page.ClickAsync("[data-view='split']");
 
-        var leftHidden = await Page.EvalOnSelectorAsync<bool>("#left-panel", "el => el.classList.contains('hidden')");
-        leftHidden.ShouldBeFalse();
+        var leftPanel = await Page.QuerySelectorAsync("#left-panel");
+        leftPanel.ShouldNotBeNull();
 
-        var jsonHidden = await Page.EvalOnSelectorAsync<bool>("#json-panel", "el => el.classList.contains('hidden')");
-        jsonHidden.ShouldBeFalse();
+        var jsonPanel = await Page.QuerySelectorAsync("#json-panel");
+        jsonPanel.ShouldNotBeNull();
 
-        var handleHidden = await Page.EvalOnSelectorAsync<bool>("#resize-handle", "el => el.classList.contains('hidden')");
-        handleHidden.ShouldBeFalse();
+        var resizeHandle = await Page.QuerySelectorAsync("#resize-handle");
+        resizeHandle.ShouldNotBeNull();
     }
 
     [Fact]

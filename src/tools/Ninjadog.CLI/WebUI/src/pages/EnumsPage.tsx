@@ -11,7 +11,8 @@ function getEntityColor(name: string) {
   return `hsl(${hue}, 65%, 55%)`;
 }
 
-function AutoFocusInput({ value, onChange, onKeyDown, placeholder, className, style }: {
+function AutoFocusInput({ id, value, onChange, onKeyDown, placeholder, className, style }: {
+  id?: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
@@ -24,6 +25,7 @@ function AutoFocusInput({ value, onChange, onKeyDown, placeholder, className, st
   return (
     <input
       ref={ref}
+      id={id}
       className={className}
       style={style}
       placeholder={placeholder}
@@ -99,6 +101,7 @@ export default function EnumsPage() {
           {addFormOpen ? (
             <div className="inline-add-form">
               <AutoFocusInput
+                id="enum-add-input"
                 className="field-input text-sm py-1"
                 style={{ width: 200 }}
                 placeholder="Enum name (PascalCase)"

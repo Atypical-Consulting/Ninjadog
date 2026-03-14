@@ -32,25 +32,29 @@ const PRESETS: Record<string, Array<Record<string, any>>> = {
   description: [{ name: 'description', type: 'string', maxLength: 2000 }],
 };
 
-function AutoFocusInput({ value, onChange, onKeyDown, placeholder, className, style }: {
+function AutoFocusInput({ id, value, onChange, onKeyDown, placeholder, className, style, 'data-entity': dataEntity }: {
+  id?: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   placeholder: string;
   className?: string;
   style?: React.CSSProperties;
+  'data-entity'?: string;
 }) {
   const ref = useRef<HTMLInputElement>(null);
   useEffect(() => { ref.current?.focus(); }, []);
   return (
     <input
       ref={ref}
+      id={id}
       className={className}
       style={style}
       placeholder={placeholder}
       value={value}
       onChange={onChange}
       onKeyDown={onKeyDown}
+      data-entity={dataEntity}
     />
   );
 }
@@ -286,6 +290,7 @@ export default function EntitiesPage() {
           {addFormOpen ? (
             <div id="entity-add-form" className="inline-add-form">
               <AutoFocusInput
+                id="entity-add-input"
                 className="field-input text-sm py-1"
                 style={{ width: 200 }}
                 placeholder="Entity name (PascalCase)"
@@ -449,6 +454,7 @@ function EntityCard({
                 <div className="inline-add-form">
                   <AutoFocusInput
                     className="field-input text-xs py-1 prop-add-input"
+                    data-entity={name}
                     style={{ width: 150 }}
                     placeholder="Property name (camelCase)"
                     value={propAddInput}
@@ -458,7 +464,7 @@ function EntityCard({
                       if (e.key === 'Escape') { setPropAddOpen(false); setPropAddInput(''); }
                     }}
                   />
-                  <button className="btn-sm btn-primary prop-add-confirm" onClick={handleAddProp}>Add</button>
+                  <button className="btn-sm btn-primary prop-add-confirm" data-entity={name} onClick={handleAddProp}>Add</button>
                   <button className="btn-sm btn-ghost" onClick={() => { setPropAddOpen(false); setPropAddInput(''); }}>Cancel</button>
                 </div>
               ) : (
@@ -570,6 +576,7 @@ function EntityCard({
                 <div className="inline-add-form">
                   <AutoFocusInput
                     className="field-input text-xs py-1 rel-add-input"
+                    data-entity={name}
                     style={{ width: 150 }}
                     placeholder="Relationship name"
                     value={relAddInput}
@@ -579,7 +586,7 @@ function EntityCard({
                       if (e.key === 'Escape') { setRelAddOpen(false); setRelAddInput(''); }
                     }}
                   />
-                  <button className="btn-sm btn-primary rel-add-confirm" onClick={handleAddRel}>Add</button>
+                  <button className="btn-sm btn-primary rel-add-confirm" data-entity={name} onClick={handleAddRel}>Add</button>
                   <button className="btn-sm btn-ghost" onClick={() => { setRelAddOpen(false); setRelAddInput(''); }}>Cancel</button>
                 </div>
               ) : (
