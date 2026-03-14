@@ -66,6 +66,7 @@ ninjadog init
 | `--namespace <ns>` | Set the root namespace (skips the namespace prompt). |
 | `--template <name>` | Template to use (e.g. `CrudWebAPI`). Skips the template prompt. |
 | `--use-case <name>` | Use case to scaffold (`TodoApp`, `RestaurantBooking`, or `Custom`). Skips the use case prompt. |
+| `--from-prompt <text>` | Generate config from a natural language description using AI. Requires `ANTHROPIC_API_KEY` environment variable. |
 
 #### Template and use case selection
 
@@ -146,6 +147,9 @@ ninjadog init --default
 
 # Non-interactive with custom values
 ninjadog init --name MyApi --namespace MyApi.Web
+
+# Generate from natural language (requires ANTHROPIC_API_KEY)
+ninjadog init --from-prompt "A blog platform with users, posts, tags, and comments"
 ```
 
 {: .tip }
@@ -298,7 +302,8 @@ ninjadog ui [OPTIONS]
 - **Live JSON preview** -- See the generated `ninjadog.json` update in real time with Monaco Editor syntax highlighting and schema validation.
 - **Validation** -- Live schema validation with error paths displayed inline.
 - **Undo / Redo** -- Full undo/redo history (up to 50 states) with <kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Y</kbd> keyboard shortcuts.
-- **Keyboard shortcuts** -- <kbd>Ctrl+S</kbd> save, <kbd>Ctrl+B</kbd> build, <kbd>Ctrl+E</kbd> add entity, <kbd>1</kbd>--<kbd>4</kbd> switch tabs, <kbd>?</kbd> show shortcut overlay.
+- **AI Assistant** -- Describe your API in plain English and generate a complete configuration. Toggle the chat panel with the sparkle icon or <kbd>Ctrl+Shift+A</kbd>. Supports multi-turn conversation for iterating on the schema. Requires `ANTHROPIC_API_KEY` environment variable.
+- **Keyboard shortcuts** -- <kbd>Ctrl+S</kbd> save, <kbd>Ctrl+B</kbd> build, <kbd>Ctrl+E</kbd> add entity, <kbd>Ctrl+Shift+A</kbd> AI assistant, <kbd>1</kbd>--<kbd>4</kbd> switch tabs, <kbd>?</kbd> show shortcut overlay.
 - **Auto-save** -- Optional auto-save to localStorage with 3-second debounce.
 - **View modes** -- Toggle between Split View (form + JSON), Form Only, or JSON Only layouts.
 - **Template picker** -- Start from pre-built templates (Blank, Todo App, Blog API, E-Commerce) instead of an empty configuration.

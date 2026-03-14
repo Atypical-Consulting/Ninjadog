@@ -406,6 +406,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 .evolve-badge-modified { background: rgba(232, 163, 61, 0.15); color: #e8a33d; }
 .evolve-sql-preview { background: var(--bg-deep); border: 1px solid var(--border-dim); border-radius: 4px; padding: 12px 16px; margin: 4px 8px 8px; font-family: var(--font-mono); font-size: 12px; line-height: 1.6; color: var(--text-secondary); white-space: pre-wrap; word-break: break-all; overflow-x: auto; }
 
+/* === Chat Panel === */
+.chat-icon-btn { padding: 4px; border-radius: var(--radius-sm); color: var(--text-muted); background: none; border: none; cursor: pointer; transition: color 150ms; }
+.chat-icon-btn:hover { color: var(--text); }
+.chat-apply-btn { width: 100%; font-size: 0.75rem; font-weight: 500; padding: 6px 0; border-radius: var(--radius-sm); background: var(--accent-dim); color: var(--accent-bright); border: 1px solid rgba(232, 85, 61, 0.25); cursor: pointer; transition: background 150ms; }
+.chat-apply-btn:hover { background: var(--accent-glow); }
+
 /* === Responsive === */
 @media (max-width: 768px) {
     .template-grid { grid-template-columns: 1fr; }

@@ -5,8 +5,8 @@
   <ItemGroup>
     <!-- DependencyInjection -->
     <PackageVersion Include="CliWrap" Version="3.10.0" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.4" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.5" />
     <!-- Validation -->
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
     <!-- JSON Schema -->
@@ -30,14 +30,14 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="0.5.0-beta.7" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.0" />
     <!-- Web -->
-    <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.4" />
-    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.4" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.4" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.4" />
+    <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.5" />
     <!-- CAKE -->
     <PackageVersion Include="Cake.Frosting" Version="6.1.0" />
     <!-- Test Frameworks -->
-    <PackageVersion Include="Microsoft.Playwright" Version="1.52.0" />
+    <PackageVersion Include="Microsoft.Playwright" Version="1.58.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
@@ -53,8 +53,8 @@
     <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
     <PackageVersion Include="Roslynator.Analyzers" Version="4.15.0" />
     <!-- Source Linking -->
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.200" />
-    <PackageVersion Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.4" />
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.201" />
+    <PackageVersion Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.5" />
     <!-- Other Tools -->
     <PackageVersion Include="DotNet.ReproducibleBuilds" Version="2.0.2" />
     <PackageVersion Include="MinVer" Version="7.0.0" />

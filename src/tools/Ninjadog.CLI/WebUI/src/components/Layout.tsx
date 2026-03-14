@@ -8,6 +8,7 @@ import ShortcutsOverlay from './ShortcutsOverlay';
 import TemplatePicker from './TemplatePicker';
 import ImportModal from './ImportModal';
 import BuildConsole from './BuildConsole';
+import ChatPanel from './ChatPanel';
 import { useUiStore } from '../store/ui-store';
 import { useAutoSave } from '../hooks/useAutoSave';
 import { useValidation } from '../hooks/useValidation';
@@ -50,6 +51,8 @@ export default function Layout() {
         <div id="json-panel" className={`flex flex-col${!showRight ? ' hidden' : ''}`} style={{ width: viewMode === 'json' ? '100%' : `${panelWidth}px` }}>
           <JsonPanel width={viewMode === 'json' ? '100%' : `${panelWidth}px`} />
         </div>
+
+        <ChatPanel />
       </div>
 
       <BuildConsole />

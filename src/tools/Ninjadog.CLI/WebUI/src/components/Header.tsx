@@ -1,4 +1,5 @@
 import { useConfigStore } from '../store/config-store';
+import { useChatStore } from '../store/chat-store';
 import { useUiStore } from '../store/ui-store';
 
 export default function Header() {
@@ -17,6 +18,8 @@ export default function Header() {
   const connected = useUiStore((s) => s.connected);
   const showReconnected = useUiStore((s) => s.showReconnected);
   const showBuildConsole = useUiStore((s) => s.showBuildConsole);
+  const toggleChat = useChatStore((s) => s.toggle);
+  const chatOpen = useChatStore((s) => s.open);
 
   const handleSave = async () => {
     try {
@@ -117,6 +120,15 @@ export default function Header() {
 
         <button id="btn-shortcuts" className="header-btn-icon" title="Keyboard Shortcuts (?)" onClick={toggleShortcuts}>
           <span style={{ fontSize: '14px', fontWeight: 700 }}>?</span>
+        </button>
+        <button
+          id="btn-ai"
+          className={`header-btn-icon${chatOpen ? ' header-btn-icon-active' : ''}`}
+          title="AI Assistant (Ctrl+Shift+A)"
+          onClick={toggleChat}
+          style={chatOpen ? { color: 'var(--accent)' } : undefined}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
         </button>
         <div className="header-separator" />
 

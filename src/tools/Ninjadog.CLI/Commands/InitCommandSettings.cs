@@ -23,4 +23,8 @@ internal sealed class InitCommandSettings : CommandSettings
     [CommandOption("--default")]
     [Description("Use default values without prompting")]
     public bool Default { get; init; }
+
+    [CommandOption("--from-prompt")]
+    [Description("Generate config from a natural language description using AI (requires ANTHROPIC_API_KEY)")]
+    public string? FromPrompt { get; init; }
 }
