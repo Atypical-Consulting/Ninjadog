@@ -40,6 +40,8 @@ callouts:
     title: Tip
     color: green
 
+version: "v0.0.0"
+
 footer_content: "Built with care by <a href=\"https://github.com/Atypical-Consulting\">Atypical Consulting</a> &mdash; Apache 2.0 License"
 
 exclude:
