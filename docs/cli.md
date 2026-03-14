@@ -327,6 +327,24 @@ ninjadog ui
 ninjadog ui --port 8080 --no-open
 ```
 
+### `ninjadog docs`
+
+Opens the Ninjadog documentation website in your default browser.
+
+```bash
+ninjadog docs
+```
+
+**Example:**
+
+```
+$ ninjadog docs
+Opening documentation: https://atypical-consulting.github.io/Ninjadog/
+```
+
+{: .tip }
+> If the browser cannot be opened automatically, the URL is printed to the terminal so you can copy and paste it.
+
 ---
 
 ## Next Steps
