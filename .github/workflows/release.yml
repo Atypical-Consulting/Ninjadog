@@ -45,10 +45,45 @@ jobs:
       - name: Push to NuGet
         run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
 
+      - name: Publish self-contained binaries
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF#refs/tags/v}"
+
+          for rid in osx-arm64 osx-x64 linux-x64 linux-arm64; do
+            echo "Publishing for ${rid}..."
+            dotnet publish src/tools/Ninjadog.CLI/Ninjadog.CLI.csproj \
+              --configuration Release \
+              --runtime "${rid}" \
+              --self-contained \
+              -p:PublishSingleFile=true \
+              -p:PublishTrimmed=true \
+              -p:DebugType=none \
+              -p:DebugSymbols=false \
+              --output "./dist/${rid}"
+
+            tar -czf "./dist/ninjadog-${VERSION}-${rid}.tar.gz" \
+              -C "./dist/${rid}" ninjadog
+          done
+
+      - name: Compute checksums
+        run: |
+          set -euo pipefail
+          cd dist
+          sha256sum ninjadog-*.tar.gz > checksums.txt
+          echo "Checksums:"
+          cat checksums.txt
+
+      - name: Upload checksums
+        uses: actions/upload-artifact@v4
+        with:
+          name: checksums
+          path: dist/checksums.txt
+
       - name: Generate changelog
         id: changelog
         run: |
-          # Get the current and previous tags
+          set -euo pipefail
           CURRENT_TAG="${GITHUB_REF#refs/tags/}"
           PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -v "^${CURRENT_TAG}$" | head -n 1)
 
@@ -56,13 +91,11 @@ jobs:
           echo "Previous tag: ${PREVIOUS_TAG}"
 
           if [ -z "$PREVIOUS_TAG" ]; then
-            # First release — include all commits
             CHANGELOG=$(git log --pretty=format:"- %s (%h)" "${CURRENT_TAG}")
           else
             CHANGELOG=$(git log --pretty=format:"- %s (%h)" "${PREVIOUS_TAG}..${CURRENT_TAG}")
           fi
 
-          # Write changelog to file (handles multiline safely)
           echo "$CHANGELOG" > changelog.txt
 
       - name: Create GitHub Release
@@ -71,5 +104,62 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
           body_path: changelog.txt
-          files: ./artifacts/*.nupkg
+          files: |
+            ./artifacts/*.nupkg
+            ./dist/ninjadog-*.tar.gz
+            ./dist/checksums.txt
           generate_release_notes: true
+
+  update-homebrew:
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download checksums
+        uses: actions/download-artifact@v4
+        with:
+          name: checksums
+
+      - name: Update Homebrew formula
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF#refs/tags/v}"
+
+          # Extract SHA256 values from checksums
+          SHA_OSX_ARM64=$(awk '/ninjadog-.*-osx-arm64\.tar\.gz/{print $1}' checksums.txt)
+          SHA_OSX_X64=$(awk '/ninjadog-.*-osx-x64\.tar\.gz/{print $1}' checksums.txt)
+          SHA_LINUX_X64=$(awk '/ninjadog-.*-linux-x64\.tar\.gz/{print $1}' checksums.txt)
+          SHA_LINUX_ARM64=$(awk '/ninjadog-.*-linux-arm64\.tar\.gz/{print $1}' checksums.txt)
+
+          # Validate all checksums were extracted
+          for var in SHA_OSX_ARM64 SHA_OSX_X64 SHA_LINUX_X64 SHA_LINUX_ARM64; do
+            if [ -z "${!var}" ]; then
+              echo "ERROR: Failed to extract checksum for ${var}"
+              exit 1
+            fi
+          done
+
+          # Generate formula from template
+          sed \
+            -e "s|{{VERSION}}|${VERSION}|g" \
+            -e "s|{{SHA256_OSX_ARM64}}|${SHA_OSX_ARM64}|g" \
+            -e "s|{{SHA256_OSX_X64}}|${SHA_OSX_X64}|g" \
+            -e "s|{{SHA256_LINUX_X64}}|${SHA_LINUX_X64}|g" \
+            -e "s|{{SHA256_LINUX_ARM64}}|${SHA_LINUX_ARM64}|g" \
+            homebrew/formula-template.rb > ninjadog.rb
+
+          # Push to homebrew-tap repo
+          git clone https://github.com/Atypical-Consulting/homebrew-tap.git tap-repo
+          cd tap-repo
+          git remote set-url origin "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/Atypical-Consulting/homebrew-tap.git"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          mkdir -p Formula
+          cp ../ninjadog.rb Formula/ninjadog.rb
+          git add Formula/ninjadog.rb
+          git commit -m "Update ninjadog to ${VERSION}"
+          git push
