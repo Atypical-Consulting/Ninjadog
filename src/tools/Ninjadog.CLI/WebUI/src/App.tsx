@@ -5,6 +5,7 @@ import ConfigPage from './pages/ConfigPage';
 import EntitiesPage from './pages/EntitiesPage';
 import EnumsPage from './pages/EnumsPage';
 import SeedPage from './pages/SeedPage';
+import EvolvePage from './pages/EvolvePage';
 import { useConfigStore } from './store/config-store';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/entities" element={<EntitiesPage />} />
         <Route path="/enums" element={<EnumsPage />} />
         <Route path="/seed" element={<SeedPage />} />
+        <Route path="/evolve" element={<EvolvePage />} />
         <Route path="/" element={<Navigate to="/config" replace />} />
         <Route path="*" element={<Navigate to="/config" replace />} />
       </Route>

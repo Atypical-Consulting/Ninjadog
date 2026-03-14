@@ -109,6 +109,55 @@ export async function getSchema() {
   return res.json();
 }
 
+export async function getEvolveStatus(): Promise<{ hasBaseline: boolean }> {
+  const res = await request('/api/evolve/status');
+  if (!res.ok) throw new Error(`GET /api/evolve/status failed: ${res.status}`);
+  return res.json();
+}
+
+export async function evolvePreview(config: string | object) {
+  const body = typeof config === 'string' ? config : JSON.stringify(config, null, 2);
+  const res = await request('/api/evolve/preview', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as { error?: string }).error || `POST /api/evolve/preview failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function evolveApply(config: string | object, name?: string) {
+  const configStr = typeof config === 'string' ? config : JSON.stringify(config, null, 2);
+  const body = JSON.stringify({ config: JSON.parse(configStr), name: name || null });
+  const res = await request('/api/evolve/apply', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as { error?: string }).error || `POST /api/evolve/apply failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function evolveBaseline(config: string | object) {
+  const body = typeof config === 'string' ? config : JSON.stringify(config, null, 2);
+  const res = await request('/api/evolve/baseline', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as { error?: string }).error || `POST /api/evolve/baseline failed: ${res.status}`);
+  }
+  return res.json();
+}
+
 export interface AiChatMessage {
   role: 'user' | 'assistant';
   content: string;

@@ -10,6 +10,8 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Ninjadog.CLI.AI;
+using Ninjadog.Evolution;
+using Ninjadog.Evolution.Migrations;
 using Ninjadog.Settings.Schema;
 using Ninjadog.Settings.Validation;
 
@@ -232,6 +234,169 @@ internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
             {
                 return Results.Json(new { error = "Cannot access directory" }, statusCode: 400);
             }
+        });
+
+        // API: Preview schema evolution (diff only, no file writes)
+        app.MapPost("/api/evolve/preview", async (HttpContext ctx) =>
+        {
+            var currentJson = await ReadBodyAsync(ctx);
+
+            var projectRoot = Directory.GetCurrentDirectory();
+
+            if (!SchemaState.Exists(projectRoot))
+            {
+                return Results.Json(new { hasBaseline = false });
+            }
+
+            var previousJson = SchemaState.Load(projectRoot)!;
+            NinjadogSettings previousSettings;
+            NinjadogSettings currentSettings;
+
+            try
+            {
+                previousSettings = NinjadogSettings.FromJsonString(previousJson, projectRoot);
+                currentSettings = NinjadogSettings.FromJsonString(currentJson, projectRoot);
+            }
+            catch (JsonException ex)
+            {
+                return Results.Json(new { error = ex.Message }, statusCode: 400);
+            }
+
+            var diff = SchemaDiffer.Compare(previousSettings, currentSettings);
+            var operations = MigrationSqlGenerator.Generate(diff, currentSettings);
+
+            return Results.Json(new
+            {
+                hasBaseline = true,
+                hasChanges = diff.HasChanges,
+                entities = diff.EntityChanges.Select(e => new
+                {
+                    key = e.EntityKey,
+                    kind = e.Kind.ToString(),
+                    properties = e.PropertyChanges.Select(p => new
+                    {
+                        name = p.PropertyName,
+                        kind = p.Kind.ToString(),
+                        typeChanged = p.TypeChanged,
+                        beforeType = p.Before?.Type,
+                        afterType = p.After?.Type,
+                    }),
+                    relationships = e.RelationshipChanges.Select(r => new
+                    {
+                        name = r.RelationshipName,
+                        kind = r.Kind.ToString(),
+                    }),
+                }),
+                config = new
+                {
+                    diff.ConfigChanges.HasChanges,
+                    diff.ConfigChanges.SoftDeleteChanged,
+                    diff.ConfigChanges.SoftDeleteEnabled,
+                    diff.ConfigChanges.AuditingChanged,
+                    diff.ConfigChanges.AuditingEnabled,
+                    diff.ConfigChanges.DatabaseProviderChanged,
+                    diff.ConfigChanges.OldDatabaseProvider,
+                    diff.ConfigChanges.NewDatabaseProvider,
+                    diff.ConfigChanges.AotChanged,
+                    diff.ConfigChanges.CorsChanged,
+                    diff.ConfigChanges.AuthChanged,
+                    diff.ConfigChanges.RateLimitChanged,
+                    diff.ConfigChanges.VersioningChanged,
+                },
+                enums = diff.EnumChanges.Select(e => new
+                {
+                    name = e.EnumName,
+                    kind = e.Kind.ToString(),
+                    addedValues = e.AddedValues,
+                    removedValues = e.RemovedValues,
+                }),
+                operations = operations.Select(o => new
+                {
+                    o.Description,
+                    o.Sql,
+                    o.IsWarning,
+                }),
+            });
+        });
+
+        // API: Apply schema evolution (save baseline + write migration file)
+        app.MapPost("/api/evolve/apply", async (HttpContext ctx) =>
+        {
+            using var reader = new StreamReader(ctx.Request.Body);
+            var body = await reader.ReadToEndAsync(ctx.RequestAborted);
+            string currentJson;
+            string? migrationName = null;
+
+            try
+            {
+                using var doc = JsonDocument.Parse(body);
+                currentJson = doc.RootElement.GetProperty("config").GetRawText();
+                if (doc.RootElement.TryGetProperty("name", out var nameElement))
+                {
+                    migrationName = nameElement.GetString();
+                }
+            }
+            catch (JsonException ex)
+            {
+                return Results.Json(new { error = ex.Message }, statusCode: 400);
+            }
+
+            var projectRoot = Directory.GetCurrentDirectory();
+
+            if (!SchemaState.Exists(projectRoot))
+            {
+                SchemaState.Save(projectRoot, currentJson);
+                return Results.Json(new { firstRun = true, message = "Baseline saved." });
+            }
+
+            var previousJson = SchemaState.Load(projectRoot)!;
+            var previousSettings = NinjadogSettings.FromJsonString(previousJson, projectRoot);
+            var currentSettings = NinjadogSettings.FromJsonString(currentJson, projectRoot);
+
+            var diff = SchemaDiffer.Compare(previousSettings, currentSettings);
+
+            if (!diff.HasChanges)
+            {
+                return Results.Json(new { hasChanges = false });
+            }
+
+            var operations = MigrationSqlGenerator.Generate(diff, currentSettings);
+            var migrationPath = MigrationFileWriter.Write(projectRoot, operations, migrationName);
+            SchemaState.Save(projectRoot, currentJson);
+
+            return Results.Json(new
+            {
+                hasChanges = true,
+                migrationFile = migrationPath is not null ? Path.GetRelativePath(projectRoot, migrationPath) : null,
+                operationCount = operations.Count,
+            });
+        });
+
+        // API: Save current config as evolution baseline
+        app.MapPost("/api/evolve/baseline", async (HttpContext ctx) =>
+        {
+            using var reader = new StreamReader(ctx.Request.Body);
+            var json = await reader.ReadToEndAsync(ctx.RequestAborted);
+
+            try
+            {
+                using var doc = JsonDocument.Parse(json);
+            }
+            catch (JsonException ex)
+            {
+                return Results.Json(new { error = ex.Message }, statusCode: 400);
+            }
+
+            var projectRoot = Directory.GetCurrentDirectory();
+            SchemaState.Save(projectRoot, json);
+            return Results.Json(new { saved = true });
+        });
+
+        // API: Check if evolution baseline exists
+        app.MapGet("/api/evolve/status", () =>
+        {
+            var projectRoot = Directory.GetCurrentDirectory();
+            return Results.Json(new { hasBaseline = SchemaState.Exists(projectRoot) });
         });
 
         // Open browser only after server is ready
