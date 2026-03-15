@@ -226,6 +226,6 @@ public sealed class EnumTabTests(NinjadogUiFixture server, PlaywrightFixture pw)
 
         countText = await Page.TextContentAsync(".entity-card[data-enum='Season'] .text-xs.text-gray-500");
         countText.ShouldNotBeNull();
-        countText.ShouldContain("1 values");
+        countText.ShouldContain("1 value");
     }
 }
