@@ -163,7 +163,7 @@ function EnumCard({
         <div className="flex items-center gap-2">
           <span className="entity-color-dot" style={{ background: getEntityColor(name) }} />
           <span className="font-medium text-sm">{name}</span>
-          <span className="text-[11px] px-2 py-0.5 rounded-full font-medium" style={{ background: 'var(--accent-secondary-dim)', color: 'var(--accent-secondary)' }}>
+          <span className="text-xs text-gray-500 text-[11px] px-2 py-0.5 rounded-full font-medium" style={{ background: 'var(--accent-secondary-dim)', color: 'var(--accent-secondary)' }}>
             {values.length} value{values.length !== 1 ? 's' : ''}
           </span>
         </div>

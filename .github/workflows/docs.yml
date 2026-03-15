@@ -19,6 +19,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Inject version from latest git tag
+        run: |
+          VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          sed -i "s/^version: .*/version: \"$VERSION\"/" docs/_config.yml
+          echo "Injected version: $VERSION"
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1

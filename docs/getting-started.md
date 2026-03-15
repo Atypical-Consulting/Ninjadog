@@ -22,22 +22,32 @@ Get a full CRUD REST API running in under 2 minutes.
 
 ## Prerequisites
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) or later
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) or later (required for Options 2 and 3 only — Homebrew installs a self-contained binary)
 
 {: .tip }
 > Verify your SDK version with `dotnet --version`. You need **10.0** or higher.
 
 ## Installation
 
-### Option 1 -- CLI tool (recommended)
+### Option 1 -- Homebrew (macOS / Linux)
 
-Install the Ninjadog CLI as a global .NET tool:
+```bash
+brew tap atypical-consulting/tap
+brew install ninjadog
+```
+
+{: .tip }
+> This installs a self-contained binary — no .NET SDK required on the machine.
+
+### Option 2 -- .NET tool
+
+Install the Ninjadog CLI as a global .NET tool (requires .NET 10 SDK):
 
 ```bash
 dotnet tool install -g Ninjadog
 ```
 
-### Option 2 -- From Source
+### Option 3 -- From Source
 
 ```bash
 git clone https://github.com/Atypical-Consulting/Ninjadog.git

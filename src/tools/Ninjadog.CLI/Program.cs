@@ -80,6 +80,10 @@ app.Configure(config =>
     config.AddCommand<UiCommand>("ui")
         .WithDescription("Opens a web-based configuration builder.")
         .WithExample(["ui"]);
+
+    config.AddCommand<DocsCommand>("docs")
+        .WithDescription("Opens the Ninjadog documentation website.")
+        .WithExample(["docs"]);
 });
 
 try
