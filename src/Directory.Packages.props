@@ -10,7 +10,7 @@
     <!-- Validation -->
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
     <!-- JSON Schema -->
-    <PackageVersion Include="JsonSchema.Net" Version="9.1.2" />
+    <PackageVersion Include="JsonSchema.Net" Version="9.1.3" />
     <!-- DDD -->
     <PackageVersion Include="ValueOf" Version="2.0.31" />
     <!-- Spectre.Console -->
