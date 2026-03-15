@@ -1,7 +1,5 @@
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -10,6 +8,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Ninjadog.CLI.AI;
+using Ninjadog.CLI.Utilities;
 using Ninjadog.Evolution;
 using Ninjadog.Evolution.Migrations;
 using Ninjadog.Settings.Schema;
@@ -402,7 +401,17 @@ internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
         // Open browser only after server is ready
         if (!settings.NoBrowser)
         {
-            app.Lifetime.ApplicationStarted.Register(() => OpenBrowser(url));
+            app.Lifetime.ApplicationStarted.Register(() =>
+            {
+                try
+                {
+                    BrowserHelper.OpenBrowser(url);
+                }
+                catch
+                {
+                    // Swallow -- user can open the URL manually.
+                }
+            });
         }
 
         await app.StartAsync(cancellationToken);
@@ -440,29 +449,6 @@ internal sealed class UiCommand : AsyncCommand<UiCommandSettings>
         catch (SocketException)
         {
             return false;
-        }
-    }
-
-    private static void OpenBrowser(string url)
-    {
-        try
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                Process.Start(new ProcessStartInfo("open", url) { UseShellExecute = false });
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { UseShellExecute = false });
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                Process.Start(new ProcessStartInfo("xdg-open", url) { UseShellExecute = false });
-            }
-        }
-        catch
-        {
-            // Swallow -- user can open the URL manually.
         }
     }
 
