@@ -421,7 +421,7 @@ function EntityCard({
         <div className="flex items-center gap-2">
           <span className="entity-color-dot" style={{ background: getEntityColor(name) }} />
           <span className="font-medium text-sm">{name}</span>
-          <span className="text-[11px] px-2 py-0.5 rounded-full font-medium" style={{ background: 'var(--accent-dim)', color: 'var(--accent)' }}>
+          <span className="badge text-[11px] px-2 py-0.5 rounded-full font-medium" style={{ background: 'var(--accent-dim)', color: 'var(--accent)' }}>
             {propNames.length} prop{propNames.length !== 1 ? 's' : ''}
           </span>
           {relNames.length > 0 && (
